@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mountain Weather V2 — Cascade Range</title>
+<meta name="color-scheme" content="dark light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script>
+(function(){
+  try {
+    const saved = localStorage.getItem('summit-weather-theme');
+    const theme = saved || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    document.documentElement.dataset.theme = theme;
+  } catch(e) {
+    document.documentElement.dataset.theme = 'dark';
+  }
+})();
+</script>
+<style>
+:root {
+  color-scheme: dark;
+  --bg:      #0d1117;
+  --surf:    #161b22;
+  --card:    #1c2128;
+  --bdr:     #30363d;
+  --bdr2:    #484f58;
+  --txt:     #e6edf3;
+  --dim:     #8b949e;
+  --faint:   #6e7681;
+  --go:      #3fb950;
+  --watch:   #d29922;
+  --caution:    #f85149;
+  --blue:    #58a6ff;
+  --btn-txt:  #0d1117;
+  --hover-row: rgba(255,255,255,0.02);
+  --chart-grid: #21262d;
+  --window-fill: rgba(121,192,255,0.07);
+  --window-stroke: rgba(121,192,255,0.45);
+  --tooltip-bg: #0d1117;
+  --tooltip-txt: #e6edf3;
+  --inv-bg: #2d2200;
+  --inv-bdr: #614a00;
+  --inv-txt: #e3b341;
+  --tight-bdr: #1a3a1a;
+  --serif:   'Newsreader', Georgia, serif;
+  --mono:    'JetBrains Mono', ui-monospace, monospace;
+  --sans:    -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg:      #f7f8f4;
+  --surf:    #eef1eb;
+  --card:    #ffffff;
+  --bdr:     #d7ddd2;
+  --bdr2:    #b8c2b1;
+  --txt:     #172016;
+  --dim:     #5f6b5b;
+  --faint:   #7c8878;
+  --go:      #277a38;
+  --watch:   #9a640d;
+  --caution:    #c43d36;
+  --blue:    #216da8;
+  --btn-txt:  #ffffff;
+  --hover-row: rgba(23,32,22,0.035);
+  --chart-grid: #e6eadf;
+  --window-fill: rgba(33,109,168,0.08);
+  --window-stroke: rgba(33,109,168,0.42);
+  --tooltip-bg: #ffffff;
+  --tooltip-txt: #172016;
+  --inv-bg: #fff4d8;
+  --inv-bdr: #e2b75f;
+  --inv-txt: #7c4f09;
+  --tight-bdr: #8fbf91;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--txt); font-family: var(--sans); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+
+/* ── HEADER ── */
+header { border-bottom: 1px solid var(--bdr); padding: 18px 24px 14px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+header h1 { font-family: var(--serif); font-size: 26px; font-weight: 400; font-style: italic; letter-spacing: -0.02em; }
+header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-spacing: 0.04em; }
+.theme-toggle {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 8px;
+  min-height: 32px; padding: 6px 10px; border-radius: 999px;
+  border: 1px solid var(--bdr); background: var(--surf); color: var(--txt);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em;
+  text-transform: uppercase; cursor: pointer;
+}
+.theme-toggle:hover { border-color: var(--bdr2); }
+.theme-toggle .theme-icon { font-size: 14px; line-height: 1; }
+
+/* ── CONFIG PANEL ── */
+.config { padding: 20px 24px; border-bottom: 1px solid var(--bdr); display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+.config label { display: flex; flex-direction: column; gap: 5px; font-size: 11px; color: var(--dim); letter-spacing: 0.06em; text-transform: uppercase; }
+.config select, .config input[type="datetime-local"] {
+  background: var(--surf); border: 1px solid var(--bdr); color: var(--txt);
+  font-family: var(--mono); font-size: 13px; padding: 7px 10px;
+  border-radius: 5px; outline: none; min-width: 0; }
+.config select { min-width: 240px; }
+.config select:focus, .config input:focus { border-color: var(--blue); }
+.config input[type="datetime-local"] { min-width: 190px; }
+.btn { padding: 7px 20px; background: var(--blue); color: var(--btn-txt); font-weight: 700; font-size: 13px; border: none; border-radius: 5px; cursor: pointer; white-space: nowrap; letter-spacing: 0.02em; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn:hover:not(:disabled) { filter: brightness(1.1); }
+.err { font-size: 12px; color: var(--caution); width: 100%; font-family: var(--mono); }
+
+/* ── RESULTS ── */
+#results { padding: 20px 24px; }
+
+.crumb { font-family: var(--mono); font-size: 16px; color: var(--dim); margin-bottom: 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.crumb .sep { color: var(--faint); }
+.crumb strong { color: var(--txt); }
+.climb-frame { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-bottom: 18px; line-height: 1.7; }
+.climb-frame .cf-sun { color: var(--watch); }
+.climb-frame .sep { color: var(--bdr2); margin: 0 6px; }
+
+/* verdict */
+.verdict { display: flex; align-items: center; gap: 20px; padding: 18px 22px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--bdr2); background: var(--card); border-left: 5px solid; }
+.verdict.v-go   { border-left-color: var(--go); }
+.verdict.v-watch{ border-left-color: var(--watch); }
+.verdict.v-caution { border-left-color: var(--caution); }
+.v-word { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; font-family: var(--mono); flex: 0 0 auto; white-space: nowrap; }
+.v-go   .v-word { color: var(--go); }
+.v-watch.v-word, .v-watch .v-word { color: var(--watch); }
+.v-caution .v-word { color: var(--caution); }
+.v-right { display: flex; flex-direction: column; gap: 6px; flex: 1 1 auto; min-width: 0; }
+.v-detail { font-size: 13px; color: var(--dim); line-height: 1.6; font-family: var(--mono); }
+.v-why { font-size: 12px; color: var(--faint); line-height: 1.55; font-family: var(--mono); }
+.v-why .pill { font-weight: 500; }
+.v-go .v-why .pill { color: var(--go); }
+.v-watch .v-why .pill { color: var(--watch); }
+.v-caution .v-why .pill { color: var(--caution); }
+
+	/* decision surface */
+	.decision-grid { display: grid; grid-template-columns: minmax(260px, 1.15fr) minmax(260px, 0.85fr); gap: 12px; margin-bottom: 14px; }
+	.advisor-panel, .dealbreaker-panel {
+	  background: var(--card); border: 1px solid var(--bdr); border-radius: 8px;
+	  padding: 16px 18px; min-width: 0;
+	}
+	.advisor-kicker, .dealbreaker-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 8px; }
+	.advisor-title { font-family: var(--serif); font-size: 30px; line-height: 1; font-weight: 400; font-style: italic; letter-spacing: -0.02em; margin-bottom: 10px; }
+	.advisor-title.go { color: var(--go); }
+	.advisor-title.watch { color: var(--watch); }
+	.advisor-title.caution { color: var(--caution); }
+	.advisor-copy { color: var(--dim); font-size: 13px; line-height: 1.6; max-width: 74ch; }
+	.advisor-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+	.advisor-stat { border: 1px solid var(--bdr); border-radius: 6px; padding: 9px 10px; min-width: 0; }
+	.advisor-stat .lbl { font-family: var(--mono); color: var(--faint); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+	.advisor-stat .val { font-family: var(--mono); font-weight: 600; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.deal-list { display: flex; flex-direction: column; gap: 8px; }
+	.deal-item { display: grid; grid-template-columns: 9px 1fr; gap: 9px; align-items: start; font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.45; }
+	.deal-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 3px; background: var(--go); }
+	.deal-item.watch .deal-dot { background: var(--watch); }
+	.deal-item.caution .deal-dot { background: var(--caution); }
+	.phase-timeline { border: 1px solid var(--bdr); border-radius: 8px; overflow: hidden; margin-bottom: 14px; background: var(--card); }
+	.phase-note { font-family: var(--mono); font-size: 10px; color: var(--faint); line-height: 1.5; padding: 10px 14px; border-bottom: 1px solid var(--bdr); background: var(--surf); }
+	.phase-track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); min-height: 116px; }
+	.phase { padding: 13px 14px; border-right: 1px solid var(--bdr); position: relative; }
+	.phase:last-child { border-right: none; }
+	.phase::before { content:''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--go); }
+	.phase.watch::before { background: var(--watch); }
+	.phase.caution::before { background: var(--caution); }
+	.phase .name { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 5px; }
+	.phase .time { font-family: var(--mono); color: var(--txt); font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+	.phase .risk { font-size: 12px; color: var(--dim); line-height: 1.45; }
+	.phase-empty { font-family: var(--mono); font-size: 11px; color: var(--faint); padding: 12px 14px; }
+	.signal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 14px; }
+	.signal-card { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 12px 14px; border-top: 4px solid var(--go); min-width: 0; }
+	.signal-card.watch { border-top-color: var(--watch); }
+	.signal-card.caution { border-top-color: var(--caution); }
+	.signal-card .lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
+	.signal-card .val { font-family: var(--mono); font-size: 18px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 5px; }
+	.signal-card.go .val { color: var(--go); }
+	.signal-card.watch .val { color: var(--watch); }
+	.signal-card.caution .val { color: var(--caution); }
+	.signal-card .sub { color: var(--dim); font-size: 11px; line-height: 1.45; }
+
+		/* inversion alert */
+	.inv-alert { background: var(--inv-bg); border: 1px solid var(--inv-bdr); border-left: 4px solid var(--watch); color: var(--inv-txt); font-size: 12px; padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-family: var(--mono); line-height: 1.6; }
+
+/* metric cards */
+.met-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.met { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 12px 14px; }
+.met .lbl { font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.met .val { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.met .sub { font-size: 10px; color: var(--faint); margin-top: 4px; }
+.met.go   .val { color: var(--go); }
+.met.watch .val { color: var(--watch); }
+.met.caution  .val { color: var(--caution); }
+
+/* spread */
+.spread { font-family: var(--mono); font-size: 11px; padding: 8px 12px; border-radius: 6px; margin-bottom: 14px; border: 1px solid var(--bdr); color: var(--dim); }
+.spread.wide { border-color: var(--inv-bdr); color: var(--watch); }
+.spread.tight { border-color: var(--tight-bdr); color: var(--go); }
+.source-note { font-family: var(--mono); font-size: 10px; line-height: 1.6; color: var(--faint); letter-spacing: 0.02em; margin: 0 0 8px; }
+.source-note strong { color: var(--dim); font-weight: 500; }
+
+/* hourly table */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--bdr); border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+thead tr { background: var(--surf); }
+th { padding: 9px 12px; text-align: left; color: var(--faint); font-weight: 400; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border-bottom: 1px solid var(--bdr); white-space: nowrap; }
+th.r, td.r { text-align: right; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--bdr); color: var(--txt); white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--hover-row); }
+tr.inv-row td:first-child { border-left: 3px solid var(--watch); }
+tr.now-row td { background: rgba(88,166,255,0.08); }
+tr.now-row td:first-child { box-shadow: inset 3px 0 0 var(--blue); font-weight: 600; }
+.c-go    { color: var(--go); }
+.c-watch { color: var(--watch); }
+.c-caution  { color: var(--caution); }
+.c-dim   { color: var(--faint); }
+.flag { font-size: 10px; background: var(--inv-bg); color: var(--watch); padding: 1px 6px; border-radius: 4px; }
+
+/* footer */
+footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; color: var(--faint); font-family: var(--mono); line-height: 1.7; }
+
+/* ── SECTION LABELS ── */
+.sec-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--faint); margin: 26px 0 14px; display: flex; align-items: center; gap: 14px; }
+.sec-lbl::after { content:''; flex:1; height:1px; background: var(--bdr); }
+
+/* ── CHART CARDS ── */
+.chart-card { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 18px 22px; margin-bottom: 16px; }
+.chart-card h3 { font-family: var(--serif); font-size: 20px; font-weight: 400; font-style: italic; margin-bottom: 3px; letter-spacing: -0.01em; }
+.chart-sub { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-bottom: 16px; }
+.chart-wrap { height: 210px; position: relative; }
+
+/* ── QUICK LINKS ── */
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center; }
+.links-lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.14em; text-transform: uppercase; margin-right: 4px; }
+.link-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; border: 1px solid var(--bdr); border-radius: 6px;
+  background: var(--card); color: var(--txt);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.03em;
+  text-decoration: none; white-space: nowrap;
+}
+.link-chip:hover { border-color: var(--bdr2); background: var(--surf); }
+.link-chip .ext { font-size: 9px; color: var(--faint); }
+.link-chip .caveat { font-size: 9px; color: var(--watch); margin-left: 2px; text-transform: lowercase; letter-spacing: 0.04em; }
+
+/* ── ASTRONOMY CARDS ── */
+.astro-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.astro { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 12px 14px; }
+.astro .lbl { font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.astro .val { font-family: var(--mono); font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+.astro .sub { font-size: 10px; color: var(--faint); margin-top: 4px; }
+.astro .moon-icon { font-size: 14px; margin-right: 4px; }
+
+/* ── STATION CARDS ── */
+.station-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.station { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 12px 14px; }
+.station .hdr { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+.station .id { font-family: var(--mono); font-size: 12px; color: var(--blue); font-weight: 500; letter-spacing: 0.04em; }
+.station .elev { font-family: var(--mono); font-size: 10px; color: var(--faint); }
+.station .name { font-size: 11px; color: var(--dim); margin-bottom: 8px; line-height: 1.4; }
+.station .val { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.station .stats { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 6px; line-height: 1.5; }
+.station .stats.stale { color: var(--watch); }
+.station-empty { font-family: var(--mono); font-size: 11px; color: var(--faint); padding: 12px 14px; border: 1px dashed var(--bdr); border-radius: 8px; }
+
+/* ── GUIDANCE CARDS ── */
+.guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.guide-card { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 14px 16px; border-left: 4px solid var(--bdr2); }
+.guide-card .tag { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-bottom: 8px; }
+.guide-card h4 { font-family: var(--serif); font-size: 16px; font-weight: 400; font-style: italic; letter-spacing: -0.01em; margin-bottom: 6px; color: var(--txt); }
+.guide-card p { font-size: 12px; color: var(--dim); line-height: 1.6; }
+.guide-card.g-temp { border-left-color: var(--blue); }
+.guide-card.g-temp .tag { color: var(--blue); }
+.guide-card.g-wind { border-left-color: var(--watch); }
+.guide-card.g-wind .tag { color: var(--watch); }
+.guide-card.g-snow { border-left-color: var(--caution); }
+.guide-card.g-snow .tag { color: var(--caution); }
+.guide-card.g-good { border-left-color: var(--go); }
+.guide-card.g-good .tag { color: var(--go); }
+.guide-foot { font-family: var(--mono); font-size: 11px; color: var(--faint); line-height: 1.7; margin-top: 6px; margin-bottom: 4px; }
+
+/* ── AFD ── */
+.afd-card { background: var(--card); border: 1px solid var(--bdr); padding: 20px 24px; font-family: var(--mono); font-size: 12px; line-height: 1.75; white-space: pre-wrap; color: var(--dim); max-height: 440px; overflow-y: auto; border-radius: 8px; margin-bottom: 16px; }
+.afd-card::-webkit-scrollbar { width: 6px; }
+.afd-card::-webkit-scrollbar-track { background: var(--bg); }
+.afd-card::-webkit-scrollbar-thumb { background: var(--bdr2); border-radius: 3px; }
+.afd-hdr { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--txt); font-weight: 400; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--bdr); }
+
+@media (max-width: 600px) {
+  header { align-items: flex-start; padding: 14px 16px; }
+  .theme-toggle { margin-left: 0; }
+  .config { gap: 10px; padding: 14px 16px; }
+  .config select { min-width: 0; width: 100%; }
+	  .config label { width: 100%; }
+	  #results { padding: 14px 16px; }
+	  .verdict { align-items: flex-start; flex-direction: column; gap: 8px; padding: 16px 18px; }
+	  .v-word { font-size: 26px; }
+	  .v-detail { font-size: 12px; }
+	  .decision-grid { grid-template-columns: 1fr; }
+	  .advisor-stats { grid-template-columns: 1fr; }
+	  .phase-track { grid-template-columns: 1fr; }
+	  .phase { border-right: none; border-bottom: 1px solid var(--bdr); }
+	  .phase:last-child { border-bottom: none; }
+	}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mountain Weather V2</h1>
+  <p>Cascade Range · climb-window advisor · NWS + model comparison</p>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
+    <span class="theme-icon" aria-hidden="true">☾</span>
+    <span class="theme-label">Dark</span>
+  </button>
+</header>
+
+<div class="config">
+  <label>Mountain
+    <select id="sel-mtn"></select>
+  </label>
+  <label>Trailhead / Route
+    <select id="sel-th"></select>
+  </label>
+  <label>Climb start
+    <input type="datetime-local" id="inp-start">
+  </label>
+  <label>Climb end
+    <input type="datetime-local" id="inp-end">
+  </label>
+  <button class="btn" id="btn-go">Get Forecast</button>
+  <div class="err" id="err-msg" hidden></div>
+</div>
+
+<div id="results" hidden>
+  <div class="crumb" id="crumb"></div>
+  <div class="climb-frame" id="climb-frame"></div>
+  <div class="links" id="quick-links"></div>
+  <div class="verdict" id="verdict"></div>
+  <div class="inv-alert" id="inv-alert" hidden></div>
+  <div class="decision-grid">
+    <section class="advisor-panel" id="advisor-panel"></section>
+    <section class="dealbreaker-panel" id="dealbreaker-panel"></section>
+	  </div>
+	  <div class="phase-timeline" id="phase-timeline"></div>
+	  <div class="signal-grid" id="signal-grid"></div>
+	  <div class="met-grid" id="met-grid"></div>
+  <div class="spread" id="spread"></div>
+
+  <div class="sec-lbl">Detailed hourly table · climb window</div>
+  <div class="source-note" id="table-source"></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th class="r">Summit temp</th>
+          <th class="r">Trailhead temp</th>
+          <th class="r">Wind</th>
+          <th class="r">Gust</th>
+          <th>Dir</th>
+          <th class="r">Frz level</th>
+          <th class="r">Precip</th>
+          <th class="r">Sky</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+  </div>
+
+  <div class="sec-lbl">Astronomy · climb day</div>
+  <div class="astro-grid" id="astro-grid"></div>
+
+  <div class="sec-lbl">Recent precipitation · summit</div>
+  <div class="astro-grid" id="precip-history"></div>
+
+  <div class="sec-lbl">Current observations · stations near mountain</div>
+  <div class="station-grid" id="station-grid"></div>
+
+  <div class="sec-lbl">Charts — model comparison · climb window highlighted</div>
+  <div class="source-note" id="chart-source">Sources: wind, gust, freezing level, precipitation, and cloud data from Open-Meteo models. HRRR and NAM are shown where their shorter forecast horizons have data.</div>
+  <div class="chart-card">
+    <h3>Wind speed</h3>
+    <div class="chart-sub">mph · sustained · dashed line = go threshold</div>
+    <div class="chart-wrap"><canvas id="chart-wind"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Wind gusts</h3>
+    <div class="chart-sub">mph · expected peak gust per hour</div>
+    <div class="chart-wrap"><canvas id="chart-gust"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Freezing level</h3>
+    <div class="chart-sub">ft MSL · dashed line = summit elevation</div>
+    <div class="chart-wrap"><canvas id="chart-freezing"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Precipitation probability</h3>
+    <div class="chart-sub">% · any precipitation</div>
+    <div class="chart-wrap"><canvas id="chart-precip"></canvas></div>
+  </div>
+
+  <div class="sec-lbl">Model guidance for this window</div>
+  <div class="guide-grid" id="model-guidance">
+    <div class="guide-card g-temp">
+      <span class="tag">Temperature</span>
+      <h4>Pick a window first</h4>
+      <p>The recommendation changes as your start time gets closer.</p>
+    </div>
+    <div class="guide-card g-wind">
+      <span class="tag">Wind</span>
+      <h4>Pick a window first</h4>
+      <p>Wind guidance should always be checked at summit altitude.</p>
+    </div>
+    <div class="guide-card g-snow">
+      <span class="tag">Snow</span>
+      <h4>Pick a window first</h4>
+      <p>Close-in shower timing is the part that matters most for alpine starts.</p>
+    </div>
+  </div>
+
+  <div class="sec-lbl">Interpretation notes</div>
+  <div class="guide-grid">
+    <div class="guide-card g-good">
+      <span class="tag">Baseline</span>
+      <h4>NWS first</h4>
+      <p>Use the NWS hourly data here as the official, human-edited baseline. For raw model maps, compare Windy layers at the same time, layer, and altitude.</p>
+    </div>
+    <div class="guide-card g-temp">
+      <span class="tag">Close-in</span>
+      <h4>HRRR inside 48 hours</h4>
+      <p>For a 1 am start, HRRR is usually the lead model for shower timing, wind shifts, and cloud detail once you are within about two days.</p>
+    </div>
+    <div class="guide-card g-wind">
+      <span class="tag">Cross-check</span>
+      <h4>Globals + mesoscale</h4>
+      <p>ECMWF is usually most accurate for 3–7 day synoptic timing; GEM often sees Pacific systems first; ICON and GFS add independent votes. If HRRR/NAM and the globals agree, confidence is high — if they diverge close-in, trust the mesoscale model.</p>
+    </div>
+    <div class="guide-card g-snow">
+      <span class="tag">Confidence</span>
+      <h4>Spread = uncertainty</h4>
+      <p>The Model Spread tile shows wind agreement across the six models. Tight (&lt;8 mph) = high confidence; wide (≥15 mph) means check back closer to climb day before committing.</p>
+    </div>
+  </div>
+  <p class="guide-foot">Coordinates are precomputed route references, not official navigation data. NWS grid terrain is smoothed, so summit ridges can be colder, windier, or cloudier than the forecast grid cell.</p>
+
+  <div class="sec-lbl">NWS area forecast discussion</div>
+  <div class="afd-card" id="afd-card">
+    <div class="afd-hdr">Loading discussion…</div>
+  </div>
+</div>
+<footer>
+  Data: api.weather.gov for NWS hourly temperatures, snowfall grid data, and AFD · open-meteo.com for GFS, ECMWF IFS 0.25°, DWD ICON, Canadian GEM, HRRR, and NAM model fields<br>
+  Thresholds per mountain. Go/Watch/Caution is an aid — not a substitute for judgment, real-time observations, and NWAC.
+</footer>
+
+<script>
+const MTNS = {
+  baker: {
+    name: 'Mt Baker', summit: [48.7767, -121.8144, 10781], nws: 'SEW',
+    thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:40 },
+    ths: [
+      { name:'Heliotrope Ridge — Coleman Glacier', lat:48.80218056, lon:-121.894725, elev:3700, aspect:330, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/coleman-glacier-via-heliotrope-ridge-trail' },
+      { name:'Shannon Creek — Easton Glacier',     lat:48.7067849,  lon:-121.8129229, elev:3350, aspect:180, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-baker-via-easton-glacier' },
+      { name:'Boulder Ridge',                      lat:48.7870,     lon:-121.7470, elev:4200, aspect:90,  phase:[0.18,0.46,0.10,0.26] },
+    ]
+  },
+  rainier: {
+    name: 'Mt Rainier', summit: [46.8529, -121.7604, 14411], nws: 'SEW',
+    thr: { wGo:15, wWa:25, gGo:25, gWa:35, pGo:15, pWa:30 },
+    ths: [
+      { name:'Paradise — Muir Snowfield / DC route',   lat:46.7860, lon:-121.7350, elev:5400, aspect:180, phase:[0.25,0.40,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-rainier-standard-summit-route' },
+      { name:'White River — Emmons Glacier',           lat:46.9020, lon:-121.6427, elev:4250, aspect:45,  phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-rainier-via-emmons-glacier' },
+      { name:'Mowich Lake — Tahoma Cleaver',           lat:46.9335, lon:-121.8638, elev:4929, aspect:270, phase:[0.25,0.42,0.08,0.25] },
+      { name:'Carbon River — Willis Wall / Liberty',   lat:46.9940, lon:-121.9160, elev:1800, aspect:0,   phase:[0.25,0.45,0.08,0.22] },
+    ]
+  },
+  glacierPeak: {
+    name: 'Glacier Peak', summit: [48.1127, -121.1137, 10541], nws: 'SEW',
+    thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
+    ths: [
+      { name:'Suiattle River — Sitkum Glacier',     lat:48.2520, lon:-121.1810, elev:1850, aspect:315, phase:[0.35,0.38,0.07,0.20] },
+      { name:'N Fork Sauk — White Chuck Glacier',   lat:48.1680, lon:-121.1438, elev:2200, aspect:270, phase:[0.35,0.38,0.07,0.20] },
+    ]
+  },
+  stHelens: {
+    name: 'Mt St Helens', summit: [46.1912, -122.1944, 8366], nws: 'PQR',
+    thr: { wGo:25, wWa:35, gGo:35, gWa:45, pGo:20, pWa:40 },
+    ths: [
+      { name:'Marble Mountain Sno-Park — Worm Flows', lat:46.12982241, lon:-122.1711745, elev:2700, aspect:180, phase:[0.22,0.42,0.08,0.28], alltrails:'https://www.alltrails.com/trail/us/washington/mount-saint-helens-via-worm-flows-trail' },
+      { name:"Climbers Bivouac — Monitor Ridge",     lat:46.1471,     lon:-122.1838, elev:3800, aspect:180, phase:[0.18,0.44,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mount-saint-helens-summit-via-ptarmigan-trail' },
+    ]
+  },
+  adams: {
+    name: 'Mt Adams', summit: [46.2024, -121.4909, 12281], nws: 'PQR',
+    thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:40 },
+    ths: [
+      { name:'Cold Springs — South Climb',      lat:46.1359, lon:-121.4977, elev:5575, aspect:180, phase:[0.18,0.45,0.08,0.29], alltrails:'https://www.alltrails.com/trail/us/washington/mount-adams-south-climb-trail' },
+      { name:'Morrison Creek — SW Chutes',      lat:46.1760, lon:-121.4540, elev:4600, aspect:225, phase:[0.18,0.44,0.08,0.30] },
+      { name:'Killen Creek — North Ridge',      lat:46.2890, lon:-121.5460, elev:4315, aspect:0,   phase:[0.22,0.45,0.08,0.25] },
+    ]
+  },
+  hood: {
+    name: 'Mt Hood', summit: [45.3735, -121.6960, 11249], nws: 'PQR',
+    thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:40 },
+    ths: [
+      { name:'Timberline — South Side / Hogsback', lat:45.3309, lon:-121.7113, elev:5960, aspect:180, phase:[0.12,0.50,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/oregon/mount-hood-from-timberline' },
+      { name:'Cloud Cap — Cooper Spur / Sunshine', lat:45.4019, lon:-121.6537, elev:5750, aspect:45, phase:[0.18,0.48,0.08,0.26] },
+    ]
+  },
+  olympus: {
+    name: 'Mt Olympus', summit: [47.8013, -123.7108, 7980], nws: 'SEW',
+    thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
+    ths: [
+      { name:'Hoh Rain Forest — Blue Glacier', lat:47.8608, lon:-123.9343, elev:575, aspect:270, phase:[0.45,0.30,0.05,0.20], alltrails:'https://www.alltrails.com/trail/us/washington/hoh-river-trail-to-blue-glacier-trail'  },
+    ]
+  },
+  shuksan: {
+    name: 'Mt Shuksan', summit: [48.8275, -121.6149, 9131], nws: 'SEW',
+    thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
+    ths: [
+      { name:'Artist Point — Price / Sulfide Glacier', lat:48.8460, lon:-121.6920, elev:5200, aspect:180, phase:[0.18,0.45,0.08,0.29] },
+      { name:'Shannon Ridge — NW Couloir',             lat:48.8880, lon:-121.6920, elev:3200, aspect:315, phase:[0.22,0.45,0.08,0.25] },
+    ]
+  },
+  shasta: {
+    name: 'Mt Shasta', summit: [41.4092, -122.1944, 14179], nws: 'MFR',
+    thr: { wGo:15, wWa:25, gGo:25, gWa:35, pGo:15, pWa:30 },
+    ths: [
+      { name:'Bunny Flat — Avalanche Gulch',   lat:41.35373, lon:-122.23359, elev:6950, aspect:225, phase:[0.18,0.45,0.08,0.29], alltrails:'https://www.alltrails.com/trail/us/california/mount-shasta-via-avalanche-gulch-route' },
+      { name:'Clear Creek TH',                 lat:41.3700,  lon:-122.1540, elev:5760, aspect:180, phase:[0.20,0.44,0.08,0.28] },
+      { name:'Brewer Creek — Hotlum-Bolam',    lat:41.4420,  lon:-122.0920, elev:6990, aspect:45,  phase:[0.18,0.45,0.08,0.29] },
+    ]
+  },
+};
+
+const MTN_LINKS = {
+  baker: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-north',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_baker/',
+    webcam: 'https://www.mtbaker.us/the-mountain/web-cams/'
+  },
+  rainier: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-central',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_rainier/',
+    nps: 'https://www.nps.gov/mora/planyourvisit/climbing.htm',
+    webcam: 'https://www.nps.gov/mora/learn/photosmultimedia/webcams.htm'
+  },
+  glacierPeak: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-north',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/glacier_peak/'
+  },
+  stHelens: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-south',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/st_helens/',
+    nps: 'https://www.fs.usda.gov/recarea/giffordpinchot/recreation/recarea/?recid=31176'
+  },
+  adams: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-south',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_adams/',
+    nps: 'https://www.fs.usda.gov/detail/giffordpinchot/passes-permits/?cid=fsbdev3_004876'
+  },
+  hood: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/mt-hood',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_hood/',
+    nps: 'https://www.fs.usda.gov/mthood/',
+    webcam: 'https://www.timberlinelodge.com/cams'
+  },
+  olympus: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/olympics',
+    nps: 'https://www.nps.gov/olym/planyourvisit/wilderness-trip-planner.htm'
+  },
+  shuksan: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-north',
+    webcam: 'https://www.mtbaker.us/the-mountain/web-cams/'
+  },
+  shasta: {
+    avalanche: 'https://www.shastaavalanche.org/',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_shasta/',
+    nps: 'https://www.fs.usda.gov/recarea/stnf/recreation/recarea/?recid=6571'
+  }
+};
+
+const MODELS = ['gfs_seamless','ecmwf_ifs025','icon_seamless','gem_seamless','ncep_hrrr_conus','ncep_nam_conus'];
+const MODEL_COLORS = {
+  gfs_seamless:'#79c0ff', ecmwf_ifs025:'#ffa657',
+  icon_seamless:'#d2a8ff', gem_seamless:'#7ee787',
+  ncep_hrrr_conus:'#ff7b72', ncep_nam_conus:'#a5d6ff'
+};
+let _charts = {};
+let _apiData = null;
+let _lastChartArgs = null;
+
+function cssVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function chartTheme(){
+  return {
+    dim: cssVar('--dim'),
+    faint: cssVar('--faint'),
+    bdr: cssVar('--bdr'),
+    grid: cssVar('--chart-grid'),
+    windowFill: cssVar('--window-fill'),
+    windowStroke: cssVar('--window-stroke'),
+    tooltipBg: cssVar('--tooltip-bg'),
+    tooltipTxt: cssVar('--tooltip-txt'),
+  };
+}
+
+function applyTheme(theme, persist=false){
+  document.documentElement.dataset.theme = theme;
+  const isLight = theme === 'light';
+  const btn = document.getElementById('theme-toggle');
+  if(btn){
+    btn.setAttribute('aria-pressed', String(isLight));
+    btn.setAttribute('aria-label', `Switch to ${isLight ? 'dark' : 'light'} mode`);
+    btn.querySelector('.theme-icon').textContent = isLight ? '☼' : '☾';
+    btn.querySelector('.theme-label').textContent = isLight ? 'Light' : 'Dark';
+  }
+  if(persist){
+    try { localStorage.setItem('summit-weather-theme', theme); } catch(e) {}
+  }
+  if(_lastChartArgs){
+    renderCharts(..._lastChartArgs);
+  }
+}
+
+function initThemeToggle(){
+  const current = document.documentElement.dataset.theme || 'dark';
+  applyTheme(current);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    applyTheme(next, true);
+  });
+}
+
+function fmtTime(d){
+  return d.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Los_Angeles'});
+}
+
+function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={}){
+  if(!_apiData) return;
+  const ctx = document.getElementById(canvasId);
+  if(!ctx) return;
+  if(_charts[canvasId]){ _charts[canvasId].destroy(); }
+  const theme = chartTheme();
+
+  const times = _apiData.hourly.time.map(t => new Date(t));
+  const datasets = MODELS.map(mid => {
+    let vals = _apiData.hourly[`${varName}_${mid}`] || [];
+    if(opts.transform) vals = vals.map(v=>v===null?null:opts.transform(v));
+    return {
+      label: MODEL_NAMES[mid],
+      data: times.map((t,i)=>({x:t, y:vals[i]??null})),
+      borderColor: MODEL_COLORS[mid],
+      backgroundColor: MODEL_COLORS[mid]+'18',
+      borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 4,
+      tension: 0.3, spanGaps: false, fill: false,
+    };
+  });
+
+  const windowPlugin = {
+    id:'window',
+    beforeDatasetsDraw(chart){
+      const {ctx:c, chartArea:a, scales} = chart;
+      if(!a) return;
+      const x1 = scales.x.getPixelForValue(climbStart);
+      const x2 = scales.x.getPixelForValue(climbEnd);
+      if(x2<a.left||x1>a.right) return;
+      c.save();
+      c.fillStyle=theme.windowFill;
+      c.fillRect(Math.max(x1,a.left),a.top,Math.min(x2,a.right)-Math.max(x1,a.left),a.bottom-a.top);
+      c.strokeStyle=theme.windowStroke; c.lineWidth=1; c.setLineDash([3,3]);
+      [x1,x2].forEach(x=>{if(x>=a.left&&x<=a.right){c.beginPath();c.moveTo(x,a.top);c.lineTo(x,a.bottom);c.stroke();}});
+      c.restore();
+    }
+  };
+
+  const refPlugin = {
+    id:'refLine',
+    afterDatasetsDraw(chart){
+      if(!opts.refLine) return;
+      const {ctx:c, chartArea:a, scales} = chart;
+      if(!a) return;
+      const y = scales.y.getPixelForValue(opts.refLine.value);
+      if(y<a.top||y>a.bottom) return;
+      c.save();
+      c.strokeStyle=opts.refLine.color||'rgba(248,81,73,0.5)';
+      c.lineWidth=1; c.setLineDash([2,5]);
+      c.beginPath(); c.moveTo(a.left,y); c.lineTo(a.right,y); c.stroke();
+      c.setLineDash([]);
+      c.fillStyle=opts.refLine.color||'rgba(248,81,73,0.7)';
+      c.font='10px "JetBrains Mono"';
+      c.fillText(opts.refLine.label, a.left+8, y-4);
+      c.restore();
+    }
+  };
+
+  const nowPlugin = {
+    id:'nowLine',
+    afterDatasetsDraw(chart){
+      const {ctx:c, chartArea:a, scales} = chart;
+      if(!a) return;
+      const x = scales.x.getPixelForValue(Date.now());
+      if(x < a.left || x > a.right) return;
+      c.save();
+      c.strokeStyle = 'rgba(88,166,255,0.7)';
+      c.lineWidth = 1;
+      c.setLineDash([2,3]);
+      c.beginPath(); c.moveTo(x, a.top); c.lineTo(x, a.bottom); c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = 'rgba(88,166,255,0.95)';
+      c.font = '10px "JetBrains Mono"';
+      c.fillText('now', x + 4, a.top + 12);
+      c.restore();
+    }
+  };
+
+  _charts[canvasId] = new Chart(ctx, {
+    type:'line', data:{datasets},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'top',align:'end',labels:{color:theme.dim,font:{family:'JetBrains Mono',size:10},usePointStyle:true,pointStyle:'rect',boxWidth:10,boxHeight:2,padding:12}},
+        tooltip:{
+          backgroundColor:theme.tooltipBg,titleColor:theme.tooltipTxt,bodyColor:theme.tooltipTxt,
+          borderColor:theme.bdr,borderWidth:1,padding:10,
+          titleFont:{family:'JetBrains Mono',size:11,weight:'400'},
+          bodyFont:{family:'JetBrains Mono',size:11},
+          callbacks:{
+            title:items=>fmtTime(new Date(items[0].parsed.x)),
+            label:item=>`${item.dataset.label.padEnd(6)} ${Math.round(item.parsed.y)}${opts.unit||''}`,
+          }
+        }
+      },
+      scales:{
+        x:{type:'time',time:{unit:'day',displayFormats:{day:'EEE d'}},
+           min: new Date(climbStart.getTime() - 24*3600*1000),
+           ticks:{color:theme.faint,font:{family:'JetBrains Mono',size:10}},
+           grid:{color:theme.grid},border:{color:theme.bdr}},
+        y:{ticks:{color:theme.faint,font:{family:'JetBrains Mono',size:10},callback:v=>Math.round(v)+(opts.unit||'')},
+           grid:{color:theme.grid},border:{color:theme.bdr},...(opts.scaleOptions||{})},
+      }
+    },
+    plugins:[windowPlugin, refPlugin, nowPlugin]
+  });
+}
+
+function renderCharts(startStr, endStr, summitFt, thr){
+  _lastChartArgs = [startStr, endStr, summitFt, thr];
+  const cStart = new Date(startStr); const cEnd = new Date(endStr);
+  renderChart('chart-wind',     'wind_speed_10m',         cStart, cEnd, summitFt, {unit:' mph', refLine:{value:thr.wGo, label:`Go (${thr.wGo} mph)`, color:'rgba(210,153,34,0.55)'}});
+  renderChart('chart-gust',     'wind_gusts_10m',         cStart, cEnd, summitFt, {unit:' mph', refLine:{value:thr.gGo, label:`Go (${thr.gGo} mph)`, color:'rgba(210,153,34,0.55)'}});
+  renderChart('chart-freezing', 'freezing_level_height',  cStart, cEnd, summitFt, {unit:' ft', refLine:{value:summitFt, label:`Summit ${summitFt.toLocaleString()} ft`, color:'rgba(248,81,73,0.55)'}});
+  renderChart('chart-precip',   'precipitation_probability', cStart, cEnd, summitFt, {unit:'%', scaleOptions:{min:0,max:100}});
+}
+
+async function fetchNwsAfd(office){
+  const hdrs = {'Accept':'application/geo+json'};
+  try{
+    const listUrl = `https://api.weather.gov/products/types/AFD/locations/${office}`;
+    const listResponse = await fetch(listUrl, {headers:hdrs, cache:'no-store'});
+    if(!listResponse.ok) throw new Error(`AFD list HTTP ${listResponse.status}`);
+    const list = await listResponse.json();
+    const latest = (list['@graph']||[])[0];
+    if(!latest||!latest['@id']) throw new Error('empty product list');
+
+    const productResponse = await fetch(latest['@id'], {headers:hdrs, cache:'no-store'});
+    if(!productResponse.ok) throw new Error(`AFD product HTTP ${productResponse.status}`);
+    const product = await productResponse.json();
+    if(!product.productText) throw new Error('no productText');
+    return {text:product.productText, issued:product.issuanceTime||latest.issuanceTime};
+  }catch(e){
+    console.warn('AFD fetch failed:', office, e);
+    return {error:e.message};
+  }
+}
+
+function renderAfd(result, office){
+  const el = document.getElementById('afd-card');
+  if(!result||!result.text){
+    const err = result?.error||'no response';
+    const isFile = location.protocol==='file:';
+    el.innerHTML = `<div class="afd-hdr">Discussion unavailable</div>`+
+      `<span style="color:var(--caution);font-size:11px;">Error: ${err}</span><br><br>`+
+      (isFile?`<span style="color:var(--watch);">Opened via file:// — try Chrome/Firefox, or run <code>python3 -m http.server 8000</code> in the file's folder.</span><br><br>`:``) +
+      `Open directly: <a href="https://forecast.weather.gov/product.php?site=${office}&product=AFD&issuedby=${office}" target="_blank" rel="noopener" style="color:var(--blue)">forecast.weather.gov AFD (${office})</a>`;
+    return;
+  }
+  const issued = new Date(result.issued);
+  el.innerHTML = `<div class="afd-hdr">Issued ${fmtTime(issued)} · NWS ${office}</div>${result.text}`;
+}
+
+
+const MODEL_NAMES = { gfs_seamless:'GFS', ecmwf_ifs025:'ECMWF', icon_seamless:'ICON', gem_seamless:'GEM', ncep_hrrr_conus:'HRRR', ncep_nam_conus:'NAM' };
+const VARS = ['wind_speed_10m','wind_gusts_10m','wind_direction_10m','freezing_level_height','precipitation_probability','precipitation','cloud_cover'];
+
+function pad2(n){ return String(n).padStart(2,'0'); }
+function dtlStr(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
+function nonNull(arr){ return arr.filter(x=>x!==null&&!isNaN(x)); }
+function mean(arr){ const v=nonNull(arr); return v.length?v.reduce((a,b)=>a+b)/v.length:null; }
+function mx(arr){ const v=nonNull(arr); return v.length?Math.max(...v):null; }
+function rnd(v,d=0){ return v!==null?v.toFixed(d):'—'; }
+function tempFmt(v){ return v!==null&&v!==undefined?Math.round(v)+'°':'—'; }
+function tempRangeFmt(min, max){
+  if(min===null||max===null) return '—';
+  return Math.round(min)===Math.round(max) ? Math.round(min)+'°F' : `${Math.round(min)}–${Math.round(max)}°F`;
+}
+
+function windDir(deg){
+  if(deg===null) return '—';
+  const d=['N','NE','E','SE','S','SW','W','NW'];
+  return d[Math.round(deg/45)%8];
+}
+
+function colorClass(val, go, watch){
+  if(val===null) return '';
+  if(val<=go)    return 'c-go';
+  if(val<=watch) return 'c-watch';
+  return 'c-caution';
+}
+
+function metClass(val, go, watch){
+  if(val===null) return '';
+  if(val<=go)    return 'go';
+  if(val<=watch) return 'watch';
+  return 'caution';
+}
+
+async function fetchWeather(lat, lon){
+  const vars = VARS.join(',');
+  const models = MODELS.join(',');
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${vars}&models=${models}&timezone=America%2FLos_Angeles&past_days=3&forecast_days=7&wind_speed_unit=mph&precipitation_unit=inch&_=${Date.now()}`;
+  const r = await fetch(url);
+  if(!r.ok) throw new Error(`Open-Meteo ${r.status}`);
+  return r.json();
+}
+
+async function fetchNwsPointForecast(point){
+  const pointUrl = `https://api.weather.gov/points/${point.lat.toFixed(4)},${point.lon.toFixed(4)}`;
+  const pointResponse = await fetch(pointUrl, {headers:{'Accept':'application/geo+json'}});
+  if(!pointResponse.ok) throw new Error(`NWS point lookup failed for ${point.name}`);
+  const pointData = await pointResponse.json();
+  const hourlyUrl = pointData.properties.forecastHourly;
+  const gridUrl = pointData.properties.forecastGridData;
+
+  const [hourlyResponse, gridResponse] = await Promise.all([
+    fetch(hourlyUrl, {headers:{'Accept':'application/geo+json'}}),
+    fetch(gridUrl, {headers:{'Accept':'application/geo+json'}}),
+  ]);
+  if(!hourlyResponse.ok) throw new Error(`NWS hourly forecast failed for ${point.name}`);
+
+  return {
+    point,
+    pointData,
+    hourly: await hourlyResponse.json(),
+    grid: gridResponse.ok ? await gridResponse.json() : null,
+  };
+}
+
+function parseDurationHours(duration){
+  const match = String(duration||'').match(/P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?/);
+  if(!match) return 0;
+  return (Number(match[1]||0)*24) + Number(match[2]||0) + (Number(match[3]||0)/60);
+}
+
+function parseValidTime(validTime){
+  const [startIso, duration] = String(validTime).split('/');
+  const start = new Date(startIso);
+  const end = new Date(start.getTime() + parseDurationHours(duration)*3600*1000);
+  return {start, end};
+}
+
+function overlapFraction(aStart, aEnd, bStart, bEnd){
+  const overlapMs = Math.max(0, Math.min(aEnd, bEnd) - Math.max(aStart, bStart));
+  const totalMs = Math.max(1, aEnd - aStart);
+  return overlapMs / totalMs;
+}
+
+function periodOverlaps(period, start, end){
+  const pStart = new Date(period.startTime);
+  const pEnd = new Date(period.endTime);
+  return pStart < end && pEnd > start;
+}
+
+function snowInchesFromGrid(grid, start, end){
+  const values = grid?.properties?.snowfallAmount?.values || [];
+  let totalMm = 0;
+  for(const item of values){
+    const interval = parseValidTime(item.validTime);
+    totalMm += Number(item.value||0) * overlapFraction(interval.start, interval.end, start, end);
+  }
+  return totalMm * 0.0393701;
+}
+
+function summarizeNwsForecast(bundle, startStr, endStr){
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  const periods = (bundle.hourly.properties.periods||[]).filter(p => periodOverlaps(p, start, end));
+  const byTime = {};
+  periods.forEach(p => { byTime[dtlStr(new Date(p.startTime))] = p; });
+  const temps = periods.map(p => p.temperature).filter(Number.isFinite);
+  const pops = periods.map(p => p.probabilityOfPrecipitation?.value).filter(v => v!==null&&v!==undefined);
+  return {
+    periods,
+    byTime,
+    minTemp: temps.length ? Math.min(...temps) : null,
+    maxTemp: temps.length ? Math.max(...temps) : null,
+    maxPop: pops.length ? Math.max(...pops) : null,
+    snowInches: snowInchesFromGrid(bundle.grid, start, end),
+    generatedAt: bundle.hourly.properties.generatedAt || bundle.hourly.properties.updateTime || null,
+  };
+}
+
+function formatGenerated(iso){
+  return iso ? fmtTime(new Date(iso)) : 'generation time unavailable';
+}
+
+function parseWindow(api, startStr, endStr, summitFt, nws){
+  const times = api.hourly.time;
+  const rows = [];
+
+  times.forEach((t, i) => {
+    if(t < startStr || t > endStr) return;
+    const row = { time: t, byModel: {} };
+
+    MODELS.forEach(mid => {
+      row.byModel[mid] = {};
+      VARS.forEach(v => {
+        row.byModel[mid][v] = api.hourly[`${v}_${mid}`]?.[i] ?? null;
+      });
+    });
+
+    VARS.forEach(v => {
+      row[v] = mean(MODELS.map(m => row.byModel[m][v]));
+    });
+
+    row.fl_ft   = row.freezing_level_height;
+    row.summit_f = nws.upper.byTime[t]?.temperature ?? null;
+    row.trail_f = nws.trail.byTime[t]?.temperature ?? null;
+    row.snow_signal = /snow|sleet|wintry/i.test(nws.upper.byTime[t]?.shortForecast || '');
+    row.inversion = row.fl_ft !== null && (row.fl_ft - summitFt) > 3000;
+
+    const windVals = nonNull(MODELS.map(m => row.byModel[m].wind_speed_10m));
+    row.spread = windVals.length >= 2 ? Math.max(...windVals) - Math.min(...windVals) : null;
+
+    rows.push(row);
+  });
+  return rows;
+}
+
+function mxAt(rows, key){
+  let best = null, bestTime = null;
+  for(const r of rows){
+    const v = r[key];
+    if(v === null || v === undefined || isNaN(v)) continue;
+    if(best === null || v > best){ best = v; bestTime = r.time; }
+  }
+  return { value: best, at: bestTime };
+}
+
+function computeSummary(rows, thr, summitFt, nws){
+  const wRes  = mxAt(rows, 'wind_speed_10m');
+  const gRes  = mxAt(rows, 'wind_gusts_10m');
+  const flRes = mxAt(rows, 'fl_ft');
+  const pRes  = mxAt(rows, 'precipitation_probability');
+
+  const peakWind  = wRes.value;
+  const peakGust  = gRes.value;
+  const maxFL     = flRes.value;
+  const maxPrecip = pRes.value;
+  const avgSummitTemp = mean(rows.map(r=>r.summit_f));
+  const avgTrailTemp = mean(rows.map(r=>r.trail_f));
+  const avgSpread = mean(rows.map(r=>r.spread));
+  const anyInv    = rows.some(r=>r.inversion);
+  const flBelowSummit = rows.some(r=>r.fl_ft!==null && r.fl_ft < summitFt);
+  const snowInches = nws.upper.snowInches;
+  const snowHours = rows.filter(r=>r.snow_signal).length;
+
+  const wScore = peakWind  <= thr.wGo ? 'go' : peakWind  <= thr.wWa ? 'watch' : 'caution';
+  const gScore = peakGust  <= thr.gGo ? 'go' : peakGust  <= thr.gWa ? 'watch' : 'caution';
+  const pScore = maxPrecip <= thr.pGo ? 'go' : maxPrecip <= thr.pWa ? 'watch' : 'caution';
+
+  const scores = [wScore, gScore, pScore];
+  const verdict = scores.includes('caution') ? 'caution' : scores.includes('watch') ? 'watch' : 'go';
+
+  return {
+    verdict,
+    peakWind, peakWindAt: wRes.at,
+    peakGust, peakGustAt: gRes.at,
+    maxFL, maxFLAt: flRes.at,
+    maxPrecip, maxPrecipAt: pRes.at,
+    avgSummitTemp, avgTrailTemp, avgSpread,
+    anyInv, flBelowSummit, snowInches, snowHours
+  };
+}
+
+function fmtHHMM(timeStr){ return timeStr ? timeStr.slice(11,16) : ''; }
+function atSuffix(timeStr){ return timeStr ? ` · peak ${fmtHHMM(timeStr)}` : ''; }
+
+function verdictWhy(s, thr){
+  const checks = [
+    { val: s.peakWind,  at: s.peakWindAt,  go: thr.wGo, wa: thr.wWa, name: 'sustained wind', unit: ' mph' },
+    { val: s.peakGust,  at: s.peakGustAt,  go: thr.gGo, wa: thr.gWa, name: 'gusts',           unit: ' mph' },
+    { val: s.maxPrecip, at: s.maxPrecipAt, go: thr.pGo, wa: thr.pWa, name: 'precip',          unit: '%' },
+  ].filter(c => c.val !== null && c.val !== undefined);
+
+  const banded = checks.map(c => {
+    const v = c.val;
+    let band;
+    if(v <= c.go) band = 'go';
+    else if(v <= c.wa) band = 'watch';
+    else band = 'caution';
+    return { ...c, band };
+  });
+
+  function phrase(c){
+    const vStr = Math.round(c.val) + c.unit;
+    const atStr = c.at ? ` at ${fmtHHMM(c.at)}` : '';
+    if(c.band === 'caution') return `${c.name} ${vStr} &gt; caution ${c.wa}${c.unit}${atStr}`;
+    if(c.band === 'watch')   return `${c.name} ${vStr} in watch range (${c.go}–${c.wa}${c.unit})${atStr}`;
+    return `${c.name} ${vStr} (go &lt;${c.go}${c.unit})`;
+  }
+
+  if(s.verdict === 'caution'){
+    const drivers = banded.filter(c => c.band === 'caution').map(phrase).join('; ');
+    return `<span class="pill">Caution</span> because: ${drivers}.`;
+  }
+  if(s.verdict === 'watch'){
+    const drivers = banded.filter(c => c.band === 'watch').map(phrase).join('; ');
+    return `<span class="pill">Watch</span> because: ${drivers}.`;
+  }
+  const summary = banded.map(phrase).join('; ');
+  return `<span class="pill">Go</span> — all three pillars within thresholds: ${summary}.`;
+}
+
+function bandRank(band){ return band === 'caution' ? 2 : band === 'watch' ? 1 : 0; }
+function worstBand(bands){
+  return bands.reduce((worst, band) => bandRank(band) > bandRank(worst) ? band : worst, 'go');
+}
+
+function rowBand(row, thr){
+  return worstBand([
+    metClass(row.wind_speed_10m, thr.wGo, thr.wWa) || 'go',
+    metClass(row.wind_gusts_10m, thr.gGo, thr.gWa) || 'go',
+    metClass(row.precipitation_probability, thr.pGo, thr.pWa) || 'go',
+  ]);
+}
+
+function countRows(rows, predicate){
+  return rows.reduce((n, r) => n + (predicate(r) ? 1 : 0), 0);
+}
+
+function rowRiskScore(row, thr, summitFt){
+  const wind = row.wind_speed_10m !== null ? row.wind_speed_10m / Math.max(1, thr.wWa) : 0;
+  const gust = row.wind_gusts_10m !== null ? row.wind_gusts_10m / Math.max(1, thr.gWa) : 0;
+  const precip = row.precipitation_probability !== null ? row.precipitation_probability / Math.max(1, thr.pWa) : 0;
+  const spread = row.spread !== null ? row.spread / 18 : 0;
+  const flPenalty = row.fl_ft !== null && row.fl_ft > summitFt + 1000 && row.precipitation_probability >= thr.pGo ? 0.28 : 0;
+  const snowPenalty = row.snow_signal ? 0.18 : 0;
+  return (wind * 0.22) + (gust * 0.34) + (precip * 0.22) + (spread * 0.12) + flPenalty + snowPenalty;
+}
+
+function windowEndLabel(timeStr, hardEndStr){
+  if(!timeStr) return '';
+  if(hardEndStr && timeStr >= hardEndStr) return fmtHHMM(hardEndStr);
+  const d = new Date(timeStr);
+  d.setHours(d.getHours() + 1);
+  if(hardEndStr && dtlStr(d) > hardEndStr) return fmtHHMM(hardEndStr);
+  return fmtHHMM(dtlStr(d));
+}
+
+function rangeLabel(rows, hardEndStr){
+  if(!rows.length) return '—';
+  return `${fmtHHMM(rows[0].time)}-${windowEndLabel(rows[rows.length - 1].time, hardEndStr)}`;
+}
+
+function bestWindow(rows, thr, summitFt, preferredHours = 3){
+  if(!rows.length) return null;
+  const span = Math.min(preferredHours, rows.length);
+  let best = null;
+  for(let i = 0; i <= rows.length - span; i++){
+    const chunk = rows.slice(i, i + span);
+    const score = mean(chunk.map(r => rowRiskScore(r, thr, summitFt)));
+    if(best === null || score < best.score) best = { rows: chunk, score };
+  }
+  return best;
+}
+
+function windChillF(tempF, windMph){
+  if(tempF === null || windMph === null || tempF > 50 || windMph < 3) return tempF;
+  return 35.74 + (0.6215 * tempF) - (35.75 * Math.pow(windMph, 0.16)) + (0.4275 * tempF * Math.pow(windMph, 0.16));
+}
+
+function minWindChill(rows){
+  let best = null, at = null;
+  rows.forEach(r => {
+    const wc = windChillF(r.summit_f, r.wind_speed_10m);
+    if(wc === null || wc === undefined || isNaN(wc)) return;
+    if(best === null || wc < best){ best = wc; at = r.time; }
+  });
+  return { value: best, at };
+}
+
+function confidenceLabel(avgSpread, startStr){
+  const hoursOut = (new Date(startStr) - new Date()) / 36e5;
+  if(avgSpread === null) return { band:'watch', label:'Unknown', body:'Not enough model overlap to judge confidence.' };
+  if(avgSpread < 8 && hoursOut <= 72) return { band:'go', label:'High', body:'Models are clustered and the window is close enough for useful timing.' };
+  if(avgSpread < 15) return { band:'watch', label:'Moderate', body:'The signal is usable, but still worth checking again closer to departure.' };
+  return { band:'caution', label:'Low', body:'Wind guidance is spread out; treat exact timing and peak values conservatively.' };
+}
+
+function refreezeSignal(rows, nws){
+  const summitMin = nws.upper.minTemp;
+  const trailMin = nws.trail.minTemp;
+  const cloudAvg = mean(rows.map(r => r.cloud_cover));
+  if(summitMin !== null && summitMin <= 28 && (trailMin === null || trailMin <= 36) && (cloudAvg === null || cloudAvg < 70)){
+    return { band:'go', label:'Good refreeze', body:'Cold upper mountain and limited cloud signal support firmer early travel.' };
+  }
+  if(summitMin !== null && summitMin <= 34){
+    return { band:'watch', label:'Marginal refreeze', body:'Upper mountain gets near freezing, but surface quality may vary by aspect and cloud cover.' };
+  }
+  return { band:'caution', label:'Poor refreeze', body:'Temperatures stay warm enough that wet snow or punchy travel deserves attention.' };
+}
+
+function buildDecisionData(rows, s, thr, summitFt, nws, startStr){
+  const best = bestWindow(rows, thr, summitFt);
+  const windChill = minWindChill(rows);
+  const conf = confidenceLabel(s.avgSpread, startStr);
+  const refreeze = refreezeSignal(rows, nws);
+  const gustCautionHours = countRows(rows, r => r.wind_gusts_10m !== null && r.wind_gusts_10m > thr.gWa);
+  const windCautionHours = countRows(rows, r => r.wind_speed_10m !== null && r.wind_speed_10m > thr.wWa);
+  const precipWatchHours = countRows(rows, r => r.precipitation_probability !== null && r.precipitation_probability > thr.pGo);
+  const rainOnSnowHours = countRows(rows, r => r.precipitation_probability >= thr.pGo && r.fl_ft !== null && r.fl_ft > summitFt + 500);
+  const whiteoutHours = countRows(rows, r => r.precipitation_probability >= thr.pGo && (r.cloud_cover >= 80 || r.snow_signal));
+
+  const hazardCandidates = [
+    { key:'wind', band: metClass(s.peakGust, thr.gGo, thr.gWa) || 'go', label:'Wind', body:`Upper-mountain gusts peak at ${s.peakGust !== null ? Math.round(s.peakGust) + ' mph' : 'unknown'}.` },
+    { key:'precip', band: metClass(s.maxPrecip, thr.pGo, thr.pWa) || 'go', label:'Precip', body:`Precipitation probability peaks at ${s.maxPrecip !== null ? Math.round(s.maxPrecip) + '%' : 'unknown'}.` },
+    { key:'refreeze', band: refreeze.band, label:'Surface', body: refreeze.body },
+    { key:'confidence', band: conf.band, label:'Confidence', body: conf.body },
+  ];
+  const primary = hazardCandidates.sort((a, b) => bandRank(b.band) - bandRank(a.band))[0];
+
+  const deals = [];
+  if(gustCautionHours) deals.push({ band:'caution', text:`Gusts exceed caution threshold for ${gustCautionHours} hour${gustCautionHours === 1 ? '' : 's'}.` });
+  else if(s.peakGust !== null) deals.push({ band: metClass(s.peakGust, thr.gGo, thr.gWa) || 'go', text:`Peak upper-mountain gust: ${Math.round(s.peakGust)} mph at ${fmtHHMM(s.peakGustAt)}.` });
+  if(windCautionHours) deals.push({ band:'caution', text:`Sustained wind exceeds caution threshold for ${windCautionHours} hour${windCautionHours === 1 ? '' : 's'}.` });
+  if(rainOnSnowHours) deals.push({ band:'caution', text:`Rain-on-snow setup possible for ${rainOnSnowHours} hour${rainOnSnowHours === 1 ? '' : 's'}: precip with freezing level above summit.` });
+  if(whiteoutHours) deals.push({ band:'watch', text:`Whiteout/low-visibility ingredients show up for ${whiteoutHours} hour${whiteoutHours === 1 ? '' : 's'}.` });
+  if(precipWatchHours && !rainOnSnowHours) deals.push({ band: metClass(s.maxPrecip, thr.pGo, thr.pWa) || 'watch', text:`Precipitation signal is elevated for ${precipWatchHours} hour${precipWatchHours === 1 ? '' : 's'}.` });
+  if(s.flBelowSummit) deals.push({ band:'watch', text:'Freezing level drops below summit during the window.' });
+  deals.push({ band: refreeze.band, text:`${refreeze.label}: ${refreeze.body}` });
+  deals.push({ band: conf.band, text:`Forecast confidence: ${conf.label}. ${conf.body}` });
+
+  return { best, windChill, conf, refreeze, primary, deals: deals.slice(0, 5) };
+}
+
+function renderDecisionSurface(rows, s, thr, summitFt, nws, startStr){
+  const data = buildDecisionData(rows, s, thr, summitFt, nws, startStr);
+  const advisor = document.getElementById('advisor-panel');
+  const deals = document.getElementById('dealbreaker-panel');
+  if(!advisor || !deals) return;
+
+  const bestLabel = data.best ? rangeLabel(data.best.rows) : '—';
+  const wcLabel = data.windChill.value !== null ? `${Math.round(data.windChill.value)}°F` : '—';
+  const hazardClass = data.primary.band;
+  const title = data.primary.band === 'go' ? 'Window looks usable' : data.primary.band === 'watch' ? `${data.primary.label} needs attention` : `${data.primary.label} is the critical criterion`;
+  const advisorCopy = `${data.primary.body} Best low-risk block inside your selected window is ${bestLabel}. Use the detailed table below to decide whether that block matches your actual summit and descent timing.`;
+
+  advisor.innerHTML = `
+    <div class="advisor-kicker">Route advisor</div>
+    <div class="advisor-title ${hazardClass}">${title}</div>
+    <div class="advisor-copy">${advisorCopy}</div>
+    <div class="advisor-stats">
+      <div class="advisor-stat"><div class="lbl">Best block</div><div class="val">${bestLabel}</div></div>
+      <div class="advisor-stat"><div class="lbl">Lowest wind chill</div><div class="val">${wcLabel}${data.windChill.at ? ' · ' + fmtHHMM(data.windChill.at) : ''}</div></div>
+      <div class="advisor-stat"><div class="lbl">Confidence</div><div class="val">${data.conf.label}</div></div>
+    </div>`;
+
+  deals.innerHTML = `
+    <div class="dealbreaker-kicker">Critical criteria</div>
+    <div class="deal-list">
+      ${data.deals.map(d => `<div class="deal-item ${d.band}"><span class="deal-dot"></span><span>${d.text}</span></div>`).join('')}
+    </div>`;
+}
+
+function phaseSummary(rows, thr, summitFt){
+  const peakGust = mx(rows.map(r => r.wind_gusts_10m));
+  const maxPrecip = mx(rows.map(r => r.precipitation_probability));
+  const minTemp = rows.map(r => r.summit_f).filter(v => v !== null && v !== undefined).reduce((best, v) => best === null || v < best ? v : best, null);
+  const bands = rows.map(r => rowBand(r, thr));
+  const band = worstBand(bands);
+  const flBelow = rows.some(r => r.fl_ft !== null && r.fl_ft < summitFt);
+  const snow = rows.some(r => r.snow_signal);
+  const notes = [
+    peakGust !== null ? `G ${Math.round(peakGust)} mph` : null,
+    maxPrecip !== null ? `${Math.round(maxPrecip)}% precip` : null,
+    minTemp !== null ? `${Math.round(minTemp)}°F summit` : null,
+    flBelow ? 'freezing level below summit' : null,
+    snow ? 'snow signal' : null,
+  ].filter(Boolean).join(' · ');
+  return { band, notes: notes || 'No standout hazard in this phase.' };
+}
+
+function phaseProfile(th){
+  const defaults = [0.22, 0.42, 0.08, 0.28];
+  const profile = Array.isArray(th?.phase) && th.phase.length === 4 ? th.phase : defaults;
+  const total = profile.reduce((a,b) => a + b, 0) || 1;
+  return profile.map(v => v / total);
+}
+
+function phaseProfileLabel(profile){
+  const names = ['approach', 'climb', 'summit', 'descent'];
+  return profile.map((v, i) => `${Math.round(v * 100)}% ${names[i]}`).join(' / ');
+}
+
+function splitPhases(rows, th){
+  const names = ['Approach', 'Climb', 'Summit block', 'Descent'];
+  const profile = phaseProfile(th);
+  let cursor = 0;
+  return names.map((name, idx) => {
+    const remainingRows = rows.length - cursor;
+    const remainingPhases = names.length - idx;
+    if(remainingRows <= 0) return { name, rows: [] };
+    const count = idx === names.length - 1
+      ? remainingRows
+      : Math.max(1, Math.min(remainingRows - remainingPhases + 1, Math.round(rows.length * profile[idx])));
+    const phaseRows = rows.slice(cursor, cursor + count);
+    cursor += count;
+    return { name, rows: phaseRows };
+  }).filter(p => p.rows.length);
+}
+
+function renderPhaseTimeline(rows, thr, summitFt, endStr, th){
+  const el = document.getElementById('phase-timeline');
+  if(!el) return;
+  if(!rows.length){
+    el.innerHTML = '<div class="phase-empty">No phase timeline available for this window.</div>';
+    return;
+  }
+  const profile = phaseProfile(th);
+  const phases = splitPhases(rows, th).map(p => ({ ...p, summary: phaseSummary(p.rows, thr, summitFt) }));
+  el.innerHTML = `<div class="phase-note">Route-weighted planning split for ${th.name}: ${phaseProfileLabel(profile)}. Adjust the selected window if your party's actual pacing differs.</div><div class="phase-track">
+    ${phases.map(p => `
+      <div class="phase ${p.summary.band}">
+        <div class="name">${p.name}</div>
+        <div class="time">${rangeLabel(p.rows, endStr)}</div>
+        <div class="risk">${p.summary.notes}</div>
+      </div>`).join('')}
+  </div>`;
+}
+
+function circularMeanDeg(values){
+  const nums = nonNull(values);
+  if(!nums.length) return null;
+  const sum = nums.reduce((acc, deg) => {
+    const rad = deg * Math.PI / 180;
+    acc.x += Math.cos(rad);
+    acc.y += Math.sin(rad);
+    return acc;
+  }, {x:0, y:0});
+  return ((Math.atan2(sum.y, sum.x) * 180 / Math.PI) + 360) % 360;
+}
+
+function angleDiff(a, b){
+  if(a === null || b === null || a === undefined || b === undefined) return null;
+  const diff = Math.abs((((a - b) % 360) + 540) % 360 - 180);
+  return diff;
+}
+
+function cardBandLabel(band){
+  return band === 'caution' ? 'High' : band === 'watch' ? 'Watch' : 'Favorable';
+}
+
+function buildSignal(label, value, band, body){
+  return { label, value, band: band || 'go', body };
+}
+
+function visibilitySignal(rows, thr){
+  const poorHours = countRows(rows, r =>
+    (r.precipitation_probability !== null && r.precipitation_probability >= thr.pGo && r.cloud_cover !== null && r.cloud_cover >= 80) ||
+    r.snow_signal
+  );
+  const maxCloud = mx(rows.map(r => r.cloud_cover));
+  if(poorHours >= 3){
+    return buildSignal('Visibility', 'Whiteout risk', 'caution', `${poorHours} hours combine precip/snow signal with heavy cloud cover.`);
+  }
+  if(poorHours >= 1){
+    return buildSignal('Visibility', 'Limited windows', 'watch', `${poorHours} hour${poorHours === 1 ? '' : 's'} may have low-visibility ingredients.`);
+  }
+  return buildSignal('Visibility', 'Mostly workable', 'go', `Peak cloud cover ${maxCloud !== null ? Math.round(maxCloud) + '%' : 'unknown'} in this window.`);
+}
+
+function rainOnSnowSignal(rows, thr, summitFt){
+  const hours = countRows(rows, r => r.precipitation_probability >= thr.pGo && r.fl_ft !== null && r.fl_ft > summitFt + 500);
+  if(hours >= 2) return buildSignal('Rain on snow', `${hours} hr setup`, 'caution', 'Precip overlaps a freezing level above the summit grid point.');
+  if(hours === 1) return buildSignal('Rain on snow', 'Brief setup', 'watch', 'One hour hints at precip with freezing level above the summit.');
+  return buildSignal('Rain on snow', 'Not flagged', 'go', 'Precip and freezing-level guidance do not overlap in a classic rain-on-snow pattern.');
+}
+
+function wetSnowSignal(rows, startStr, endStr, lat, lon, summitFt){
+  const mid = new Date((new Date(startStr).getTime() + new Date(endStr).getTime()) / 2);
+  const events = solarEvents(mid, lat, lon);
+  const sunrise = events.sunrise;
+  const sunset = events.sunset;
+  const warmSolarHours = countRows(rows, r => {
+    const t = new Date(r.time);
+    const daylight = sunrise && sunset ? t >= sunrise && t <= sunset : true;
+    const warmSurface = r.summit_f !== null && r.summit_f >= 32;
+    const highFL = r.fl_ft !== null && r.fl_ft > summitFt + 1000;
+    return daylight && (warmSurface || highFL);
+  });
+  if(warmSolarHours >= 3) return buildSignal('Wet snow', `${warmSolarHours} hr solar/warm`, 'caution', 'Daylight overlaps warm upper-mountain or high freezing-level guidance.');
+  if(warmSolarHours >= 1) return buildSignal('Wet snow', 'Watch timing', 'watch', 'Some daylight hours could soften solar aspects or surface crust.');
+  return buildSignal('Wet snow', 'Low signal', 'go', 'Selected window stays mostly cold or dark by this simple screen.');
+}
+
+function coldStressSignal(rows){
+  const wc = minWindChill(rows);
+  if(wc.value === null) return buildSignal('Cold stress', 'Unknown', 'watch', 'Wind chill could not be calculated from available rows.');
+  if(wc.value <= 0) return buildSignal('Cold stress', `${Math.round(wc.value)}°F`, 'caution', `Lowest wind chill around ${fmtHHMM(wc.at)}; manage exposed skin and slow transitions.`);
+  if(wc.value <= 15) return buildSignal('Cold stress', `${Math.round(wc.value)}°F`, 'watch', `Lowest wind chill around ${fmtHHMM(wc.at)}; cold stops and summit delays matter.`);
+  return buildSignal('Cold stress', `${Math.round(wc.value)}°F`, 'go', `Lowest wind chill around ${fmtHHMM(wc.at)}.`);
+}
+
+function windExposureSignal(rows, th, thr){
+  const avgDir = circularMeanDeg(rows.map(r => r.wind_direction_10m));
+  const peakGust = mx(rows.map(r => r.wind_gusts_10m));
+  if(avgDir === null || th.aspect === undefined){
+    return buildSignal('Wind exposure', 'Route aspect unknown', metClass(peakGust, thr.gGo, thr.gWa) || 'watch', 'Route aspect metadata is not set for this line yet.');
+  }
+  const diff = angleDiff(avgDir, th.aspect);
+  let value = 'Crosswind';
+  let body = `${windDir(avgDir)} wind across a ${windDir(th.aspect)}-facing route.`;
+  if(diff <= 45){
+    value = 'Windward';
+    body = `${windDir(avgDir)} wind hits the ${windDir(th.aspect)}-facing route more directly.`;
+  } else if(diff >= 135){
+    value = 'Lee side';
+    body = `${windDir(avgDir)} wind puts this ${windDir(th.aspect)}-facing route closer to lee-side terrain; watch loading if snow is moving.`;
+  }
+  let band = metClass(peakGust, thr.gGo, thr.gWa) || 'go';
+  if(value === 'Lee side' && peakGust !== null && peakGust >= thr.gGo) band = worstBand([band, 'watch']);
+  return buildSignal('Wind exposure', value, band, `${body} Peak gust ${peakGust !== null ? Math.round(peakGust) + ' mph' : 'unknown'}.`);
+}
+
+function renderSignalGrid(rows, thr, summitFt, nws, startStr, endStr, mtn, th){
+  const el = document.getElementById('signal-grid');
+  if(!el) return;
+  const refreeze = refreezeSignal(rows, nws);
+  const signals = [
+    buildSignal('Refreeze', refreeze.label, refreeze.band, refreeze.body),
+    wetSnowSignal(rows, startStr, endStr, mtn.summit[0], mtn.summit[1], summitFt),
+    rainOnSnowSignal(rows, thr, summitFt),
+    visibilitySignal(rows, thr),
+    coldStressSignal(rows),
+    windExposureSignal(rows, th, thr),
+  ];
+  el.innerHTML = signals.map(sig => `
+    <div class="signal-card ${sig.band}">
+      <div class="lbl">${sig.label}</div>
+      <div class="val">${sig.value}</div>
+      <div class="sub">${sig.body}</div>
+    </div>`).join('');
+}
+
+function renderClimbFrame(startStr, endStr, lat, lon){
+  const el = document.getElementById('climb-frame');
+  if(!el) return;
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  const mid = new Date((start.getTime() + end.getTime()) / 2);
+  const events = solarEvents(mid, lat, lon);
+  const sunrise = events.sunrise;
+  const sunset = events.sunset;
+
+  function relDiff(dt, ref, label){
+    if(!ref) return '';
+    const diffMin = Math.round((dt - ref) / 60000);
+    const abs = Math.abs(diffMin);
+    const h = Math.floor(abs / 60);
+    const m = abs % 60;
+    const span = h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+    return diffMin >= 0 ? `${span} after ${label}` : `${span} before ${label}`;
+  }
+
+  const startClock = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', hour12:false });
+  const endClock = end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', hour12:false });
+
+  const startRel = relDiff(start, sunrise, 'sunrise');
+  const endRel = relDiff(end, sunrise, 'sunrise');
+  const sunriseStr = sunrise ? fmtClock(sunrise) : '—';
+  const sunsetStr = sunset ? fmtClock(sunset) : '—';
+
+  el.innerHTML =
+    `Start <strong>${startClock}</strong> · ${startRel}` +
+    `<span class="sep">·</span>` +
+    `<span class="cf-sun">☀ sunrise ${sunriseStr} · sunset ${sunsetStr}</span>` +
+    `<span class="sep">·</span>` +
+    `End <strong>${endClock}</strong> · ${endRel}`;
+}
+
+function renderAll(mtn, th, startStr, endStr, rows, s, nws){
+  const verdictLabel = { go:'Go', watch:'Watch', caution:'Caution' };
+  const summitFt = mtn.summit[2];
+
+  document.getElementById('crumb').innerHTML =
+    `<strong>${mtn.name}</strong><span class="sep">›</span>${th.name} (${th.elev.toLocaleString()} ft TH)`+
+    `<span class="sep">›</span>${startStr.replace('T',' ')} – ${endStr.slice(11,16)} PDT`+
+    `<span class="sep">·</span>Summit ${summitFt.toLocaleString()} ft`;
+
+  renderClimbFrame(startStr, endStr, mtn.summit[0], mtn.summit[1]);
+
+  const vEl = document.getElementById('verdict');
+  vEl.className = `verdict v-${s.verdict}`;
+
+  const details = [
+    s.avgSummitTemp !== null ? `summit avg ${Math.round(s.avgSummitTemp)}°F` : null,
+    s.peakWind  !== null ? `wind peaks ${Math.round(s.peakWind)} mph` : null,
+    s.peakGust  !== null ? `gusts to ${Math.round(s.peakGust)}` : null,
+    s.maxFL     !== null ? `FL max ${Math.round(s.maxFL).toLocaleString()} ft` : null,
+    s.maxPrecip !== null ? `precip ${Math.round(s.maxPrecip)}%` : null,
+  ].filter(Boolean).join(' · ');
+
+	  const why = verdictWhy(s, mtn.thr);
+	  vEl.innerHTML = `<div class="v-word">${verdictLabel[s.verdict]}</div>`+
+	    `<div class="v-right"><div class="v-detail">${details}</div><div class="v-why">${why}</div></div>`;
+
+  const inv = document.getElementById('inv-alert');
+  if(s.anyInv){
+    inv.hidden = false;
+    inv.innerHTML = `<strong>⚠ Inversion detected:</strong> freezing level is &gt;3,000 ft above the summit during part of this window — warm air aloft with cold pool below. `+
+      `Open-Meteo freezing-level guidance suggests warm air aloft; compare against the NWS summit temperature and recent observations before committing.`;
+	  } else { inv.hidden = true; }
+
+	  const thr = mtn.thr;
+	  renderDecisionSurface(rows, s, thr, summitFt, nws, startStr);
+	  renderPhaseTimeline(rows, thr, summitFt, endStr, th);
+	  renderSignalGrid(rows, thr, summitFt, nws, startStr, endStr, mtn, th);
+
+	  document.getElementById('met-grid').innerHTML = `
+    <div class="met">
+      <div class="lbl">Summit temp</div>
+      <div class="val">${tempRangeFmt(nws.upper.minTemp,nws.upper.maxTemp)}</div>
+      <div class="sub">NWS hourly · upper point</div>
+    </div>
+    <div class="met">
+      <div class="lbl">Trailhead temp</div>
+      <div class="val">${tempRangeFmt(nws.trail.minTemp,nws.trail.maxTemp)}</div>
+      <div class="sub">NWS hourly · ${th.elev.toLocaleString()} ft</div>
+    </div>
+    <div class="met ${metClass(s.peakWind,thr.wGo,thr.wWa)}">
+      <div class="lbl">Upper mtn peak wind</div>
+      <div class="val">${s.peakWind!==null?Math.round(s.peakWind)+' mph':'—'}</div>
+      <div class="sub">go &lt;${thr.wGo} · caution &gt;${thr.wWa}${atSuffix(s.peakWindAt)}</div>
+    </div>
+    <div class="met ${metClass(s.peakGust,thr.gGo,thr.gWa)}">
+      <div class="lbl">Upper mtn peak gust</div>
+      <div class="val">${s.peakGust!==null?Math.round(s.peakGust)+' mph':'—'}</div>
+      <div class="sub">go &lt;${thr.gGo} · caution &gt;${thr.gWa}${atSuffix(s.peakGustAt)}</div>
+    </div>
+    <div class="met">
+      <div class="lbl">Max freezing level</div>
+      <div class="val">${s.maxFL!==null?Math.round(s.maxFL).toLocaleString()+' ft':'—'}</div>
+      <div class="sub">summit ${summitFt.toLocaleString()} ft${s.flBelowSummit?' · ↓ below summit at times':''}${atSuffix(s.maxFLAt)}</div>
+    </div>
+    <div class="met ${metClass(s.maxPrecip,thr.pGo,thr.pWa)}">
+      <div class="lbl">Max precip prob</div>
+      <div class="val">${s.maxPrecip!==null?Math.round(s.maxPrecip)+'%':'—'}</div>
+      <div class="sub">Open-Meteo mean · go &lt;${thr.pGo}%${atSuffix(s.maxPrecipAt)}</div>
+    </div>
+    <div class="met">
+      <div class="lbl">Snow signal</div>
+      <div class="val">${s.snowInches>=0.05?s.snowInches.toFixed(1)+' in':s.snowHours?s.snowHours+' hr':'Low'}</div>
+      <div class="sub">NWS grid snow · upper point</div>
+    </div>
+    <div class="met">
+      <div class="lbl">Model spread</div>
+      <div class="val">${s.avgSpread!==null?Math.round(s.avgSpread)+' mph':'—'}</div>
+      <div class="sub">wind spread across available models</div>
+    </div>
+  `;
+
+  const spreadEl = document.getElementById('spread');
+  if(s.avgSpread!==null){
+    const tight = s.avgSpread<8, wide = s.avgSpread>=15;
+    spreadEl.className = `spread ${tight?'tight':wide?'wide':''}`;
+    const modelVals = MODELS.map(m=>{
+      const peakByModel = mx(rows.map(r=>r.byModel[m].wind_speed_10m));
+      return peakByModel!==null?`${MODEL_NAMES[m]}: ${Math.round(peakByModel)}`:null;
+    }).filter(Boolean).join(' · ');
+    spreadEl.textContent = `Model peaks (wind) → ${modelVals} · spread ${Math.round(s.avgSpread)} mph · ${tight?'tight — high confidence':wide?'wide — low confidence — check back closer':'moderate uncertainty'}`;
+  } else { spreadEl.textContent = ''; }
+
+  document.getElementById('table-source').innerHTML =
+    `<strong>Sources:</strong> summit/trailhead temperatures = NWS hourly point forecasts `+
+    `(summit generated ${formatGenerated(nws.upper.generatedAt)}; trailhead generated ${formatGenerated(nws.trail.generatedAt)}) · `+
+    `wind/gust/freezing level/precip/cloud = Open-Meteo available-model mean · snow flag = NWS upper forecast text`;
+
+  const tbody = document.getElementById('tbl-body');
+  tbody.innerHTML = '';
+
+  const nowHour = new Date();
+  nowHour.setMinutes(0, 0, 0);
+  const nowKey = dtlStr(nowHour);
+
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    const classes = [];
+    if(r.inversion) classes.push('inv-row');
+    if(r.time === nowKey) classes.push('now-row');
+    if(classes.length) tr.className = classes.join(' ');
+
+    const wC = colorClass(r.wind_speed_10m, thr.wGo, thr.wWa);
+    const gC = colorClass(r.wind_gusts_10m, thr.gGo, thr.gWa);
+    const pC = colorClass(r.precipitation_probability, thr.pGo, thr.pWa);
+
+    const flVsSummit = r.fl_ft!==null && r.fl_ft < summitFt ? ' ↓' : '';
+    const flStr = r.fl_ft!==null ? Math.round(r.fl_ft).toLocaleString()+flVsSummit : '—';
+
+    const flags = [];
+    if(r.inversion) flags.push('<span class="flag">⬆ warm aloft</span>');
+    if(r.snow_signal) flags.push('<span class="flag">snow</span>');
+
+    tr.innerHTML =
+      `<td>${r.time.slice(11,16)}</td>`+
+      `<td class="r">${tempFmt(r.summit_f)}</td>`+
+      `<td class="r c-dim">${tempFmt(r.trail_f)}</td>`+
+      `<td class="r ${wC}">${rnd(r.wind_speed_10m,0)}</td>`+
+      `<td class="r ${gC}">${rnd(r.wind_gusts_10m,0)}</td>`+
+      `<td>${windDir(r.wind_direction_10m)}</td>`+
+      `<td class="r">${flStr}</td>`+
+      `<td class="r ${pC}">${rnd(r.precipitation_probability,0)}%</td>`+
+      `<td class="r c-dim">${rnd(r.cloud_cover,0)}%</td>`+
+      `<td>${flags.join(' ')}</td>`;
+
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('results').hidden = false;
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function modelAdvice(start){
+  const hoursOut = (start - new Date()) / 36e5;
+  if(hoursOut <= 0){
+    return {
+      label: 'Nowcast',
+      tempTitle: 'NWS + summit obs beat models',
+      windTitle: 'HRRR/RAP, verify with stations',
+      snowTitle: 'Radar/satellite first',
+      temp: 'NWS hourly plus summit and RAWS observations beat any model in nowcast range. Use HRRR only as a supplement.',
+      wind: 'Use HRRR/RAP for the next few hours; verify against nearby high-elevation stations (RAWS, summit obs) where available.',
+      snow: 'Use radar and satellite as primary; HRRR for short-term trends. If showers are already over the mountain, distrust any model that clears them.'
+    };
+  }
+  if(hoursOut <= 48){
+    return {
+      label: 'HRRR lead',
+      tempTitle: 'NWS baseline + HRRR trend',
+      windTitle: 'HRRR primary, NAM cross-check',
+      snowTitle: 'HRRR timing, NAM context',
+      temp: 'NWS hourly is the baseline; HRRR gives the final temp trend at altitude. Spot-check on Windy at 8–9k ft.',
+      wind: 'HRRR is primary for alpine-start timing and direction; NAM 3 km is the sanity check. If GFS/ECMWF/ICON/GEM disagree with HRRR on the synoptic pattern, lean conservative.',
+      snow: 'HRRR for whether showers persist into your window; NAM 3 km confirms the broader snow-ending trend.'
+    };
+  }
+  if(hoursOut <= 84){
+    return {
+      label: 'NAM bridge',
+      tempTitle: 'NWS/NBM + NAM trend',
+      windTitle: 'NAM regional, globals synoptic',
+      snowTitle: 'NAM precipitation shield',
+      temp: 'NWS/NBM and NAM carry the cold-air trend at this range; HRRR does not fully cover the window yet.',
+      wind: 'NAM 3 km for the regional pattern with ECMWF/GFS/ICON/GEM as synoptic backdrop. Wait for HRRR before locking the final call.',
+      snow: 'NAM judges whether the precipitation shield exits before your start. Recheck with HRRR once inside 48 hours.'
+    };
+  }
+  return {
+    label: 'Global pattern',
+    tempTitle: 'ECMWF + GFS broad pattern',
+    windTitle: 'Pressure pattern, ICON/GEM votes',
+    snowTitle: 'Globals only, GEM sees Pacific',
+    temp: 'ECMWF and GFS for the broad temperature pattern; ICON and GEM act as independent global votes. Expect local details to shift as mesoscale models enter range.',
+    wind: 'ECMWF/GFS for the big pressure pattern; if ICON and GEM agree, confidence rises. Summit-level wind detail is not ready yet.',
+    snow: 'All four globals (GFS/ECMWF/ICON/GEM) for storm timing; GEM often sees Pacific approach systems first. Treat exact amounts as low confidence until NAM/HRRR enter range.'
+  };
+}
+
+function buildGuideCard(klass, tagText, title, body){
+  const card = document.createElement('div');
+  card.className = `guide-card ${klass}`;
+  const tag = document.createElement('span');
+  tag.className = 'tag';
+  tag.textContent = tagText;
+  const h = document.createElement('h4');
+  h.textContent = title;
+  const p = document.createElement('p');
+  p.textContent = body;
+  card.append(tag, h, p);
+  return card;
+}
+
+function renderModelGuidance(start){
+  const a = modelAdvice(start);
+  const el = document.getElementById('model-guidance');
+  if(!el) return;
+  el.replaceChildren(
+    buildGuideCard('g-temp', `Temperature · ${a.label}`, a.tempTitle, a.temp),
+    buildGuideCard('g-wind', `Wind · ${a.label}`,        a.windTitle, a.wind),
+    buildGuideCard('g-snow', `Snow · ${a.label}`,        a.snowTitle, a.snow),
+  );
+}
+
+function buildLinkChip(label, url, caveat){
+  const a = document.createElement('a');
+  a.className = 'link-chip';
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  const txt = document.createElement('span');
+  txt.textContent = label;
+  a.appendChild(txt);
+  if(caveat){
+    const c = document.createElement('span');
+    c.className = 'caveat';
+    c.textContent = '· ' + caveat;
+    a.appendChild(c);
+  }
+  const ext = document.createElement('span');
+  ext.className = 'ext';
+  ext.textContent = '↗';
+  a.appendChild(ext);
+  return a;
+}
+
+function allTrailsRouteUrl(mtn, th){
+  if(th.alltrails) return { url: th.alltrails, caveat: null };
+  const query = `${mtn.name} ${th.name} AllTrails`;
+  return {
+    url: `https://www.google.com/search?q=${encodeURIComponent('site:alltrails.com/trail ' + query)}`,
+    caveat: 'route search'
+  };
+}
+
+function renderQuickLinks(mtnKey, mtn, th){
+  const el = document.getElementById('quick-links');
+  if(!el) return;
+  const [lat, lon] = mtn.summit;
+  const extras = MTN_LINKS[mtnKey] || {};
+  const alltrails = allTrailsRouteUrl(mtn, th);
+
+  const chips = [];
+
+  const lbl = document.createElement('span');
+  lbl.className = 'links-lbl';
+  lbl.textContent = 'Verify on';
+  chips.push(lbl);
+
+  chips.push(buildLinkChip('NWS forecast',
+    `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${lon}`));
+
+  chips.push(buildLinkChip('Windy',
+    `https://www.windy.com/?${lat},${lon},10`));
+
+  if(extras.nwac){
+    chips.push(buildLinkChip('NWAC avalanche', extras.nwac));
+  } else if(extras.avalanche){
+    chips.push(buildLinkChip('Shasta Avalanche', extras.avalanche));
+  }
+
+  chips.push(buildLinkChip('Pivotal Weather (HRRR)',
+    `https://www.pivotalweather.com/model.php?m=hrrr&p=sfc_wind_mph&rh=2024010100&fh=12&r=conus&dpdt=&mc=`));
+
+  if(extras.volcano){
+    chips.push(buildLinkChip('USGS volcano status', extras.volcano));
+  }
+  if(extras.nps){
+    chips.push(buildLinkChip('Climbing info', extras.nps));
+  }
+  if(extras.webcam){
+    chips.push(buildLinkChip('Webcam', extras.webcam));
+  }
+
+  chips.push(buildLinkChip('Mountain-Forecast',
+    `https://www.google.com/search?q=${encodeURIComponent('site:mountain-forecast.com ' + mtn.name)}`,
+    'close-in only'));
+
+  chips.push(buildLinkChip('AllTrails', alltrails.url, alltrails.caveat));
+
+  el.replaceChildren(...chips);
+}
+
+function julianDay(date){
+  return date.getTime() / 86400000 + 2440587.5;
+}
+
+function jdToDate(jd){
+  return new Date((jd - 2440587.5) * 86400000);
+}
+
+function solarEvents(date, lat, lon){
+  const dayNoon = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+  const J = julianDay(dayNoon);
+  const n = Math.floor(J - 2451545 + 0.0008);
+  const Jstar = n - lon/360;
+  const Mdeg = ((357.5291 + 0.98560028 * Jstar) % 360 + 360) % 360;
+  const M = Mdeg * Math.PI / 180;
+  const Cdeg = 1.9148*Math.sin(M) + 0.02*Math.sin(2*M) + 0.0003*Math.sin(3*M);
+  const lambdaDeg = ((Mdeg + Cdeg + 180 + 102.9372) % 360 + 360) % 360;
+  const lambda = lambdaDeg * Math.PI / 180;
+  const Jtransit = 2451545 + Jstar + 0.0053*Math.sin(M) - 0.0069*Math.sin(2*lambda);
+  const delta = Math.asin(Math.sin(lambda) * Math.sin(23.44 * Math.PI / 180));
+  const latRad = lat * Math.PI / 180;
+
+  function eventAt(altDeg){
+    const alt = altDeg * Math.PI / 180;
+    const num = Math.sin(alt) - Math.sin(latRad)*Math.sin(delta);
+    const den = Math.cos(latRad)*Math.cos(delta);
+    const cosOmega = num/den;
+    if(cosOmega > 1 || cosOmega < -1) return { rise:null, set:null };
+    const omegaDeg = Math.acos(cosOmega) * 180 / Math.PI;
+    return {
+      rise: jdToDate(Jtransit - omegaDeg/360),
+      set:  jdToDate(Jtransit + omegaDeg/360),
+    };
+  }
+
+  const std   = eventAt(-0.833);
+  const civil = eventAt(-6);
+  return { sunrise: std.rise, sunset: std.set, civilDawn: civil.rise, civilDusk: civil.set };
+}
+
+function moonPhase(date){
+  const synodic = 29.530588853;
+  const refNew  = 2451550.1;
+  const J = julianDay(date);
+  let phase = ((J - refNew) / synodic) % 1;
+  if(phase < 0) phase += 1;
+  const illum = (1 - Math.cos(phase * 2 * Math.PI)) / 2;
+  let name, icon;
+  if(phase < 0.03 || phase > 0.97){ name='New';            icon='🌑'; }
+  else if(phase < 0.22){            name='Waxing crescent';icon='🌒'; }
+  else if(phase < 0.28){            name='First quarter';  icon='🌓'; }
+  else if(phase < 0.47){            name='Waxing gibbous'; icon='🌔'; }
+  else if(phase < 0.53){            name='Full';           icon='🌕'; }
+  else if(phase < 0.72){            name='Waning gibbous'; icon='🌖'; }
+  else if(phase < 0.78){            name='Last quarter';   icon='🌗'; }
+  else {                            name='Waning crescent';icon='🌘'; }
+  return { phase, illum, name, icon };
+}
+
+function fmtClock(d){
+  if(!d || isNaN(d)) return '—';
+  return d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', hour12:false });
+}
+
+function buildAstroCard(label, val, sub, iconMarkup){
+  const card = document.createElement('div');
+  card.className = 'astro';
+  const l = document.createElement('div');
+  l.className = 'lbl'; l.textContent = label;
+  const v = document.createElement('div');
+  v.className = 'val';
+  if(iconMarkup){
+    const i = document.createElement('span');
+    i.className = 'moon-icon';
+    i.textContent = iconMarkup;
+    v.appendChild(i);
+  }
+  v.appendChild(document.createTextNode(val));
+  const s = document.createElement('div');
+  s.className = 'sub'; s.textContent = sub;
+  card.append(l, v, s);
+  return card;
+}
+
+function renderAstronomy(startStr, endStr, lat, lon){
+  const el = document.getElementById('astro-grid');
+  if(!el) return;
+  const start = new Date(startStr);
+  const end   = new Date(endStr);
+  const mid   = new Date((start.getTime() + end.getTime()) / 2);
+  const events = solarEvents(mid, lat, lon);
+  const moon = moonPhase(mid);
+
+  let dayLen = '—';
+  if(events.sunrise && events.sunset){
+    const ms = events.sunset - events.sunrise;
+    const h = Math.floor(ms / 3600000);
+    const m = Math.round((ms % 3600000) / 60000);
+    dayLen = `${h}h ${m}m`;
+  }
+
+  const dayLabel = mid.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' });
+
+  el.replaceChildren(
+    buildAstroCard('Sunrise',  fmtClock(events.sunrise), `${dayLabel} · civil dawn ${fmtClock(events.civilDawn)}`),
+    buildAstroCard('Sunset',   fmtClock(events.sunset),  `${dayLabel} · civil dusk ${fmtClock(events.civilDusk)}`),
+    buildAstroCard('Daylight', dayLen,                   'sunrise → sunset on climb day'),
+    buildAstroCard('Moon',     `${Math.round(moon.illum*100)}% lit`, moon.name, moon.icon),
+  );
+}
+
+function computePrecipHistory(api){
+  const times = api?.hourly?.time;
+  if(!times || !times.length) return null;
+
+  const precipMean = times.map((_, i) => {
+    const vals = MODELS
+      .map(m => api.hourly[`precipitation_${m}`]?.[i])
+      .filter(v => v !== null && v !== undefined && !isNaN(v));
+    return vals.length ? vals.reduce((a,b)=>a+b, 0) / vals.length : null;
+  });
+
+  const now = new Date();
+  let nowIdx = -1;
+  for(let i = 0; i < times.length; i++){
+    if(new Date(times[i]) <= now) nowIdx = i;
+    else break;
+  }
+  if(nowIdx < 0) return null;
+
+  function sumHoursBack(hours){
+    const startIdx = Math.max(0, nowIdx - hours + 1);
+    let sum = 0;
+    for(let i = startIdx; i <= nowIdx; i++){
+      if(precipMean[i] !== null) sum += precipMean[i];
+    }
+    return sum;
+  }
+
+  const windowStart = Math.max(0, nowIdx - 72 + 1);
+  let peakSum = 0;
+  let peakEnd = null;
+  for(let end = windowStart + 11; end <= nowIdx; end++){
+    let sum = 0;
+    for(let i = end - 11; i <= end; i++){
+      if(precipMean[i] !== null) sum += precipMean[i];
+    }
+    if(sum > peakSum){
+      peakSum = sum;
+      peakEnd = times[end];
+    }
+  }
+
+  return {
+    total24: sumHoursBack(24),
+    total48: sumHoursBack(48),
+    total72: sumHoursBack(72),
+    peak12: peakSum,
+    peak12End: peakEnd,
+  };
+}
+
+function renderPrecipHistory(api){
+  const el = document.getElementById('precip-history');
+  if(!el) return;
+  const h = computePrecipHistory(api);
+  if(!h){ el.replaceChildren(); return; }
+
+  const fmt = v => v < 0.005 ? '0.00 in' : v.toFixed(2) + ' in';
+  const cards = [
+    buildAstroCard('Last 24 h', fmt(h.total24), 'summit · model mean'),
+    buildAstroCard('Last 48 h', fmt(h.total48), 'summit · model mean'),
+    buildAstroCard('Last 72 h', fmt(h.total72), 'summit · model mean'),
+  ];
+
+  if(h.peak12 >= 0.05){
+    const endLbl = h.peak12End ? new Date(h.peak12End).toLocaleString([], { weekday:'short', hour:'2-digit', minute:'2-digit' }) : '—';
+    cards.push(buildAstroCard('Heaviest 12 h', fmt(h.peak12), `ending ${endLbl}`));
+  } else {
+    cards.push(buildAstroCard('Heaviest 12 h', fmt(h.peak12), 'no significant storm cycle'));
+  }
+
+  el.replaceChildren(...cards);
+}
+
+function haversineMi(lat1, lon1, lat2, lon2){
+  const R = 3958.8;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+async function fetchNearestStations(lat, lon, summitFt, max = 3){
+  try {
+    const url = `https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}/stations`;
+    const r = await fetch(url, { headers: { 'Accept': 'application/geo+json' } });
+    if(!r.ok) return [];
+    const data = await r.json();
+    const features = data.features || [];
+
+    const MAX_DIST_MI = 40;
+    const candidates = features.map(f => {
+      const props = f.properties || {};
+      const elevM = props.elevation?.value;
+      const elevFt = elevM !== null && elevM !== undefined ? elevM * 3.28084 : null;
+      const coords = f.geometry?.coordinates;
+      const sLon = Array.isArray(coords) ? coords[0] : null;
+      const sLat = Array.isArray(coords) ? coords[1] : null;
+      const distMi = (sLat !== null && sLon !== null) ? haversineMi(lat, lon, sLat, sLon) : null;
+      return {
+        id: props.stationIdentifier,
+        name: props.name || props.stationIdentifier,
+        elevFt,
+        elevDiff: elevFt !== null ? Math.abs(elevFt - summitFt) : Infinity,
+        distMi,
+      };
+    }).filter(s => s.id && s.distMi !== null && s.distMi <= MAX_DIST_MI);
+    candidates.sort((a, b) => a.elevDiff - b.elevDiff);
+
+    const top = candidates.slice(0, 6);
+    const obsResults = await Promise.allSettled(
+      top.map(s => fetch(`https://api.weather.gov/stations/${s.id}/observations/latest`, {
+        headers: { 'Accept': 'application/geo+json' }
+      }).then(r => r.ok ? r.json() : null))
+    );
+
+    const enriched = top.map((s, i) => {
+      const result = obsResults[i];
+      const obs = result.status === 'fulfilled' ? result.value : null;
+      const p = obs?.properties;
+      if(!p || !p.timestamp) return null;
+      const obsTime = new Date(p.timestamp);
+      const ageMin = (Date.now() - obsTime.getTime()) / 60000;
+      if(ageMin > 360) return null;
+
+      const tempC = p.temperature?.value;
+      const windKmh = p.windSpeed?.value;
+      const gustKmh = p.windGust?.value;
+      const precipMm = p.precipitationLastHour?.value;
+
+      return {
+        ...s,
+        obsTime, ageMin,
+        tempF:   tempC   !== null && tempC   !== undefined ? tempC * 9/5 + 32 : null,
+        windMph: windKmh !== null && windKmh !== undefined ? windKmh * 0.621371 : null,
+        gustMph: gustKmh !== null && gustKmh !== undefined ? gustKmh * 0.621371 : null,
+        windDirDeg: p.windDirection?.value ?? null,
+        precipHrIn: precipMm !== null && precipMm !== undefined ? precipMm / 25.4 : null,
+      };
+    }).filter(Boolean);
+
+    return enriched.slice(0, max);
+  } catch(e) {
+    console.warn('Stations fetch failed:', e);
+    return [];
+  }
+}
+
+function buildStationCard(s, summitFt){
+  const card = document.createElement('div');
+  card.className = 'station';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'hdr';
+  const idEl = document.createElement('span');
+  idEl.className = 'id';
+  idEl.textContent = s.id;
+  const elevEl = document.createElement('span');
+  elevEl.className = 'elev';
+  const parts = [];
+  if(s.elevFt !== null){
+    const diffFt = Math.round(s.elevFt - summitFt);
+    const sign = diffFt >= 0 ? '+' : '−';
+    parts.push(`${Math.round(s.elevFt).toLocaleString()} ft (${sign}${Math.abs(diffFt).toLocaleString()})`);
+  }
+  if(s.distMi !== null && s.distMi !== undefined){
+    parts.push(`${s.distMi.toFixed(1)} mi`);
+  }
+  elevEl.textContent = parts.join(' · ') || '—';
+  hdr.append(idEl, elevEl);
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'name';
+  nameEl.textContent = s.name;
+
+  const valEl = document.createElement('div');
+  valEl.className = 'val';
+  valEl.textContent = s.tempF !== null ? `${Math.round(s.tempF)}°F` : '—';
+
+  const stats = [];
+  if(s.windMph !== null){
+    let w = `wind ${Math.round(s.windMph)} mph`;
+    if(s.windDirDeg !== null) w += ` ${windDir(s.windDirDeg)}`;
+    if(s.gustMph !== null && s.gustMph > s.windMph) w += ` · G ${Math.round(s.gustMph)}`;
+    stats.push(w);
+  }
+  if(s.precipHrIn !== null && s.precipHrIn >= 0.005){
+    stats.push(`precip ${s.precipHrIn.toFixed(2)} in/h`);
+  }
+  const ageH = s.ageMin / 60;
+  const ageStr = ageH >= 1 ? `${ageH.toFixed(1)} h ago` : `${Math.round(s.ageMin)} min ago`;
+
+  const statsEl = document.createElement('div');
+  statsEl.className = 'stats' + (s.ageMin > 120 ? ' stale' : '');
+  statsEl.textContent = stats.length ? `${stats.join(' · ')} · ${ageStr}` : ageStr;
+
+  card.append(hdr, nameEl, valEl, statsEl);
+  return card;
+}
+
+function renderStations(stations, summitFt, status){
+  const el = document.getElementById('station-grid');
+  if(!el) return;
+  if(status === 'loading'){
+    const note = document.createElement('div');
+    note.className = 'station-empty';
+    note.textContent = 'Loading station observations…';
+    el.replaceChildren(note);
+    return;
+  }
+  if(!stations || !stations.length){
+    const note = document.createElement('div');
+    note.className = 'station-empty';
+    note.textContent = 'No nearby station observations within 6 hours.';
+    el.replaceChildren(note);
+    return;
+  }
+  el.replaceChildren(...stations.map(s => buildStationCard(s, summitFt)));
+}
+
+async function loadForecast(){
+  const mtnKey  = document.getElementById('sel-mtn').value;
+  const mtn     = MTNS[mtnKey];
+  const thIdx   = parseInt(document.getElementById('sel-th').value)||0;
+  const th      = mtn.ths[thIdx];
+  const start   = document.getElementById('inp-start').value;
+  const end     = document.getElementById('inp-end').value;
+
+  const errEl = document.getElementById('err-msg');
+  errEl.hidden = true;
+
+  if(!start||!end||start>=end){
+    errEl.textContent = 'Enter a valid start and end time (start must be before end).';
+    errEl.hidden = false;
+    return;
+  }
+
+  savePrefs();
+
+  const btn = document.getElementById('btn-go');
+  btn.textContent = 'Loading…';
+  btn.disabled = true;
+
+  try {
+    const [lat,lon] = mtn.summit;
+    const summitPoint = {name:`${mtn.name} summit`, lat, lon, elevFt:mtn.summit[2]};
+    const trailPoint = {name:th.name, lat:th.lat, lon:th.lon, elevFt:th.elev};
+    const [api, upperBundle, trailBundle] = await Promise.all([
+      fetchWeather(lat, lon),
+      fetchNwsPointForecast(summitPoint),
+      fetchNwsPointForecast(trailPoint),
+    ]);
+    _apiData = api;
+    const nws = {
+      upper: summarizeNwsForecast(upperBundle, start, end),
+      trail: summarizeNwsForecast(trailBundle, start, end),
+    };
+    const rows = parseWindow(api, start, end, mtn.summit[2], nws);
+
+    if(!rows.length){
+      errEl.textContent = 'No data for that window. Open-Meteo covers the next 7 days — try dates closer to now.';
+      errEl.hidden = false;
+      return;
+    }
+
+    const s = computeSummary(rows, mtn.thr, mtn.summit[2], nws);
+    renderAll(mtn, th, start, end, rows, s, nws);
+    renderCharts(start, end, mtn.summit[2], mtn.thr);
+    renderModelGuidance(new Date(start));
+    renderQuickLinks(mtnKey, mtn, th);
+    renderAstronomy(start, end, mtn.summit[0], mtn.summit[1]);
+    renderPrecipHistory(api);
+    renderStations(null, mtn.summit[2], 'loading');
+    fetchNearestStations(mtn.summit[0], mtn.summit[1], mtn.summit[2])
+      .then(stations => renderStations(stations, mtn.summit[2]));
+
+    document.getElementById('afd-card').innerHTML = '<div class="afd-hdr">Loading discussion…</div>';
+    fetchNwsAfd(mtn.nws).then(afd => renderAfd(afd, mtn.nws));
+  } catch(e) {
+    errEl.textContent = 'Fetch failed: '+e.message+'. Check your connection.';
+    errEl.hidden = false;
+    console.error(e);
+  } finally {
+    btn.textContent = 'Get Forecast';
+    btn.disabled = false;
+  }
+}
+
+const PREFS_KEY = 'mountain-weather-prefs';
+
+function savePrefs(){
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({
+      mtn:   document.getElementById('sel-mtn').value,
+      th:    document.getElementById('sel-th').value,
+      start: document.getElementById('inp-start').value,
+      end:   document.getElementById('inp-end').value,
+    }));
+  } catch(e) {}
+}
+
+function loadPrefs(){
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function initForm(){
+  const selMtn = document.getElementById('sel-mtn');
+  Object.entries(MTNS).forEach(([k,m])=>{
+    const o = document.createElement('option');
+    o.value = k; o.textContent = m.name;
+    selMtn.appendChild(o);
+  });
+
+  function updateThs(k){
+    const sel = document.getElementById('sel-th');
+    sel.innerHTML = '';
+    MTNS[k].ths.forEach((t,i)=>{
+      const o = document.createElement('option');
+      o.value = i; o.textContent = `${t.name} · ${t.elev.toLocaleString()} ft`;
+      sel.appendChild(o);
+    });
+  }
+
+  selMtn.addEventListener('change', ()=>updateThs(selMtn.value));
+
+  const now = new Date();
+  const dToSat = (6-now.getDay()+7)%7||7;
+  const sat = new Date(now);
+  sat.setDate(now.getDate()+dToSat);
+  sat.setHours(22,0,0,0);
+  const sun = new Date(sat);
+  sun.setHours(sat.getHours()+12);
+
+  const inpStart = document.getElementById('inp-start');
+  const inpEnd   = document.getElementById('inp-end');
+  inpStart.value = dtlStr(sat);
+  inpEnd.value   = dtlStr(sun);
+
+  document.getElementById('btn-go').addEventListener('click', loadForecast);
+
+  const prefs = loadPrefs();
+  const mtnKey = prefs && MTNS[prefs.mtn] ? prefs.mtn : 'stHelens';
+  selMtn.value = mtnKey;
+  updateThs(mtnKey);
+
+  if(prefs){
+    const selTh = document.getElementById('sel-th');
+    if(prefs.th !== undefined && selTh.querySelector(`option[value="${prefs.th}"]`)){
+      selTh.value = prefs.th;
+    }
+    if(prefs.start) inpStart.value = prefs.start;
+    if(prefs.end)   inpEnd.value   = prefs.end;
+  }
+}
+
+initThemeToggle();
+initForm();
+</script>
+</body>
+</html>

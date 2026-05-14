@@ -1064,12 +1064,12 @@ function renderAll(mtn, th, startStr, endStr, rows, s, nws){
       <div class="sub">NWS hourly · ${th.elev.toLocaleString()} ft</div>
     </div>
     <div class="met ${metClass(s.peakWind,thr.wGo,thr.wWa)}">
-      <div class="lbl">Peak wind</div>
+      <div class="lbl">Upper mtn peak wind</div>
       <div class="val">${s.peakWind!==null?Math.round(s.peakWind)+' mph':'—'}</div>
       <div class="sub">go &lt;${thr.wGo} · caution &gt;${thr.wWa}${atSuffix(s.peakWindAt)}</div>
     </div>
     <div class="met ${metClass(s.peakGust,thr.gGo,thr.gWa)}">
-      <div class="lbl">Peak gust</div>
+      <div class="lbl">Upper mtn peak gust</div>
       <div class="val">${s.peakGust!==null?Math.round(s.peakGust)+' mph':'—'}</div>
       <div class="sub">go &lt;${thr.gGo} · caution &gt;${thr.gWa}${atSuffix(s.peakGustAt)}</div>
     </div>

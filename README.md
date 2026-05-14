@@ -4,7 +4,7 @@ Small static mountaineering weather tools for comparing climb windows on Cascade
 
 ## Main Page
 
-Open `mountain-weather.html` (or just `index.html`, which redirects there) to use the unified mountain weather dashboard.
+Open `mw1.html` (or just `index.html`, which redirects there) to use the original mountain weather dashboard. Open `mw2.html` to try the newer mountaineering-focused version.
 
 The page helps evaluate a selected mountain, trailhead/route, and climb window. It combines official NWS point forecasts with raw model guidance so you can compare the human-edited baseline against multiple numerical models.
 
@@ -65,8 +65,9 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 
 ## Files
 
-- `index.html`: redirects to `mountain-weather.html` (default entry point).
-- `mountain-weather.html`: unified mountain weather dashboard.
+- `index.html`: redirects to `mw1.html` (default entry point).
+- `mw1.html`: original unified mountain weather dashboard.
+- `mw2.html`: mountaineering-focused A/B dashboard.
 - `mountain-weather-window.html`: earlier NWS-focused weather-window prototype.
 
 ## Planned Improvements
