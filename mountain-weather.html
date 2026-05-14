@@ -128,7 +128,13 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 .v-go   .v-word { color: var(--go); }
 .v-watch.v-word, .v-watch .v-word { color: var(--watch); }
 .v-caution .v-word { color: var(--caution); }
+.v-right { display: flex; flex-direction: column; gap: 6px; flex: 1 1 auto; min-width: 0; }
 .v-detail { font-size: 13px; color: var(--dim); line-height: 1.6; font-family: var(--mono); }
+.v-why { font-size: 12px; color: var(--faint); line-height: 1.55; font-family: var(--mono); }
+.v-why .pill { font-weight: 500; }
+.v-go .v-why .pill { color: var(--go); }
+.v-watch .v-why .pill { color: var(--watch); }
+.v-caution .v-why .pill { color: var(--caution); }
 
 /* inversion alert */
 .inv-alert { background: var(--inv-bg); border: 1px solid var(--inv-bdr); border-left: 4px solid var(--watch); color: var(--inv-txt); font-size: 12px; padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-family: var(--mono); line-height: 1.6; }
@@ -940,6 +946,42 @@ function computeSummary(rows, thr, summitFt, nws){
 function fmtHHMM(timeStr){ return timeStr ? timeStr.slice(11,16) : ''; }
 function atSuffix(timeStr){ return timeStr ? ` · peak ${fmtHHMM(timeStr)}` : ''; }
 
+function verdictWhy(s, thr){
+  const checks = [
+    { val: s.peakWind,  at: s.peakWindAt,  go: thr.wGo, wa: thr.wWa, name: 'sustained wind', unit: ' mph' },
+    { val: s.peakGust,  at: s.peakGustAt,  go: thr.gGo, wa: thr.gWa, name: 'gusts',           unit: ' mph' },
+    { val: s.maxPrecip, at: s.maxPrecipAt, go: thr.pGo, wa: thr.pWa, name: 'precip',          unit: '%' },
+  ].filter(c => c.val !== null && c.val !== undefined);
+
+  const banded = checks.map(c => {
+    const v = c.val;
+    let band;
+    if(v <= c.go) band = 'go';
+    else if(v <= c.wa) band = 'watch';
+    else band = 'caution';
+    return { ...c, band };
+  });
+
+  function phrase(c){
+    const vStr = Math.round(c.val) + c.unit;
+    const atStr = c.at ? ` at ${fmtHHMM(c.at)}` : '';
+    if(c.band === 'caution') return `${c.name} ${vStr} &gt; caution ${c.wa}${c.unit}${atStr}`;
+    if(c.band === 'watch')   return `${c.name} ${vStr} in watch range (${c.go}–${c.wa}${c.unit})${atStr}`;
+    return `${c.name} ${vStr} (go &lt;${c.go}${c.unit})`;
+  }
+
+  if(s.verdict === 'caution'){
+    const drivers = banded.filter(c => c.band === 'caution').map(phrase).join('; ');
+    return `<span class="pill">Caution</span> because: ${drivers}.`;
+  }
+  if(s.verdict === 'watch'){
+    const drivers = banded.filter(c => c.band === 'watch').map(phrase).join('; ');
+    return `<span class="pill">Watch</span> because: ${drivers}.`;
+  }
+  const summary = banded.map(phrase).join('; ');
+  return `<span class="pill">Go</span> — all three pillars within thresholds: ${summary}.`;
+}
+
 function renderClimbFrame(startStr, endStr, lat, lon){
   const el = document.getElementById('climb-frame');
   if(!el) return;
@@ -998,7 +1040,9 @@ function renderAll(mtn, th, startStr, endStr, rows, s, nws){
     s.maxPrecip !== null ? `precip ${Math.round(s.maxPrecip)}%` : null,
   ].filter(Boolean).join(' · ');
 
-  vEl.innerHTML = `<div class="v-word">${verdictLabel[s.verdict]}</div><div class="v-detail">${details}</div>`;
+  const why = verdictWhy(s, mtn.thr);
+  vEl.innerHTML = `<div class="v-word">${verdictLabel[s.verdict]}</div>`+
+    `<div class="v-right"><div class="v-detail">${details}</div><div class="v-why">${why}</div></div>`;
 
   const inv = document.getElementById('inv-alert');
   if(s.anyInv){
