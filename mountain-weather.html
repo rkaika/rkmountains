@@ -198,6 +198,18 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 .astro .sub { font-size: 10px; color: var(--faint); margin-top: 4px; }
 .astro .moon-icon { font-size: 14px; margin-right: 4px; }
 
+/* ── STATION CARDS ── */
+.station-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.station { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 12px 14px; }
+.station .hdr { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+.station .id { font-family: var(--mono); font-size: 12px; color: var(--blue); font-weight: 500; letter-spacing: 0.04em; }
+.station .elev { font-family: var(--mono); font-size: 10px; color: var(--faint); }
+.station .name { font-size: 11px; color: var(--dim); margin-bottom: 8px; line-height: 1.4; }
+.station .val { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.station .stats { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 6px; line-height: 1.5; }
+.station .stats.stale { color: var(--watch); }
+.station-empty { font-family: var(--mono); font-size: 11px; color: var(--faint); padding: 12px 14px; border: 1px dashed var(--bdr); border-radius: 8px; }
+
 /* ── GUIDANCE CARDS ── */
 .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px; }
 .guide-card { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 14px 16px; border-left: 4px solid var(--bdr2); }
@@ -270,6 +282,12 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 
   <div class="sec-lbl">Astronomy · climb day</div>
   <div class="astro-grid" id="astro-grid"></div>
+
+  <div class="sec-lbl">Recent precipitation · summit</div>
+  <div class="astro-grid" id="precip-history"></div>
+
+  <div class="sec-lbl">Current observations · stations near mountain</div>
+  <div class="station-grid" id="station-grid"></div>
 
   <div class="source-note" id="table-source"></div>
   <div class="tbl-wrap">
@@ -618,6 +636,7 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
       },
       scales:{
         x:{type:'time',time:{unit:'day',displayFormats:{day:'EEE d'}},
+           min: new Date(climbStart.getTime() - 24*3600*1000),
            ticks:{color:theme.faint,font:{family:'JetBrains Mono',size:10}},
            grid:{color:theme.grid},border:{color:theme.bdr}},
         y:{ticks:{color:theme.faint,font:{family:'JetBrains Mono',size:10},callback:v=>Math.round(v)+(opts.unit||'')},
@@ -712,7 +731,7 @@ function metClass(val, go, watch){
 async function fetchWeather(lat, lon){
   const vars = VARS.join(',');
   const models = MODELS.join(',');
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${vars}&models=${models}&timezone=America%2FLos_Angeles&forecast_days=7&wind_speed_unit=mph&precipitation_unit=inch&_=${Date.now()}`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${vars}&models=${models}&timezone=America%2FLos_Angeles&past_days=3&forecast_days=7&wind_speed_unit=mph&precipitation_unit=inch&_=${Date.now()}`;
   const r = await fetch(url);
   if(!r.ok) throw new Error(`Open-Meteo ${r.status}`);
   return r.json();
@@ -1229,6 +1248,227 @@ function renderAstronomy(startStr, endStr, lat, lon){
   );
 }
 
+function computePrecipHistory(api){
+  const times = api?.hourly?.time;
+  if(!times || !times.length) return null;
+
+  const precipMean = times.map((_, i) => {
+    const vals = MODELS
+      .map(m => api.hourly[`precipitation_${m}`]?.[i])
+      .filter(v => v !== null && v !== undefined && !isNaN(v));
+    return vals.length ? vals.reduce((a,b)=>a+b, 0) / vals.length : null;
+  });
+
+  const now = new Date();
+  let nowIdx = -1;
+  for(let i = 0; i < times.length; i++){
+    if(new Date(times[i]) <= now) nowIdx = i;
+    else break;
+  }
+  if(nowIdx < 0) return null;
+
+  function sumHoursBack(hours){
+    const startIdx = Math.max(0, nowIdx - hours + 1);
+    let sum = 0;
+    for(let i = startIdx; i <= nowIdx; i++){
+      if(precipMean[i] !== null) sum += precipMean[i];
+    }
+    return sum;
+  }
+
+  const windowStart = Math.max(0, nowIdx - 72 + 1);
+  let peakSum = 0;
+  let peakEnd = null;
+  for(let end = windowStart + 11; end <= nowIdx; end++){
+    let sum = 0;
+    for(let i = end - 11; i <= end; i++){
+      if(precipMean[i] !== null) sum += precipMean[i];
+    }
+    if(sum > peakSum){
+      peakSum = sum;
+      peakEnd = times[end];
+    }
+  }
+
+  return {
+    total24: sumHoursBack(24),
+    total48: sumHoursBack(48),
+    total72: sumHoursBack(72),
+    peak12: peakSum,
+    peak12End: peakEnd,
+  };
+}
+
+function renderPrecipHistory(api){
+  const el = document.getElementById('precip-history');
+  if(!el) return;
+  const h = computePrecipHistory(api);
+  if(!h){ el.replaceChildren(); return; }
+
+  const fmt = v => v < 0.005 ? '0.00 in' : v.toFixed(2) + ' in';
+  const cards = [
+    buildAstroCard('Last 24 h', fmt(h.total24), 'summit · model mean'),
+    buildAstroCard('Last 48 h', fmt(h.total48), 'summit · model mean'),
+    buildAstroCard('Last 72 h', fmt(h.total72), 'summit · model mean'),
+  ];
+
+  if(h.peak12 >= 0.05){
+    const endLbl = h.peak12End ? new Date(h.peak12End).toLocaleString([], { weekday:'short', hour:'2-digit', minute:'2-digit' }) : '—';
+    cards.push(buildAstroCard('Heaviest 12 h', fmt(h.peak12), `ending ${endLbl}`));
+  } else {
+    cards.push(buildAstroCard('Heaviest 12 h', fmt(h.peak12), 'no significant storm cycle'));
+  }
+
+  el.replaceChildren(...cards);
+}
+
+function haversineMi(lat1, lon1, lat2, lon2){
+  const R = 3958.8;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+async function fetchNearestStations(lat, lon, summitFt, max = 3){
+  try {
+    const url = `https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}/stations`;
+    const r = await fetch(url, { headers: { 'Accept': 'application/geo+json' } });
+    if(!r.ok) return [];
+    const data = await r.json();
+    const features = data.features || [];
+
+    const MAX_DIST_MI = 40;
+    const candidates = features.map(f => {
+      const props = f.properties || {};
+      const elevM = props.elevation?.value;
+      const elevFt = elevM !== null && elevM !== undefined ? elevM * 3.28084 : null;
+      const coords = f.geometry?.coordinates;
+      const sLon = Array.isArray(coords) ? coords[0] : null;
+      const sLat = Array.isArray(coords) ? coords[1] : null;
+      const distMi = (sLat !== null && sLon !== null) ? haversineMi(lat, lon, sLat, sLon) : null;
+      return {
+        id: props.stationIdentifier,
+        name: props.name || props.stationIdentifier,
+        elevFt,
+        elevDiff: elevFt !== null ? Math.abs(elevFt - summitFt) : Infinity,
+        distMi,
+      };
+    }).filter(s => s.id && s.distMi !== null && s.distMi <= MAX_DIST_MI);
+    candidates.sort((a, b) => a.elevDiff - b.elevDiff);
+
+    const top = candidates.slice(0, 6);
+    const obsResults = await Promise.allSettled(
+      top.map(s => fetch(`https://api.weather.gov/stations/${s.id}/observations/latest`, {
+        headers: { 'Accept': 'application/geo+json' }
+      }).then(r => r.ok ? r.json() : null))
+    );
+
+    const enriched = top.map((s, i) => {
+      const result = obsResults[i];
+      const obs = result.status === 'fulfilled' ? result.value : null;
+      const p = obs?.properties;
+      if(!p || !p.timestamp) return null;
+      const obsTime = new Date(p.timestamp);
+      const ageMin = (Date.now() - obsTime.getTime()) / 60000;
+      if(ageMin > 360) return null;
+
+      const tempC = p.temperature?.value;
+      const windKmh = p.windSpeed?.value;
+      const gustKmh = p.windGust?.value;
+      const precipMm = p.precipitationLastHour?.value;
+
+      return {
+        ...s,
+        obsTime, ageMin,
+        tempF:   tempC   !== null && tempC   !== undefined ? tempC * 9/5 + 32 : null,
+        windMph: windKmh !== null && windKmh !== undefined ? windKmh * 0.621371 : null,
+        gustMph: gustKmh !== null && gustKmh !== undefined ? gustKmh * 0.621371 : null,
+        windDirDeg: p.windDirection?.value ?? null,
+        precipHrIn: precipMm !== null && precipMm !== undefined ? precipMm / 25.4 : null,
+      };
+    }).filter(Boolean);
+
+    return enriched.slice(0, max);
+  } catch(e) {
+    console.warn('Stations fetch failed:', e);
+    return [];
+  }
+}
+
+function buildStationCard(s, summitFt){
+  const card = document.createElement('div');
+  card.className = 'station';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'hdr';
+  const idEl = document.createElement('span');
+  idEl.className = 'id';
+  idEl.textContent = s.id;
+  const elevEl = document.createElement('span');
+  elevEl.className = 'elev';
+  const parts = [];
+  if(s.elevFt !== null){
+    const diffFt = Math.round(s.elevFt - summitFt);
+    const sign = diffFt >= 0 ? '+' : '−';
+    parts.push(`${Math.round(s.elevFt).toLocaleString()} ft (${sign}${Math.abs(diffFt).toLocaleString()})`);
+  }
+  if(s.distMi !== null && s.distMi !== undefined){
+    parts.push(`${s.distMi.toFixed(1)} mi`);
+  }
+  elevEl.textContent = parts.join(' · ') || '—';
+  hdr.append(idEl, elevEl);
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'name';
+  nameEl.textContent = s.name;
+
+  const valEl = document.createElement('div');
+  valEl.className = 'val';
+  valEl.textContent = s.tempF !== null ? `${Math.round(s.tempF)}°F` : '—';
+
+  const stats = [];
+  if(s.windMph !== null){
+    let w = `wind ${Math.round(s.windMph)} mph`;
+    if(s.windDirDeg !== null) w += ` ${windDir(s.windDirDeg)}`;
+    if(s.gustMph !== null && s.gustMph > s.windMph) w += ` · G ${Math.round(s.gustMph)}`;
+    stats.push(w);
+  }
+  if(s.precipHrIn !== null && s.precipHrIn >= 0.005){
+    stats.push(`precip ${s.precipHrIn.toFixed(2)} in/h`);
+  }
+  const ageH = s.ageMin / 60;
+  const ageStr = ageH >= 1 ? `${ageH.toFixed(1)} h ago` : `${Math.round(s.ageMin)} min ago`;
+
+  const statsEl = document.createElement('div');
+  statsEl.className = 'stats' + (s.ageMin > 120 ? ' stale' : '');
+  statsEl.textContent = stats.length ? `${stats.join(' · ')} · ${ageStr}` : ageStr;
+
+  card.append(hdr, nameEl, valEl, statsEl);
+  return card;
+}
+
+function renderStations(stations, summitFt, status){
+  const el = document.getElementById('station-grid');
+  if(!el) return;
+  if(status === 'loading'){
+    const note = document.createElement('div');
+    note.className = 'station-empty';
+    note.textContent = 'Loading station observations…';
+    el.replaceChildren(note);
+    return;
+  }
+  if(!stations || !stations.length){
+    const note = document.createElement('div');
+    note.className = 'station-empty';
+    note.textContent = 'No nearby station observations within 6 hours.';
+    el.replaceChildren(note);
+    return;
+  }
+  el.replaceChildren(...stations.map(s => buildStationCard(s, summitFt)));
+}
+
 async function loadForecast(){
   const mtnKey  = document.getElementById('sel-mtn').value;
   const mtn     = MTNS[mtnKey];
@@ -1280,6 +1520,10 @@ async function loadForecast(){
     renderModelGuidance(new Date(start));
     renderQuickLinks(mtnKey, mtn);
     renderAstronomy(start, end, mtn.summit[0], mtn.summit[1]);
+    renderPrecipHistory(api);
+    renderStations(null, mtn.summit[2], 'loading');
+    fetchNearestStations(mtn.summit[0], mtn.summit[1], mtn.summit[2])
+      .then(stations => renderStations(stations, mtn.summit[2]));
 
     document.getElementById('afd-card').innerHTML = '<div class="afd-hdr">Loading discussion…</div>';
     fetchNwsAfd(mtn.nws).then(afd => renderAfd(afd, mtn.nws));
