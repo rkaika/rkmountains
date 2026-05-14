@@ -4,13 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Summit Weather — Cascade Range</title>
+<meta name="color-scheme" content="dark light">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script>
+(function(){
+  try {
+    const saved = localStorage.getItem('summit-weather-theme');
+    const theme = saved || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    document.documentElement.dataset.theme = theme;
+  } catch(e) {
+    document.documentElement.dataset.theme = 'dark';
+  }
+})();
+</script>
 <style>
 :root {
+  color-scheme: dark;
   --bg:      #0d1117;
   --surf:    #161b22;
   --card:    #1c2128;
@@ -23,17 +36,63 @@
   --watch:   #d29922;
   --stop:    #f85149;
   --blue:    #58a6ff;
+  --btn-txt:  #0d1117;
+  --hover-row: rgba(255,255,255,0.02);
+  --chart-grid: #21262d;
+  --window-fill: rgba(121,192,255,0.07);
+  --window-stroke: rgba(121,192,255,0.45);
+  --tooltip-bg: #0d1117;
+  --tooltip-txt: #e6edf3;
+  --inv-bg: #2d2200;
+  --inv-bdr: #614a00;
+  --inv-txt: #e3b341;
+  --tight-bdr: #1a3a1a;
   --serif:   'Newsreader', Georgia, serif;
   --mono:    'JetBrains Mono', ui-monospace, monospace;
   --sans:    -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg:      #f7f8f4;
+  --surf:    #eef1eb;
+  --card:    #ffffff;
+  --bdr:     #d7ddd2;
+  --bdr2:    #b8c2b1;
+  --txt:     #172016;
+  --dim:     #5f6b5b;
+  --faint:   #7c8878;
+  --go:      #277a38;
+  --watch:   #9a640d;
+  --stop:    #c43d36;
+  --blue:    #216da8;
+  --btn-txt:  #ffffff;
+  --hover-row: rgba(23,32,22,0.035);
+  --chart-grid: #e6eadf;
+  --window-fill: rgba(33,109,168,0.08);
+  --window-stroke: rgba(33,109,168,0.42);
+  --tooltip-bg: #ffffff;
+  --tooltip-txt: #172016;
+  --inv-bg: #fff4d8;
+  --inv-bdr: #e2b75f;
+  --inv-txt: #7c4f09;
+  --tight-bdr: #8fbf91;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--txt); font-family: var(--sans); font-size: 14px; line-height: 1.5; min-height: 100vh; }
 
 /* ── HEADER ── */
-header { border-bottom: 1px solid var(--bdr); padding: 18px 24px 14px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+header { border-bottom: 1px solid var(--bdr); padding: 18px 24px 14px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 header h1 { font-family: var(--serif); font-size: 26px; font-weight: 400; font-style: italic; letter-spacing: -0.02em; }
 header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-spacing: 0.04em; }
+.theme-toggle {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 8px;
+  min-height: 32px; padding: 6px 10px; border-radius: 999px;
+  border: 1px solid var(--bdr); background: var(--surf); color: var(--txt);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em;
+  text-transform: uppercase; cursor: pointer;
+}
+.theme-toggle:hover { border-color: var(--bdr2); }
+.theme-toggle .theme-icon { font-size: 14px; line-height: 1; }
 
 /* ── CONFIG PANEL ── */
 .config { padding: 20px 24px; border-bottom: 1px solid var(--bdr); display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
@@ -44,8 +103,8 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
   border-radius: 5px; outline: none; min-width: 0; }
 .config select { min-width: 240px; }
 .config select:focus, .config input:focus { border-color: var(--blue); }
-.config input[type="datetime-local"] { min-width: 190px; color-scheme: dark; }
-.btn { padding: 7px 20px; background: var(--blue); color: #0d1117; font-weight: 700; font-size: 13px; border: none; border-radius: 5px; cursor: pointer; white-space: nowrap; letter-spacing: 0.02em; }
+.config input[type="datetime-local"] { min-width: 190px; }
+.btn { padding: 7px 20px; background: var(--blue); color: var(--btn-txt); font-weight: 700; font-size: 13px; border: none; border-radius: 5px; cursor: pointer; white-space: nowrap; letter-spacing: 0.02em; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn:hover:not(:disabled) { filter: brightness(1.1); }
 .err { font-size: 12px; color: var(--stop); width: 100%; font-family: var(--mono); }
@@ -69,7 +128,7 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 .v-detail { font-size: 13px; color: var(--dim); line-height: 1.6; font-family: var(--mono); }
 
 /* inversion alert */
-.inv-alert { background: #2d2200; border: 1px solid #614a00; border-left: 4px solid var(--watch); color: #e3b341; font-size: 12px; padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-family: var(--mono); line-height: 1.6; }
+.inv-alert { background: var(--inv-bg); border: 1px solid var(--inv-bdr); border-left: 4px solid var(--watch); color: var(--inv-txt); font-size: 12px; padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-family: var(--mono); line-height: 1.6; }
 
 /* metric cards */
 .met-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
@@ -83,8 +142,8 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 
 /* spread */
 .spread { font-family: var(--mono); font-size: 11px; padding: 8px 12px; border-radius: 6px; margin-bottom: 14px; border: 1px solid var(--bdr); color: var(--dim); }
-.spread.wide { border-color: #614a00; color: var(--watch); }
-.spread.tight { border-color: #1a3a1a; color: var(--go); }
+.spread.wide { border-color: var(--inv-bdr); color: var(--watch); }
+.spread.tight { border-color: var(--tight-bdr); color: var(--go); }
 
 /* hourly table */
 .tbl-wrap { overflow-x: auto; border: 1px solid var(--bdr); border-radius: 8px; }
@@ -94,13 +153,13 @@ th { padding: 9px 12px; text-align: left; color: var(--faint); font-weight: 400;
 th.r, td.r { text-align: right; }
 td { padding: 8px 12px; border-bottom: 1px solid var(--bdr); color: var(--txt); white-space: nowrap; }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(255,255,255,0.02); }
+tr:hover td { background: var(--hover-row); }
 tr.inv-row td:first-child { border-left: 3px solid var(--watch); }
 .c-go    { color: var(--go); }
 .c-watch { color: var(--watch); }
 .c-stop  { color: var(--stop); }
 .c-dim   { color: var(--faint); }
-.flag { font-size: 10px; background: #2d2200; color: var(--watch); padding: 1px 6px; border-radius: 4px; }
+.flag { font-size: 10px; background: var(--inv-bg); color: var(--watch); padding: 1px 6px; border-radius: 4px; }
 
 /* footer */
 footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; color: var(--faint); font-family: var(--mono); line-height: 1.7; }
@@ -123,6 +182,8 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 .afd-hdr { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--txt); font-weight: 400; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--bdr); }
 
 @media (max-width: 600px) {
+  header { align-items: flex-start; padding: 14px 16px; }
+  .theme-toggle { margin-left: 0; }
   .config { gap: 10px; padding: 14px 16px; }
   .config select { min-width: 0; width: 100%; }
   .config label { width: 100%; }
@@ -136,6 +197,10 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 <header>
   <h1>Summit Weather</h1>
   <p>Cascade Range · 4-model ensemble · Open-Meteo API</p>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
+    <span class="theme-icon" aria-hidden="true">☾</span>
+    <span class="theme-label">Dark</span>
+  </button>
 </header>
 
 <div class="config">
@@ -207,6 +272,7 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
     <div class="afd-hdr">Loading discussion…</div>
   </div>
 </div>
+<footer>
   Data: open-meteo.com · GFS, ECMWF IFS 0.25°, DWD ICON, Canadian GEM · summit coordinates · est temp from freezing level (±5°F)<br>
   Thresholds per mountain. Go/Watch/Stop is an aid — not a substitute for judgment, real-time observations, and NWAC.
 </footer>
@@ -290,6 +356,51 @@ const MODEL_COLORS = {
 };
 let _charts = {};
 let _apiData = null;
+let _lastChartArgs = null;
+
+function cssVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function chartTheme(){
+  return {
+    dim: cssVar('--dim'),
+    faint: cssVar('--faint'),
+    bdr: cssVar('--bdr'),
+    grid: cssVar('--chart-grid'),
+    windowFill: cssVar('--window-fill'),
+    windowStroke: cssVar('--window-stroke'),
+    tooltipBg: cssVar('--tooltip-bg'),
+    tooltipTxt: cssVar('--tooltip-txt'),
+  };
+}
+
+function applyTheme(theme, persist=false){
+  document.documentElement.dataset.theme = theme;
+  const isLight = theme === 'light';
+  const btn = document.getElementById('theme-toggle');
+  if(btn){
+    btn.setAttribute('aria-pressed', String(isLight));
+    btn.setAttribute('aria-label', `Switch to ${isLight ? 'dark' : 'light'} mode`);
+    btn.querySelector('.theme-icon').textContent = isLight ? '☼' : '☾';
+    btn.querySelector('.theme-label').textContent = isLight ? 'Light' : 'Dark';
+  }
+  if(persist){
+    try { localStorage.setItem('summit-weather-theme', theme); } catch(e) {}
+  }
+  if(_lastChartArgs){
+    renderCharts(..._lastChartArgs);
+  }
+}
+
+function initThemeToggle(){
+  const current = document.documentElement.dataset.theme || 'dark';
+  applyTheme(current);
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    applyTheme(next, true);
+  });
+}
 
 function fmtTime(d){
   return d.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Los_Angeles'});
@@ -300,6 +411,7 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
   const ctx = document.getElementById(canvasId);
   if(!ctx) return;
   if(_charts[canvasId]){ _charts[canvasId].destroy(); }
+  const theme = chartTheme();
 
   const times = _apiData.hourly.time.map(t => new Date(t));
   const datasets = MODELS.map(mid => {
@@ -324,9 +436,9 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
       const x2 = scales.x.getPixelForValue(climbEnd);
       if(x2<a.left||x1>a.right) return;
       c.save();
-      c.fillStyle='rgba(121,192,255,0.07)';
+      c.fillStyle=theme.windowFill;
       c.fillRect(Math.max(x1,a.left),a.top,Math.min(x2,a.right)-Math.max(x1,a.left),a.bottom-a.top);
-      c.strokeStyle='rgba(121,192,255,0.45)'; c.lineWidth=1; c.setLineDash([3,3]);
+      c.strokeStyle=theme.windowStroke; c.lineWidth=1; c.setLineDash([3,3]);
       [x1,x2].forEach(x=>{if(x>=a.left&&x<=a.right){c.beginPath();c.moveTo(x,a.top);c.lineTo(x,a.bottom);c.stroke();}});
       c.restore();
     }
@@ -358,10 +470,10 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
       responsive:true, maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{
-        legend:{position:'top',align:'end',labels:{color:'#8b949e',font:{family:'JetBrains Mono',size:10},usePointStyle:true,pointStyle:'rect',boxWidth:10,boxHeight:2,padding:12}},
+        legend:{position:'top',align:'end',labels:{color:theme.dim,font:{family:'JetBrains Mono',size:10},usePointStyle:true,pointStyle:'rect',boxWidth:10,boxHeight:2,padding:12}},
         tooltip:{
-          backgroundColor:'#0d1117',titleColor:'#e6edf3',bodyColor:'#e6edf3',
-          borderColor:'#30363d',borderWidth:1,padding:10,
+          backgroundColor:theme.tooltipBg,titleColor:theme.tooltipTxt,bodyColor:theme.tooltipTxt,
+          borderColor:theme.bdr,borderWidth:1,padding:10,
           titleFont:{family:'JetBrains Mono',size:11,weight:'400'},
           bodyFont:{family:'JetBrains Mono',size:11},
           callbacks:{
@@ -372,10 +484,10 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
       },
       scales:{
         x:{type:'time',time:{unit:'day',displayFormats:{day:'EEE d'}},
-           ticks:{color:'#6e7681',font:{family:'JetBrains Mono',size:10}},
-           grid:{color:'#21262d'},border:{color:'#30363d'}},
-        y:{ticks:{color:'#6e7681',font:{family:'JetBrains Mono',size:10},callback:v=>Math.round(v)+(opts.unit||'')},
-           grid:{color:'#21262d'},border:{color:'#30363d'},...(opts.scaleOptions||{})},
+           ticks:{color:theme.faint,font:{family:'JetBrains Mono',size:10}},
+           grid:{color:theme.grid},border:{color:theme.bdr}},
+        y:{ticks:{color:theme.faint,font:{family:'JetBrains Mono',size:10},callback:v=>Math.round(v)+(opts.unit||'')},
+           grid:{color:theme.grid},border:{color:theme.bdr},...(opts.scaleOptions||{})},
       }
     },
     plugins:[windowPlugin, refPlugin]
@@ -383,6 +495,7 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
 }
 
 function renderCharts(startStr, endStr, summitFt, thr){
+  _lastChartArgs = [startStr, endStr, summitFt, thr];
   const cStart = new Date(startStr); const cEnd = new Date(endStr);
   renderChart('chart-wind',     'wind_speed_10m',         cStart, cEnd, summitFt, {unit:' mph', refLine:{value:thr.wGo, label:`Go (${thr.wGo} mph)`, color:'rgba(210,153,34,0.55)'}});
   renderChart('chart-gust',     'wind_gusts_10m',         cStart, cEnd, summitFt, {unit:' mph', refLine:{value:thr.gGo, label:`Go (${thr.gGo} mph)`, color:'rgba(210,153,34,0.55)'}});
@@ -724,6 +837,7 @@ function initForm(){
   updateThs('stHelens');
 }
 
+initThemeToggle();
 initForm();
 </script>
 </body>
