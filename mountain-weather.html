@@ -198,7 +198,7 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 
 <header>
   <h1>Mountain Weather</h1>
-  <p>Cascade Range · NWS temperatures · 4-model Open-Meteo ensemble</p>
+  <p>Cascade Range · NWS temperatures · Open-Meteo model comparison</p>
   <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
     <span class="theme-icon" aria-hidden="true">☾</span>
     <span class="theme-label">Dark</span>
@@ -249,8 +249,8 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
     </table>
   </div>
 
-  <div class="sec-lbl">Charts — 4-model comparison · climb window highlighted</div>
-  <div class="source-note" id="chart-source">Sources: wind, gust, freezing level, precipitation, and cloud data from Open-Meteo 4-model ensemble.</div>
+  <div class="sec-lbl">Charts — model comparison · climb window highlighted</div>
+  <div class="source-note" id="chart-source">Sources: wind, gust, freezing level, precipitation, and cloud data from Open-Meteo models. HRRR and NAM are shown where their shorter forecast horizons have data.</div>
   <div class="chart-card">
     <h3>Wind speed</h3>
     <div class="chart-sub">mph · sustained · dashed line = go threshold</div>
@@ -278,7 +278,7 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
   </div>
 </div>
 <footer>
-  Data: api.weather.gov for NWS hourly temperatures, snowfall grid data, and AFD · open-meteo.com for GFS, ECMWF IFS 0.25°, DWD ICON, and Canadian GEM model fields<br>
+  Data: api.weather.gov for NWS hourly temperatures, snowfall grid data, and AFD · open-meteo.com for GFS, ECMWF IFS 0.25°, DWD ICON, Canadian GEM, HRRR, and NAM model fields<br>
   Thresholds per mountain. Go/Watch/Stop is an aid — not a substitute for judgment, real-time observations, and NWAC.
 </footer>
 
@@ -354,10 +354,11 @@ const MTNS = {
   },
 };
 
-const MODELS = ['gfs_seamless','ecmwf_ifs025','icon_seamless','gem_seamless'];
+const MODELS = ['gfs_seamless','ecmwf_ifs025','icon_seamless','gem_seamless','ncep_hrrr_conus','ncep_nam_conus'];
 const MODEL_COLORS = {
   gfs_seamless:'#79c0ff', ecmwf_ifs025:'#ffa657',
-  icon_seamless:'#d2a8ff', gem_seamless:'#7ee787'
+  icon_seamless:'#d2a8ff', gem_seamless:'#7ee787',
+  ncep_hrrr_conus:'#ff7b72', ncep_nam_conus:'#a5d6ff'
 };
 let _charts = {};
 let _apiData = null;
@@ -504,7 +505,7 @@ function renderCharts(startStr, endStr, summitFt, thr){
   const cStart = new Date(startStr); const cEnd = new Date(endStr);
   renderChart('chart-wind',     'wind_speed_10m',         cStart, cEnd, summitFt, {unit:' mph', refLine:{value:thr.wGo, label:`Go (${thr.wGo} mph)`, color:'rgba(210,153,34,0.55)'}});
   renderChart('chart-gust',     'wind_gusts_10m',         cStart, cEnd, summitFt, {unit:' mph', refLine:{value:thr.gGo, label:`Go (${thr.gGo} mph)`, color:'rgba(210,153,34,0.55)'}});
-  renderChart('chart-freezing', 'freezing_level_height',  cStart, cEnd, summitFt, {unit:' ft', transform:v=>v*3.28084, refLine:{value:summitFt, label:`Summit ${summitFt.toLocaleString()} ft`, color:'rgba(248,81,73,0.55)'}});
+  renderChart('chart-freezing', 'freezing_level_height',  cStart, cEnd, summitFt, {unit:' ft', refLine:{value:summitFt, label:`Summit ${summitFt.toLocaleString()} ft`, color:'rgba(248,81,73,0.55)'}});
   renderChart('chart-precip',   'precipitation_probability', cStart, cEnd, summitFt, {unit:'%', scaleOptions:{min:0,max:100}});
 }
 
@@ -545,12 +546,11 @@ function renderAfd(result, office){
 }
 
 
-const MODEL_NAMES = { gfs_seamless:'GFS', ecmwf_ifs025:'ECMWF', icon_seamless:'ICON', gem_seamless:'GEM' };
+const MODEL_NAMES = { gfs_seamless:'GFS', ecmwf_ifs025:'ECMWF', icon_seamless:'ICON', gem_seamless:'GEM', ncep_hrrr_conus:'HRRR', ncep_nam_conus:'NAM' };
 const VARS = ['wind_speed_10m','wind_gusts_10m','wind_direction_10m','freezing_level_height','precipitation_probability','precipitation','cloud_cover'];
 
 function pad2(n){ return String(n).padStart(2,'0'); }
 function dtlStr(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
-function m2ft(m){ return m*3.28084; }
 function nonNull(arr){ return arr.filter(x=>x!==null&&!isNaN(x)); }
 function mean(arr){ const v=nonNull(arr); return v.length?v.reduce((a,b)=>a+b)/v.length:null; }
 function mx(arr){ const v=nonNull(arr); return v.length?Math.max(...v):null; }
@@ -689,7 +689,7 @@ function parseWindow(api, startStr, endStr, summitFt, nws){
       row[v] = mean(MODELS.map(m => row.byModel[m][v]));
     });
 
-    row.fl_ft   = row.freezing_level_height !== null ? m2ft(row.freezing_level_height) : null;
+    row.fl_ft   = row.freezing_level_height;
     row.summit_f = nws.upper.byTime[t]?.temperature ?? null;
     row.trail_f = nws.trail.byTime[t]?.temperature ?? null;
     row.snow_signal = /snow|sleet|wintry/i.test(nws.upper.byTime[t]?.shortForecast || '');
@@ -795,7 +795,7 @@ function renderAll(mtn, th, startStr, endStr, rows, s, nws){
     <div class="met">
       <div class="lbl">Model spread</div>
       <div class="val">${s.avgSpread!==null?Math.round(s.avgSpread)+' mph':'—'}</div>
-      <div class="sub">wind spread across 4 models</div>
+      <div class="sub">wind spread across available models</div>
     </div>
   `;
 
@@ -813,7 +813,7 @@ function renderAll(mtn, th, startStr, endStr, rows, s, nws){
   document.getElementById('table-source').innerHTML =
     `<strong>Sources:</strong> summit/trailhead temperatures = NWS hourly point forecasts `+
     `(summit generated ${formatGenerated(nws.upper.generatedAt)}; trailhead generated ${formatGenerated(nws.trail.generatedAt)}) · `+
-    `wind/gust/freezing level/precip/cloud = Open-Meteo 4-model mean · snow flag = NWS upper forecast text`;
+    `wind/gust/freezing level/precip/cloud = Open-Meteo available-model mean · snow flag = NWS upper forecast text`;
 
   const tbody = document.getElementById('tbl-body');
   tbody.innerHTML = '';
