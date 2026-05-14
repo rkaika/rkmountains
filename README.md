@@ -4,7 +4,7 @@ Small static mountaineering weather tools for comparing climb windows on Cascade
 
 ## Main Page
 
-Open `mw1.html` (or just `index.html`, which redirects there) to use the original mountain weather dashboard. Open `mw2.html` to try the newer mountaineering-focused version.
+Open `mw2.html` (or just `index.html`, which redirects there) to use the mountaineering-focused mountain weather dashboard. Open `mw1.html` for the original version.
 
 The page helps evaluate a selected mountain, trailhead/route, and climb window. It combines official NWS point forecasts with raw model guidance so you can compare the human-edited baseline against multiple numerical models.
 
@@ -40,7 +40,22 @@ HRRR and NAM have shorter forecast horizons than the global models, so they only
 
 ## How To Use It
 
-1. Open `index.html` in a browser, or serve the folder locally:
+Use the hosted GitHub Pages version:
+
+- [Latest dashboard](https://rkaika.github.io/rkmountains/)
+- [Mountaineering-focused dashboard](https://rkaika.github.io/rkmountains/mw2.html)
+- [Original dashboard](https://rkaika.github.io/rkmountains/mw1.html)
+
+Then:
+
+1. Select a mountain and route/trailhead.
+2. Set your climb start and expected end time.
+3. Click **Get Forecast**.
+4. Read the NWS summit/trailhead temperatures first, then compare the route advisor, critical criteria, phase timeline, model spread, wind/gust charts, freezing level, precipitation, observations, and NWS discussion.
+
+To run it locally instead:
+
+1. Serve the folder from this repo:
 
    ```sh
    python3 -m http.server 8766
@@ -52,11 +67,6 @@ HRRR and NAM have shorter forecast horizons than the global models, so they only
    http://localhost:8766/
    ```
 
-3. Select a mountain and route/trailhead.
-4. Set your climb start and expected end time.
-5. Click **Get Forecast**.
-6. Read the NWS summit/trailhead temperatures first, then compare model spread, wind/gust charts, freezing level, precipitation, and the NWS discussion.
-
 ## Interpreting The Output
 
 The Go / Watch / Caution verdict is only a planning aid. It is not a substitute for judgment, current observations, avalanche forecasts, route condition reports, or turning around.
@@ -65,9 +75,9 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 
 ## Files
 
-- `index.html`: redirects to `mw1.html` (default entry point).
+- `index.html`: redirects to `mw2.html` (default entry point).
 - `mw1.html`: original unified mountain weather dashboard.
-- `mw2.html`: mountaineering-focused A/B dashboard.
+- `mw2.html`: mountaineering-focused dashboard.
 - `mountain-weather-window.html`: earlier NWS-focused weather-window prototype.
 
 ## Planned Improvements

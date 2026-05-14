@@ -179,6 +179,19 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 	.signal-card.watch .val { color: var(--watch); }
 	.signal-card.caution .val { color: var(--caution); }
 	.signal-card .sub { color: var(--dim); font-size: 11px; line-height: 1.45; }
+	.context-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-bottom: 14px; }
+	.context-card { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 13px 15px; border-left: 4px solid var(--bdr2); min-width: 0; }
+	.context-card.go { border-left-color: var(--go); }
+	.context-card.watch { border-left-color: var(--watch); }
+	.context-card.caution { border-left-color: var(--caution); }
+	.context-card .lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 6px; }
+	.context-card .val { font-family: var(--mono); font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+	.context-card.go .val { color: var(--go); }
+	.context-card.watch .val { color: var(--watch); }
+	.context-card.caution .val { color: var(--caution); }
+	.context-card .sub { color: var(--dim); font-size: 11px; line-height: 1.5; }
+	.context-card a { color: var(--blue); text-decoration: none; }
+	.context-card a:hover { text-decoration: underline; }
 
 		/* inversion alert */
 	.inv-alert { background: var(--inv-bg); border: 1px solid var(--inv-bdr); border-left: 4px solid var(--watch); color: var(--inv-txt); font-size: 12px; padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-family: var(--mono); line-height: 1.6; }
@@ -343,10 +356,11 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
   <div class="decision-grid">
     <section class="advisor-panel" id="advisor-panel"></section>
     <section class="dealbreaker-panel" id="dealbreaker-panel"></section>
-	  </div>
-	  <div class="phase-timeline" id="phase-timeline"></div>
-	  <div class="signal-grid" id="signal-grid"></div>
-	  <div class="met-grid" id="met-grid"></div>
+		  </div>
+		  <div class="phase-timeline" id="phase-timeline"></div>
+		  <div class="signal-grid" id="signal-grid"></div>
+		  <div class="context-grid" id="external-context"></div>
+		  <div class="met-grid" id="met-grid"></div>
   <div class="spread" id="spread"></div>
 
   <div class="sec-lbl">Detailed hourly table · climb window</div>
@@ -1183,14 +1197,14 @@ function renderDecisionSurface(rows, s, thr, summitFt, nws, startStr){
   const wcLabel = data.windChill.value !== null ? `${Math.round(data.windChill.value)}°F` : '—';
   const hazardClass = data.primary.band;
   const title = data.primary.band === 'go' ? 'Window looks usable' : data.primary.band === 'watch' ? `${data.primary.label} needs attention` : `${data.primary.label} is the critical criterion`;
-  const advisorCopy = `${data.primary.body} Best low-risk block inside your selected window is ${bestLabel}. Use the detailed table below to decide whether that block matches your actual summit and descent timing.`;
+  const advisorCopy = `${data.primary.body} Best weather window inside your selected climb period is ${bestLabel}. Use the detailed table below to decide whether that window matches your actual summit and descent timing.`;
 
   advisor.innerHTML = `
     <div class="advisor-kicker">Route advisor</div>
     <div class="advisor-title ${hazardClass}">${title}</div>
     <div class="advisor-copy">${advisorCopy}</div>
     <div class="advisor-stats">
-      <div class="advisor-stat"><div class="lbl">Best block</div><div class="val">${bestLabel}</div></div>
+      <div class="advisor-stat"><div class="lbl">Best weather window</div><div class="val">${bestLabel}</div></div>
       <div class="advisor-stat"><div class="lbl">Lowest wind chill</div><div class="val">${wcLabel}${data.windChill.at ? ' · ' + fmtHHMM(data.windChill.at) : ''}</div></div>
       <div class="advisor-stat"><div class="lbl">Confidence</div><div class="val">${data.conf.label}</div></div>
     </div>`;
@@ -1382,6 +1396,158 @@ function renderSignalGrid(rows, thr, summitFt, nws, startStr, endStr, mtn, th){
     </div>`).join('');
 }
 
+function escapeHtml(text){
+  return String(text ?? '').replace(/[&<>"']/g, ch => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[ch]));
+}
+
+function alertBand(alert){
+  const event = (alert?.properties?.event || '').toLowerCase();
+  const severity = (alert?.properties?.severity || '').toLowerCase();
+  if(severity === 'extreme' || severity === 'severe' || /warning|emergency/.test(event)) return 'caution';
+  if(severity === 'moderate' || /watch|advisory|statement/.test(event)) return 'watch';
+  return 'go';
+}
+
+function alertUrl(alert){
+  const id = alert?.id || alert?.properties?.id || '';
+  return id && /^https?:\/\//.test(id) ? id : 'https://www.weather.gov/alerts';
+}
+
+async function fetchNwsAlerts(lat, lon){
+  const url = `https://api.weather.gov/alerts/active?point=${lat.toFixed(4)},${lon.toFixed(4)}`;
+  const r = await fetch(url, {headers:{'Accept':'application/geo+json'}, cache:'no-store'});
+  if(!r.ok) throw new Error(`NWS alerts ${r.status}`);
+  return r.json();
+}
+
+function snowpackLinks(lat, lon){
+  const nrMap = 'https://www.nrcs.usda.gov/resources/data-and-reports/snow-and-water-interactive-map';
+  const snotelInfo = `https://snotel.info/?lat=${lat.toFixed(3)}&lon=${lon.toFixed(3)}&zoom=8`;
+  return { nrMap, snotelInfo };
+}
+
+function externalCard(label, value, band, body){
+  return `
+    <div class="context-card ${band || 'go'}">
+      <div class="lbl">${escapeHtml(label)}</div>
+      <div class="val">${value}</div>
+      <div class="sub">${body}</div>
+    </div>`;
+}
+
+function avalancheContextCard(extras){
+  if(extras.nwac){
+    const month = new Date().getMonth();
+    const seasonal = month >= 4 && month <= 9
+      ? 'Daily winter forecasts may be out of season; check NWAC statements and recent observations.'
+      : 'Open the current zone forecast and recent observations before committing.';
+    return externalCard(
+      'Avalanche forecast',
+      `<a href="${extras.nwac}" target="_blank" rel="noopener noreferrer">NWAC zone</a>`,
+      'watch',
+      seasonal
+    );
+  }
+  if(extras.avalanche){
+    return externalCard(
+      'Avalanche forecast',
+      `<a href="${extras.avalanche}" target="_blank" rel="noopener noreferrer">Shasta Avalanche Center</a>`,
+      'watch',
+      'Check the current advisory, observations, and seasonal statements.'
+    );
+  }
+  return externalCard('Avalanche forecast', 'No direct zone link', 'watch', 'Use local avalanche center and recent observations for snowpack decisions.');
+}
+
+function snowpackContextCard(mtn){
+  const [lat, lon] = mtn.summit;
+  const links = snowpackLinks(lat, lon);
+  return externalCard(
+    'Snowpack context',
+    `<a href="${links.nrMap}" target="_blank" rel="noopener noreferrer">NRCS map</a> · <a href="${links.snotelInfo}" target="_blank" rel="noopener noreferrer">SNOTEL dashboard</a>`,
+    'watch',
+    'Use nearby SNOTEL/Snow Course data as regional context only; station elevation and aspect may differ from the climb.'
+  );
+}
+
+function observationsContextCard(){
+  return externalCard(
+    'Current observations',
+    'Nearby stations below',
+    'watch',
+    'Prefer high-elevation, recent, wind-exposed stations. Low trailhead stations can miss summit wind and cooling.'
+  );
+}
+
+function renderExternalContextBase(mtnKey, mtn){
+  const el = document.getElementById('external-context');
+  if(!el) return;
+  const extras = MTN_LINKS[mtnKey] || {};
+  el.innerHTML = [
+    externalCard('NWS active alerts', 'Checking...', 'watch', 'Fetching official active alerts for the summit point.'),
+    avalancheContextCard(extras),
+    snowpackContextCard(mtn),
+    observationsContextCard(),
+  ].join('');
+}
+
+function renderNwsAlertsCard(alerts){
+  const el = document.getElementById('external-context');
+  if(!el) return;
+  const cards = Array.from(el.children);
+  const features = alerts?.features || [];
+  let alertCard;
+  if(!features.length){
+    alertCard = externalCard(
+      'NWS active alerts',
+      'None active',
+      'go',
+      'No active NWS watches, warnings, or advisories matched the summit point at fetch time.'
+    );
+  } else {
+    const sorted = features.slice().sort((a,b) => bandRank(alertBand(b)) - bandRank(alertBand(a)));
+    const top = sorted[0];
+    const props = top.properties || {};
+    const count = features.length > 1 ? ` +${features.length - 1} more` : '';
+    const headline = props.headline || props.description || 'Open alert details.';
+    alertCard = externalCard(
+      'NWS active alerts',
+      `<a href="${alertUrl(top)}" target="_blank" rel="noopener noreferrer">${escapeHtml(props.event || 'Active alert')}</a>${count}`,
+      alertBand(top),
+      `${escapeHtml(props.severity || 'Unknown severity')}: ${escapeHtml(headline).slice(0, 220)}`
+    );
+  }
+  cards[0]?.insertAdjacentHTML('beforebegin', alertCard);
+  cards[0]?.remove();
+}
+
+function renderNwsAlertsError(){
+  const el = document.getElementById('external-context');
+  if(!el) return;
+  const cards = Array.from(el.children);
+  const alertCard = externalCard(
+    'NWS active alerts',
+    `<a href="https://www.weather.gov/alerts" target="_blank" rel="noopener noreferrer">Check manually</a>`,
+    'watch',
+    'The official NWS alerts API could not be reached from this page.'
+  );
+  cards[0]?.insertAdjacentHTML('beforebegin', alertCard);
+  cards[0]?.remove();
+}
+
+function renderExternalContext(mtnKey, mtn){
+  renderExternalContextBase(mtnKey, mtn);
+  const [lat, lon] = mtn.summit;
+  fetchNwsAlerts(lat, lon)
+    .then(renderNwsAlertsCard)
+    .catch(err => {
+      console.warn('NWS alerts fetch failed:', err);
+      renderNwsAlertsError();
+    });
+}
+
 function renderClimbFrame(startStr, endStr, lat, lon){
   const el = document.getElementById('climb-frame');
   if(!el) return;
@@ -1418,7 +1584,7 @@ function renderClimbFrame(startStr, endStr, lat, lon){
     `End <strong>${endClock}</strong> · ${endRel}`;
 }
 
-function renderAll(mtn, th, startStr, endStr, rows, s, nws){
+function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws){
   const verdictLabel = { go:'Go', watch:'Watch', caution:'Caution' };
   const summitFt = mtn.summit[2];
 
@@ -1455,6 +1621,7 @@ function renderAll(mtn, th, startStr, endStr, rows, s, nws){
 	  renderDecisionSurface(rows, s, thr, summitFt, nws, startStr);
 	  renderPhaseTimeline(rows, thr, summitFt, endStr, th);
 	  renderSignalGrid(rows, thr, summitFt, nws, startStr, endStr, mtn, th);
+	  renderExternalContext(mtnKey, mtn);
 
 	  document.getElementById('met-grid').innerHTML = `
     <div class="met">
@@ -2096,7 +2263,7 @@ async function loadForecast(){
     }
 
     const s = computeSummary(rows, mtn.thr, mtn.summit[2], nws);
-    renderAll(mtn, th, start, end, rows, s, nws);
+    renderAll(mtnKey, mtn, th, start, end, rows, s, nws);
     renderCharts(start, end, mtn.summit[2], mtn.thr);
     renderModelGuidance(new Date(start));
     renderQuickLinks(mtnKey, mtn, th);
