@@ -461,6 +461,14 @@ const MTNS = {
       { name:'Hoh Rain Forest — Blue Glacier', lat:47.8608, lon:-123.9343, elev:575  },
     ]
   },
+  mailbox: {
+    name: 'Mailbox Peak', summit: [47.462405, -121.63926, 4841], nws: 'SEW',
+    thr: { wGo:25, wWa:35, gGo:35, gWa:45, pGo:20, pWa:40 },
+    ths: [
+      { name:'Mailbox Peak TH — New Trail', lat:47.466707, lon:-121.673491, elev:900, alltrails:'https://www.alltrails.com/trail/us/washington/mailbox-peak-new-trail--2' },
+      { name:'Mailbox Peak TH — Old Trail', lat:47.466707, lon:-121.673491, elev:900, alltrails:'https://www.alltrails.com/trail/us/washington/mailbox-peak-old-trail' },
+    ]
+  },
   shuksan: {
     name: 'Mt Shuksan', summit: [48.8275, -121.6149, 9131], nws: 'SEW',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
@@ -483,38 +491,42 @@ const MTNS = {
 const MTN_LINKS = {
   baker: {
     nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-north',
-    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_baker/',
+    volcano: 'https://www.usgs.gov/volcanoes/mount-baker',
     webcam: 'https://www.mtbaker.us/the-mountain/web-cams/'
   },
   rainier: {
     nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-central',
-    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_rainier/',
+    volcano: 'https://www.usgs.gov/volcanoes/mount-rainier',
     nps: 'https://www.nps.gov/mora/planyourvisit/climbing.htm',
     webcam: 'https://www.nps.gov/mora/learn/photosmultimedia/webcams.htm'
   },
   glacierPeak: {
     nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-north',
-    volcano: 'https://volcanoes.usgs.gov/volcanoes/glacier_peak/'
+    volcano: 'https://www.usgs.gov/volcanoes/glacier-peak'
   },
   stHelens: {
     nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-south',
-    volcano: 'https://volcanoes.usgs.gov/volcanoes/st_helens/',
-    nps: 'https://www.fs.usda.gov/recarea/giffordpinchot/recreation/recarea/?recid=31176'
+    volcano: 'https://www.usgs.gov/volcanoes/mount-st-helens',
+    nps: 'https://www.fs.usda.gov/r06/giffordpinchot/recreation/mount-st-helens-summit'
   },
   adams: {
     nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-south',
-    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_adams/',
-    nps: 'https://www.fs.usda.gov/detail/giffordpinchot/passes-permits/?cid=fsbdev3_004876'
+    volcano: 'https://www.usgs.gov/volcanoes/mount-adams',
+    nps: 'https://www.fs.usda.gov/r06/giffordpinchot/recreation/mt-adams-summit'
   },
   hood: {
     nwac: 'https://nwac.us/avalanche-forecast/#/mt-hood',
-    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_hood/',
-    nps: 'https://www.fs.usda.gov/mthood/',
+    volcano: 'https://www.usgs.gov/volcanoes/mount-hood',
+    nps: 'https://www.fs.usda.gov/r06/mthood/permits/climbing-mt-hood',
     webcam: 'https://www.timberlinelodge.com/cams'
   },
   olympus: {
     nwac: 'https://nwac.us/avalanche-forecast/#/olympics',
     nps: 'https://www.nps.gov/olym/planyourvisit/wilderness-trip-planner.htm'
+  },
+  mailbox: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-central',
+    wta: 'https://www.wta.org/go-hiking/hikes/mailbox-peak'
   },
   shuksan: {
     nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-north',
@@ -522,8 +534,8 @@ const MTN_LINKS = {
   },
   shasta: {
     avalanche: 'https://www.shastaavalanche.org/',
-    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_shasta/',
-    nps: 'https://www.fs.usda.gov/recarea/stnf/recreation/recarea/?recid=6571'
+    volcano: 'https://www.usgs.gov/volcanoes/mount-shasta',
+    nps: 'https://www.fs.usda.gov/r05/shasta-trinity/recreation/mt-shasta-wilderness'
   }
 };
 
@@ -1248,11 +1260,27 @@ function buildLinkChip(label, url, caveat){
   return a;
 }
 
-function renderQuickLinks(mtnKey, mtn){
+function allTrailsRouteUrl(mtn, th){
+  if(th?.alltrails) return { url: th.alltrails, caveat: null };
+  const query = `${mtn.name} ${th?.name || ''} AllTrails`;
+  return {
+    url: `https://www.google.com/search?q=${encodeURIComponent('site:alltrails.com/trail ' + query)}`,
+    caveat: 'route search'
+  };
+}
+
+function windyUrl(lat, lon){
+  const latStr = lat.toFixed(3);
+  const lonStr = lon.toFixed(3);
+  return `https://www.windy.com/${latStr}/${lonStr}?${latStr},${lonStr},10`;
+}
+
+function renderQuickLinks(mtnKey, mtn, th){
   const el = document.getElementById('quick-links');
   if(!el) return;
   const [lat, lon] = mtn.summit;
   const extras = MTN_LINKS[mtnKey] || {};
+  const alltrails = allTrailsRouteUrl(mtn, th);
 
   const chips = [];
 
@@ -1265,7 +1293,7 @@ function renderQuickLinks(mtnKey, mtn){
     `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${lon}`));
 
   chips.push(buildLinkChip('Windy',
-    `https://www.windy.com/?${lat},${lon},10`));
+    windyUrl(lat, lon)));
 
   if(extras.nwac){
     chips.push(buildLinkChip('NWAC avalanche', extras.nwac));
@@ -1274,7 +1302,7 @@ function renderQuickLinks(mtnKey, mtn){
   }
 
   chips.push(buildLinkChip('Pivotal Weather (HRRR)',
-    `https://www.pivotalweather.com/model.php?m=hrrr&p=sfc_wind_mph&rh=2024010100&fh=12&r=conus&dpdt=&mc=`));
+    `https://www.pivotalweather.com/model.php?m=hrrr&p=sfcwind_mslp`));
 
   if(extras.volcano){
     chips.push(buildLinkChip('USGS volcano status', extras.volcano));
@@ -1289,6 +1317,11 @@ function renderQuickLinks(mtnKey, mtn){
   chips.push(buildLinkChip('Mountain-Forecast',
     `https://www.google.com/search?q=${encodeURIComponent('site:mountain-forecast.com ' + mtn.name)}`,
     'close-in only'));
+
+  chips.push(buildLinkChip('AllTrails', alltrails.url, alltrails.caveat));
+  if(extras.wta){
+    chips.push(buildLinkChip('WTA', extras.wta));
+  }
 
   el.replaceChildren(...chips);
 }
@@ -1674,7 +1707,7 @@ async function loadForecast(){
     renderAll(mtn, th, start, end, rows, s, nws);
     renderCharts(start, end, mtn.summit[2], mtn.thr);
     renderModelGuidance(new Date(start));
-    renderQuickLinks(mtnKey, mtn);
+    renderQuickLinks(mtnKey, mtn, th);
     renderAstronomy(start, end, mtn.summit[0], mtn.summit[1]);
     renderPrecipHistory(api);
     renderStations(null, mtn.summit[2], 'loading');
