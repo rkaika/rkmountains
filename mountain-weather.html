@@ -176,6 +176,22 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 .chart-sub { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-bottom: 16px; }
 .chart-wrap { height: 210px; position: relative; }
 
+/* ── GUIDANCE CARDS ── */
+.guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.guide-card { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 14px 16px; border-left: 4px solid var(--bdr2); }
+.guide-card .tag { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-bottom: 8px; }
+.guide-card h4 { font-family: var(--serif); font-size: 16px; font-weight: 400; font-style: italic; letter-spacing: -0.01em; margin-bottom: 6px; color: var(--txt); }
+.guide-card p { font-size: 12px; color: var(--dim); line-height: 1.6; }
+.guide-card.g-temp { border-left-color: var(--blue); }
+.guide-card.g-temp .tag { color: var(--blue); }
+.guide-card.g-wind { border-left-color: var(--watch); }
+.guide-card.g-wind .tag { color: var(--watch); }
+.guide-card.g-snow { border-left-color: var(--stop); }
+.guide-card.g-snow .tag { color: var(--stop); }
+.guide-card.g-good { border-left-color: var(--go); }
+.guide-card.g-good .tag { color: var(--go); }
+.guide-foot { font-family: var(--mono); font-size: 11px; color: var(--faint); line-height: 1.7; margin-top: 6px; margin-bottom: 4px; }
+
 /* ── AFD ── */
 .afd-card { background: var(--card); border: 1px solid var(--bdr); padding: 20px 24px; font-family: var(--mono); font-size: 12px; line-height: 1.75; white-space: pre-wrap; color: var(--dim); max-height: 440px; overflow-y: auto; border-radius: 8px; margin-bottom: 16px; }
 .afd-card::-webkit-scrollbar { width: 6px; }
@@ -271,6 +287,45 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
     <div class="chart-sub">% · any precipitation</div>
     <div class="chart-wrap"><canvas id="chart-precip"></canvas></div>
   </div>
+
+  <div class="sec-lbl">Model guidance for this window</div>
+  <div class="guide-grid" id="model-guidance">
+    <div class="guide-card g-temp">
+      <span class="tag">Temperature</span>
+      <h4>Pick a window first</h4>
+      <p>The recommendation changes as your start time gets closer.</p>
+    </div>
+    <div class="guide-card g-wind">
+      <span class="tag">Wind</span>
+      <h4>Pick a window first</h4>
+      <p>Wind guidance should always be checked at summit altitude.</p>
+    </div>
+    <div class="guide-card g-snow">
+      <span class="tag">Snow</span>
+      <h4>Pick a window first</h4>
+      <p>Close-in shower timing is the part that matters most for alpine starts.</p>
+    </div>
+  </div>
+
+  <div class="sec-lbl">Interpretation notes</div>
+  <div class="guide-grid">
+    <div class="guide-card g-good">
+      <span class="tag">Baseline</span>
+      <h4>NWS first</h4>
+      <p>Use the NWS hourly data here as the official, human-edited baseline. For raw model maps, compare Windy layers at the same time, layer, and altitude.</p>
+    </div>
+    <div class="guide-card g-temp">
+      <span class="tag">Close-in</span>
+      <h4>HRRR inside 48 hours</h4>
+      <p>For a 1 am start, HRRR is usually the lead model for shower timing, wind shifts, and cloud detail once you are within about two days.</p>
+    </div>
+    <div class="guide-card g-wind">
+      <span class="tag">Cross-check</span>
+      <h4>NAM 3 km for context</h4>
+      <p>If HRRR and NAM agree that snow has ended and winds are manageable, confidence improves. If they disagree, make the plan more conservative.</p>
+    </div>
+  </div>
+  <p class="guide-foot">Coordinates are precomputed route references, not official navigation data. NWS grid terrain is smoothed, so summit ridges can be colder, windier, or cloudier than the forecast grid cell.</p>
 
   <div class="sec-lbl">NWS area forecast discussion</div>
   <div class="afd-card" id="afd-card">
@@ -852,6 +907,77 @@ function renderAll(mtn, th, startStr, endStr, rows, s, nws){
   document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+function modelAdvice(start){
+  const hoursOut = (start - new Date()) / 36e5;
+  if(hoursOut <= 0){
+    return {
+      label: 'Nowcast',
+      tempTitle: 'Use NWS plus observations',
+      windTitle: 'HRRR/RAP, verify with stations',
+      snowTitle: 'Radar over models',
+      temp: 'Use NWS hourly plus observed stations. HRRR is still useful, but radar/satellite and actual mountain reports take priority.',
+      wind: 'Use HRRR/RAP for the next few hours, then verify against nearby high-elevation stations where available.',
+      snow: 'Use radar, satellite, and HRRR. If showers are already over the mountain, treat model clearing with suspicion.'
+    };
+  }
+  if(hoursOut <= 48){
+    return {
+      label: 'HRRR lead',
+      tempTitle: 'NWS + HRRR first',
+      windTitle: 'HRRR, then NAM 3 km',
+      snowTitle: 'HRRR timing, NAM context',
+      temp: 'Use NWS hourly as baseline and HRRR for the final temp trend. Check Windy at 8000-9000 ft or summit altitude.',
+      wind: 'Use HRRR first for 1 am timing and direction, then NAM 3 km as a sanity check. Inspect altitude/gust layers.',
+      snow: 'Use HRRR for whether showers persist into the climb window. Use NAM 3 km to confirm the larger snow-ending trend.'
+    };
+  }
+  if(hoursOut <= 84){
+    return {
+      label: 'NAM bridge',
+      tempTitle: 'NWS/NBM and NAM',
+      windTitle: 'NAM 3 km, wait for HRRR',
+      snowTitle: 'NAM precipitation shield',
+      temp: 'Use NWS/NBM and NAM for the cold-air trend. HRRR may not fully cover the window yet.',
+      wind: 'Use NAM 3 km and NWS for the regional wind pattern; wait for HRRR before locking the final call.',
+      snow: 'Use NAM to judge if the precipitation shield exits before your start. Recheck with HRRR once inside 48 hours.'
+    };
+  }
+  return {
+    label: 'Global pattern',
+    tempTitle: 'ECMWF/GFS broad pattern',
+    windTitle: 'Pressure pattern only',
+    snowTitle: 'Storm timing uncertain',
+    temp: 'Use NWS/NBM, ECMWF, and GFS for the broad temperature pattern. Expect local details to move.',
+    wind: 'Use ECMWF/GFS for the big pressure pattern only; summit wind details are not ready yet.',
+    snow: 'Use global models for storm timing uncertainty. Treat exact snow amounts as low confidence until NAM/HRRR enter range.'
+  };
+}
+
+function buildGuideCard(klass, tagText, title, body){
+  const card = document.createElement('div');
+  card.className = `guide-card ${klass}`;
+  const tag = document.createElement('span');
+  tag.className = 'tag';
+  tag.textContent = tagText;
+  const h = document.createElement('h4');
+  h.textContent = title;
+  const p = document.createElement('p');
+  p.textContent = body;
+  card.append(tag, h, p);
+  return card;
+}
+
+function renderModelGuidance(start){
+  const a = modelAdvice(start);
+  const el = document.getElementById('model-guidance');
+  if(!el) return;
+  el.replaceChildren(
+    buildGuideCard('g-temp', `Temperature · ${a.label}`, a.tempTitle, a.temp),
+    buildGuideCard('g-wind', `Wind · ${a.label}`,        a.windTitle, a.wind),
+    buildGuideCard('g-snow', `Snow · ${a.label}`,        a.snowTitle, a.snow),
+  );
+}
+
 async function loadForecast(){
   const mtnKey  = document.getElementById('sel-mtn').value;
   const mtn     = MTNS[mtnKey];
@@ -898,6 +1024,7 @@ async function loadForecast(){
     const s = computeSummary(rows, mtn.thr, mtn.summit[2], nws);
     renderAll(mtn, th, start, end, rows, s, nws);
     renderCharts(start, end, mtn.summit[2], mtn.thr);
+    renderModelGuidance(new Date(start));
 
     document.getElementById('afd-card').innerHTML = '<div class="afd-hdr">Loading discussion…</div>';
     fetchNwsAfd(mtn.nws).then(afd => renderAfd(afd, mtn.nws));
