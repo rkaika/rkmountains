@@ -34,7 +34,7 @@
   --faint:   #6e7681;
   --go:      #3fb950;
   --watch:   #d29922;
-  --stop:    #f85149;
+  --caution:    #f85149;
   --blue:    #58a6ff;
   --btn-txt:  #0d1117;
   --hover-row: rgba(255,255,255,0.02);
@@ -63,7 +63,7 @@ html[data-theme="light"] {
   --faint:   #7c8878;
   --go:      #277a38;
   --watch:   #9a640d;
-  --stop:    #c43d36;
+  --caution:    #c43d36;
   --blue:    #216da8;
   --btn-txt:  #ffffff;
   --hover-row: rgba(23,32,22,0.035);
@@ -107,7 +107,7 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 .btn { padding: 7px 20px; background: var(--blue); color: var(--btn-txt); font-weight: 700; font-size: 13px; border: none; border-radius: 5px; cursor: pointer; white-space: nowrap; letter-spacing: 0.02em; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn:hover:not(:disabled) { filter: brightness(1.1); }
-.err { font-size: 12px; color: var(--stop); width: 100%; font-family: var(--mono); }
+.err { font-size: 12px; color: var(--caution); width: 100%; font-family: var(--mono); }
 
 /* ── RESULTS ── */
 #results { padding: 20px 24px; }
@@ -120,11 +120,11 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 .verdict { display: flex; align-items: center; gap: 20px; padding: 18px 22px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--bdr2); background: var(--card); border-left: 5px solid; }
 .verdict.v-go   { border-left-color: var(--go); }
 .verdict.v-watch{ border-left-color: var(--watch); }
-.verdict.v-stop { border-left-color: var(--stop); }
-.v-word { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; font-family: var(--mono); min-width: 90px; }
+.verdict.v-caution { border-left-color: var(--caution); }
+.v-word { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; font-family: var(--mono); flex: 0 0 auto; white-space: nowrap; }
 .v-go   .v-word { color: var(--go); }
 .v-watch.v-word, .v-watch .v-word { color: var(--watch); }
-.v-stop .v-word { color: var(--stop); }
+.v-caution .v-word { color: var(--caution); }
 .v-detail { font-size: 13px; color: var(--dim); line-height: 1.6; font-family: var(--mono); }
 
 /* inversion alert */
@@ -138,7 +138,7 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 .met .sub { font-size: 10px; color: var(--faint); margin-top: 4px; }
 .met.go   .val { color: var(--go); }
 .met.watch .val { color: var(--watch); }
-.met.stop  .val { color: var(--stop); }
+.met.caution  .val { color: var(--caution); }
 
 /* spread */
 .spread { font-family: var(--mono); font-size: 11px; padding: 8px 12px; border-radius: 6px; margin-bottom: 14px; border: 1px solid var(--bdr); color: var(--dim); }
@@ -159,7 +159,7 @@ tr:hover td { background: var(--hover-row); }
 tr.inv-row td:first-child { border-left: 3px solid var(--watch); }
 .c-go    { color: var(--go); }
 .c-watch { color: var(--watch); }
-.c-stop  { color: var(--stop); }
+.c-caution  { color: var(--caution); }
 .c-dim   { color: var(--faint); }
 .flag { font-size: 10px; background: var(--inv-bg); color: var(--watch); padding: 1px 6px; border-radius: 4px; }
 
@@ -186,8 +186,8 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 .guide-card.g-temp .tag { color: var(--blue); }
 .guide-card.g-wind { border-left-color: var(--watch); }
 .guide-card.g-wind .tag { color: var(--watch); }
-.guide-card.g-snow { border-left-color: var(--stop); }
-.guide-card.g-snow .tag { color: var(--stop); }
+.guide-card.g-snow { border-left-color: var(--caution); }
+.guide-card.g-snow .tag { color: var(--caution); }
 .guide-card.g-good { border-left-color: var(--go); }
 .guide-card.g-good .tag { color: var(--go); }
 .guide-foot { font-family: var(--mono); font-size: 11px; color: var(--faint); line-height: 1.7; margin-top: 6px; margin-bottom: 4px; }
@@ -334,7 +334,7 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 </div>
 <footer>
   Data: api.weather.gov for NWS hourly temperatures, snowfall grid data, and AFD · open-meteo.com for GFS, ECMWF IFS 0.25°, DWD ICON, Canadian GEM, HRRR, and NAM model fields<br>
-  Thresholds per mountain. Go/Watch/Stop is an aid — not a substitute for judgment, real-time observations, and NWAC.
+  Thresholds per mountain. Go/Watch/Caution is an aid — not a substitute for judgment, real-time observations, and NWAC.
 </footer>
 
 <script>
@@ -591,7 +591,7 @@ function renderAfd(result, office){
     const err = result?.error||'no response';
     const isFile = location.protocol==='file:';
     el.innerHTML = `<div class="afd-hdr">Discussion unavailable</div>`+
-      `<span style="color:var(--stop);font-size:11px;">Error: ${err}</span><br><br>`+
+      `<span style="color:var(--caution);font-size:11px;">Error: ${err}</span><br><br>`+
       (isFile?`<span style="color:var(--watch);">Opened via file:// — try Chrome/Firefox, or run <code>python3 -m http.server 8000</code> in the file's folder.</span><br><br>`:``) +
       `Open directly: <a href="https://forecast.weather.gov/product.php?site=${office}&product=AFD&issuedby=${office}" target="_blank" rel="noopener" style="color:var(--blue)">forecast.weather.gov AFD (${office})</a>`;
     return;
@@ -626,14 +626,14 @@ function colorClass(val, go, watch){
   if(val===null) return '';
   if(val<=go)    return 'c-go';
   if(val<=watch) return 'c-watch';
-  return 'c-stop';
+  return 'c-caution';
 }
 
 function metClass(val, go, watch){
   if(val===null) return '';
   if(val<=go)    return 'go';
   if(val<=watch) return 'watch';
-  return 'stop';
+  return 'caution';
 }
 
 async function fetchWeather(lat, lon){
@@ -771,18 +771,18 @@ function computeSummary(rows, thr, summitFt, nws){
   const snowInches = nws.upper.snowInches;
   const snowHours = rows.filter(r=>r.snow_signal).length;
 
-  const wScore = peakWind  <= thr.wGo ? 'go' : peakWind  <= thr.wWa ? 'watch' : 'stop';
-  const gScore = peakGust  <= thr.gGo ? 'go' : peakGust  <= thr.gWa ? 'watch' : 'stop';
-  const pScore = maxPrecip <= thr.pGo ? 'go' : maxPrecip <= thr.pWa ? 'watch' : 'stop';
+  const wScore = peakWind  <= thr.wGo ? 'go' : peakWind  <= thr.wWa ? 'watch' : 'caution';
+  const gScore = peakGust  <= thr.gGo ? 'go' : peakGust  <= thr.gWa ? 'watch' : 'caution';
+  const pScore = maxPrecip <= thr.pGo ? 'go' : maxPrecip <= thr.pWa ? 'watch' : 'caution';
 
   const scores = [wScore, gScore, pScore];
-  const verdict = scores.includes('stop') ? 'stop' : scores.includes('watch') ? 'watch' : 'go';
+  const verdict = scores.includes('caution') ? 'caution' : scores.includes('watch') ? 'watch' : 'go';
 
   return { verdict, peakWind, peakGust, maxFL, maxPrecip, avgSummitTemp, avgTrailTemp, avgSpread, anyInv, flBelowSummit, snowInches, snowHours };
 }
 
 function renderAll(mtn, th, startStr, endStr, rows, s, nws){
-  const verdictLabel = { go:'Go', watch:'Watch', stop:'Stop' };
+  const verdictLabel = { go:'Go', watch:'Watch', caution:'Caution' };
   const summitFt = mtn.summit[2];
 
   document.getElementById('crumb').innerHTML =
@@ -825,12 +825,12 @@ function renderAll(mtn, th, startStr, endStr, rows, s, nws){
     <div class="met ${metClass(s.peakWind,thr.wGo,thr.wWa)}">
       <div class="lbl">Peak wind</div>
       <div class="val">${s.peakWind!==null?Math.round(s.peakWind)+' mph':'—'}</div>
-      <div class="sub">go &lt;${thr.wGo} · stop &gt;${thr.wWa}</div>
+      <div class="sub">go &lt;${thr.wGo} · caution &gt;${thr.wWa}</div>
     </div>
     <div class="met ${metClass(s.peakGust,thr.gGo,thr.gWa)}">
       <div class="lbl">Peak gust</div>
       <div class="val">${s.peakGust!==null?Math.round(s.peakGust)+' mph':'—'}</div>
-      <div class="sub">go &lt;${thr.gGo} · stop &gt;${thr.gWa}</div>
+      <div class="sub">go &lt;${thr.gGo} · caution &gt;${thr.gWa}</div>
     </div>
     <div class="met">
       <div class="lbl">Max freezing level</div>
