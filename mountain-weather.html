@@ -1000,6 +1000,8 @@ async function loadForecast(){
     return;
   }
 
+  savePrefs();
+
   const btn = document.getElementById('btn-go');
   btn.textContent = 'Loading…';
   btn.disabled = true;
@@ -1043,6 +1045,26 @@ async function loadForecast(){
   }
 }
 
+const PREFS_KEY = 'mountain-weather-prefs';
+
+function savePrefs(){
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify({
+      mtn:   document.getElementById('sel-mtn').value,
+      th:    document.getElementById('sel-th').value,
+      start: document.getElementById('inp-start').value,
+      end:   document.getElementById('inp-end').value,
+    }));
+  } catch(e) {}
+}
+
+function loadPrefs(){
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
 function initForm(){
   const selMtn = document.getElementById('sel-mtn');
   Object.entries(MTNS).forEach(([k,m])=>{
@@ -1062,7 +1084,6 @@ function initForm(){
   }
 
   selMtn.addEventListener('change', ()=>updateThs(selMtn.value));
-  updateThs(selMtn.value);
 
   const now = new Date();
   const dToSat = (6-now.getDay()+7)%7||7;
@@ -1072,13 +1093,26 @@ function initForm(){
   const sun = new Date(sat);
   sun.setHours(sat.getHours()+12);
 
-  document.getElementById('inp-start').value = dtlStr(sat);
-  document.getElementById('inp-end').value   = dtlStr(sun);
+  const inpStart = document.getElementById('inp-start');
+  const inpEnd   = document.getElementById('inp-end');
+  inpStart.value = dtlStr(sat);
+  inpEnd.value   = dtlStr(sun);
 
   document.getElementById('btn-go').addEventListener('click', loadForecast);
 
-  selMtn.value = 'stHelens';
-  updateThs('stHelens');
+  const prefs = loadPrefs();
+  const mtnKey = prefs && MTNS[prefs.mtn] ? prefs.mtn : 'stHelens';
+  selMtn.value = mtnKey;
+  updateThs(mtnKey);
+
+  if(prefs){
+    const selTh = document.getElementById('sel-th');
+    if(prefs.th !== undefined && selTh.querySelector(`option[value="${prefs.th}"]`)){
+      selTh.value = prefs.th;
+    }
+    if(prefs.start) inpStart.value = prefs.start;
+    if(prefs.end)   inpEnd.value   = prefs.end;
+  }
 }
 
 initThemeToggle();
