@@ -112,9 +112,12 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 /* ── RESULTS ── */
 #results { padding: 20px 24px; }
 
-.crumb { font-family: var(--mono); font-size: 12px; color: var(--dim); margin-bottom: 18px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.crumb { font-family: var(--mono); font-size: 12px; color: var(--dim); margin-bottom: 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .crumb .sep { color: var(--faint); }
 .crumb strong { color: var(--txt); }
+.climb-frame { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-bottom: 18px; line-height: 1.7; }
+.climb-frame .cf-sun { color: var(--watch); }
+.climb-frame .sep { color: var(--bdr2); margin: 0 6px; }
 
 /* verdict */
 .verdict { display: flex; align-items: center; gap: 20px; padding: 18px 22px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--bdr2); background: var(--card); border-left: 5px solid; }
@@ -157,6 +160,8 @@ td { padding: 8px 12px; border-bottom: 1px solid var(--bdr); color: var(--txt); 
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: var(--hover-row); }
 tr.inv-row td:first-child { border-left: 3px solid var(--watch); }
+tr.now-row td { background: rgba(88,166,255,0.08); }
+tr.now-row td:first-child { box-shadow: inset 3px 0 0 var(--blue); font-weight: 600; }
 .c-go    { color: var(--go); }
 .c-watch { color: var(--watch); }
 .c-caution  { color: var(--caution); }
@@ -274,21 +279,14 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 
 <div id="results" hidden>
   <div class="crumb" id="crumb"></div>
+  <div class="climb-frame" id="climb-frame"></div>
   <div class="links" id="quick-links"></div>
   <div class="verdict" id="verdict"></div>
   <div class="inv-alert" id="inv-alert" hidden></div>
   <div class="met-grid" id="met-grid"></div>
   <div class="spread" id="spread"></div>
 
-  <div class="sec-lbl">Astronomy · climb day</div>
-  <div class="astro-grid" id="astro-grid"></div>
-
-  <div class="sec-lbl">Recent precipitation · summit</div>
-  <div class="astro-grid" id="precip-history"></div>
-
-  <div class="sec-lbl">Current observations · stations near mountain</div>
-  <div class="station-grid" id="station-grid"></div>
-
+  <div class="sec-lbl">Hourly forecast · climb window</div>
   <div class="source-note" id="table-source"></div>
   <div class="tbl-wrap">
     <table>
@@ -309,6 +307,15 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
       <tbody id="tbl-body"></tbody>
     </table>
   </div>
+
+  <div class="sec-lbl">Astronomy · climb day</div>
+  <div class="astro-grid" id="astro-grid"></div>
+
+  <div class="sec-lbl">Recent precipitation · summit</div>
+  <div class="astro-grid" id="precip-history"></div>
+
+  <div class="sec-lbl">Current observations · stations near mountain</div>
+  <div class="station-grid" id="station-grid"></div>
 
   <div class="sec-lbl">Charts — model comparison · climb window highlighted</div>
   <div class="source-note" id="chart-source">Sources: wind, gust, freezing level, precipitation, and cloud data from Open-Meteo models. HRRR and NAM are shown where their shorter forecast horizons have data.</div>
@@ -616,6 +623,26 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
     }
   };
 
+  const nowPlugin = {
+    id:'nowLine',
+    afterDatasetsDraw(chart){
+      const {ctx:c, chartArea:a, scales} = chart;
+      if(!a) return;
+      const x = scales.x.getPixelForValue(Date.now());
+      if(x < a.left || x > a.right) return;
+      c.save();
+      c.strokeStyle = 'rgba(88,166,255,0.7)';
+      c.lineWidth = 1;
+      c.setLineDash([2,3]);
+      c.beginPath(); c.moveTo(x, a.top); c.lineTo(x, a.bottom); c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = 'rgba(88,166,255,0.95)';
+      c.font = '10px "JetBrains Mono"';
+      c.fillText('now', x + 4, a.top + 12);
+      c.restore();
+    }
+  };
+
   _charts[canvasId] = new Chart(ctx, {
     type:'line', data:{datasets},
     options:{
@@ -643,7 +670,7 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
            grid:{color:theme.grid},border:{color:theme.bdr},...(opts.scaleOptions||{})},
       }
     },
-    plugins:[windowPlugin, refPlugin]
+    plugins:[windowPlugin, refPlugin, nowPlugin]
   });
 }
 
@@ -850,11 +877,26 @@ function parseWindow(api, startStr, endStr, summitFt, nws){
   return rows;
 }
 
+function mxAt(rows, key){
+  let best = null, bestTime = null;
+  for(const r of rows){
+    const v = r[key];
+    if(v === null || v === undefined || isNaN(v)) continue;
+    if(best === null || v > best){ best = v; bestTime = r.time; }
+  }
+  return { value: best, at: bestTime };
+}
+
 function computeSummary(rows, thr, summitFt, nws){
-  const peakWind  = mx(rows.map(r=>r.wind_speed_10m));
-  const peakGust  = mx(rows.map(r=>r.wind_gusts_10m));
-  const maxFL     = mx(rows.map(r=>r.fl_ft));
-  const maxPrecip = mx(rows.map(r=>r.precipitation_probability));
+  const wRes  = mxAt(rows, 'wind_speed_10m');
+  const gRes  = mxAt(rows, 'wind_gusts_10m');
+  const flRes = mxAt(rows, 'fl_ft');
+  const pRes  = mxAt(rows, 'precipitation_probability');
+
+  const peakWind  = wRes.value;
+  const peakGust  = gRes.value;
+  const maxFL     = flRes.value;
+  const maxPrecip = pRes.value;
   const avgSummitTemp = mean(rows.map(r=>r.summit_f));
   const avgTrailTemp = mean(rows.map(r=>r.trail_f));
   const avgSpread = mean(rows.map(r=>r.spread));
@@ -870,7 +912,54 @@ function computeSummary(rows, thr, summitFt, nws){
   const scores = [wScore, gScore, pScore];
   const verdict = scores.includes('caution') ? 'caution' : scores.includes('watch') ? 'watch' : 'go';
 
-  return { verdict, peakWind, peakGust, maxFL, maxPrecip, avgSummitTemp, avgTrailTemp, avgSpread, anyInv, flBelowSummit, snowInches, snowHours };
+  return {
+    verdict,
+    peakWind, peakWindAt: wRes.at,
+    peakGust, peakGustAt: gRes.at,
+    maxFL, maxFLAt: flRes.at,
+    maxPrecip, maxPrecipAt: pRes.at,
+    avgSummitTemp, avgTrailTemp, avgSpread,
+    anyInv, flBelowSummit, snowInches, snowHours
+  };
+}
+
+function fmtHHMM(timeStr){ return timeStr ? timeStr.slice(11,16) : ''; }
+function atSuffix(timeStr){ return timeStr ? ` · peak ${fmtHHMM(timeStr)}` : ''; }
+
+function renderClimbFrame(startStr, endStr, lat, lon){
+  const el = document.getElementById('climb-frame');
+  if(!el) return;
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  const mid = new Date((start.getTime() + end.getTime()) / 2);
+  const events = solarEvents(mid, lat, lon);
+  const sunrise = events.sunrise;
+  const sunset = events.sunset;
+
+  function relDiff(dt, ref, label){
+    if(!ref) return '';
+    const diffMin = Math.round((dt - ref) / 60000);
+    const abs = Math.abs(diffMin);
+    const h = Math.floor(abs / 60);
+    const m = abs % 60;
+    const span = h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+    return diffMin >= 0 ? `${span} after ${label}` : `${span} before ${label}`;
+  }
+
+  const startClock = start.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', hour12:false });
+  const endClock = end.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', hour12:false });
+
+  const startRel = relDiff(start, sunrise, 'sunrise');
+  const endRel = relDiff(end, sunrise, 'sunrise');
+  const sunriseStr = sunrise ? fmtClock(sunrise) : '—';
+  const sunsetStr = sunset ? fmtClock(sunset) : '—';
+
+  el.innerHTML =
+    `Start <strong>${startClock}</strong> · ${startRel}` +
+    `<span class="sep">·</span>` +
+    `<span class="cf-sun">☀ sunrise ${sunriseStr} · sunset ${sunsetStr}</span>` +
+    `<span class="sep">·</span>` +
+    `End <strong>${endClock}</strong> · ${endRel}`;
 }
 
 function renderAll(mtn, th, startStr, endStr, rows, s, nws){
@@ -881,6 +970,8 @@ function renderAll(mtn, th, startStr, endStr, rows, s, nws){
     `<strong>${mtn.name}</strong><span class="sep">›</span>${th.name} (${th.elev.toLocaleString()} ft TH)`+
     `<span class="sep">›</span>${startStr.replace('T',' ')} – ${endStr.slice(11,16)} PDT`+
     `<span class="sep">·</span>Summit ${summitFt.toLocaleString()} ft`;
+
+  renderClimbFrame(startStr, endStr, mtn.summit[0], mtn.summit[1]);
 
   const vEl = document.getElementById('verdict');
   vEl.className = `verdict v-${s.verdict}`;
@@ -917,22 +1008,22 @@ function renderAll(mtn, th, startStr, endStr, rows, s, nws){
     <div class="met ${metClass(s.peakWind,thr.wGo,thr.wWa)}">
       <div class="lbl">Peak wind</div>
       <div class="val">${s.peakWind!==null?Math.round(s.peakWind)+' mph':'—'}</div>
-      <div class="sub">go &lt;${thr.wGo} · caution &gt;${thr.wWa}</div>
+      <div class="sub">go &lt;${thr.wGo} · caution &gt;${thr.wWa}${atSuffix(s.peakWindAt)}</div>
     </div>
     <div class="met ${metClass(s.peakGust,thr.gGo,thr.gWa)}">
       <div class="lbl">Peak gust</div>
       <div class="val">${s.peakGust!==null?Math.round(s.peakGust)+' mph':'—'}</div>
-      <div class="sub">go &lt;${thr.gGo} · caution &gt;${thr.gWa}</div>
+      <div class="sub">go &lt;${thr.gGo} · caution &gt;${thr.gWa}${atSuffix(s.peakGustAt)}</div>
     </div>
     <div class="met">
       <div class="lbl">Max freezing level</div>
       <div class="val">${s.maxFL!==null?Math.round(s.maxFL).toLocaleString()+' ft':'—'}</div>
-      <div class="sub">summit ${summitFt.toLocaleString()} ft${s.flBelowSummit?' · ↓ below summit at times':''}</div>
+      <div class="sub">summit ${summitFt.toLocaleString()} ft${s.flBelowSummit?' · ↓ below summit at times':''}${atSuffix(s.maxFLAt)}</div>
     </div>
     <div class="met ${metClass(s.maxPrecip,thr.pGo,thr.pWa)}">
       <div class="lbl">Max precip prob</div>
       <div class="val">${s.maxPrecip!==null?Math.round(s.maxPrecip)+'%':'—'}</div>
-      <div class="sub">Open-Meteo mean · go &lt;${thr.pGo}%</div>
+      <div class="sub">Open-Meteo mean · go &lt;${thr.pGo}%${atSuffix(s.maxPrecipAt)}</div>
     </div>
     <div class="met">
       <div class="lbl">Snow signal</div>
@@ -965,9 +1056,16 @@ function renderAll(mtn, th, startStr, endStr, rows, s, nws){
   const tbody = document.getElementById('tbl-body');
   tbody.innerHTML = '';
 
+  const nowHour = new Date();
+  nowHour.setMinutes(0, 0, 0);
+  const nowKey = dtlStr(nowHour);
+
   rows.forEach(r => {
     const tr = document.createElement('tr');
-    if(r.inversion) tr.className = 'inv-row';
+    const classes = [];
+    if(r.inversion) classes.push('inv-row');
+    if(r.time === nowKey) classes.push('now-row');
+    if(classes.length) tr.className = classes.join(' ');
 
     const wC = colorClass(r.wind_speed_10m, thr.wGo, thr.wWa);
     const gC = colorClass(r.wind_gusts_10m, thr.gGo, thr.gWa);
