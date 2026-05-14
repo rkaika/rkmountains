@@ -321,8 +321,13 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
     </div>
     <div class="guide-card g-wind">
       <span class="tag">Cross-check</span>
-      <h4>NAM 3 km for context</h4>
-      <p>If HRRR and NAM agree that snow has ended and winds are manageable, confidence improves. If they disagree, make the plan more conservative.</p>
+      <h4>Globals + mesoscale</h4>
+      <p>ECMWF is usually most accurate for 3–7 day synoptic timing; GEM often sees Pacific systems first; ICON and GFS add independent votes. If HRRR/NAM and the globals agree, confidence is high — if they diverge close-in, trust the mesoscale model.</p>
+    </div>
+    <div class="guide-card g-snow">
+      <span class="tag">Confidence</span>
+      <h4>Spread = uncertainty</h4>
+      <p>The Model Spread tile shows wind agreement across the six models. Tight (&lt;8 mph) = high confidence; wide (≥15 mph) means check back closer to climb day before committing.</p>
     </div>
   </div>
   <p class="guide-foot">Coordinates are precomputed route references, not official navigation data. NWS grid terrain is smoothed, so summit ridges can be colder, windier, or cloudier than the forecast grid cell.</p>
@@ -912,44 +917,44 @@ function modelAdvice(start){
   if(hoursOut <= 0){
     return {
       label: 'Nowcast',
-      tempTitle: 'Use NWS plus observations',
+      tempTitle: 'NWS + summit obs beat models',
       windTitle: 'HRRR/RAP, verify with stations',
-      snowTitle: 'Radar over models',
-      temp: 'Use NWS hourly plus observed stations. HRRR is still useful, but radar/satellite and actual mountain reports take priority.',
-      wind: 'Use HRRR/RAP for the next few hours, then verify against nearby high-elevation stations where available.',
-      snow: 'Use radar, satellite, and HRRR. If showers are already over the mountain, treat model clearing with suspicion.'
+      snowTitle: 'Radar/satellite first',
+      temp: 'NWS hourly plus summit and RAWS observations beat any model in nowcast range. Use HRRR only as a supplement.',
+      wind: 'Use HRRR/RAP for the next few hours; verify against nearby high-elevation stations (RAWS, summit obs) where available.',
+      snow: 'Use radar and satellite as primary; HRRR for short-term trends. If showers are already over the mountain, distrust any model that clears them.'
     };
   }
   if(hoursOut <= 48){
     return {
       label: 'HRRR lead',
-      tempTitle: 'NWS + HRRR first',
-      windTitle: 'HRRR, then NAM 3 km',
+      tempTitle: 'NWS baseline + HRRR trend',
+      windTitle: 'HRRR primary, NAM cross-check',
       snowTitle: 'HRRR timing, NAM context',
-      temp: 'Use NWS hourly as baseline and HRRR for the final temp trend. Check Windy at 8000-9000 ft or summit altitude.',
-      wind: 'Use HRRR first for 1 am timing and direction, then NAM 3 km as a sanity check. Inspect altitude/gust layers.',
-      snow: 'Use HRRR for whether showers persist into the climb window. Use NAM 3 km to confirm the larger snow-ending trend.'
+      temp: 'NWS hourly is the baseline; HRRR gives the final temp trend at altitude. Spot-check on Windy at 8–9k ft.',
+      wind: 'HRRR is primary for alpine-start timing and direction; NAM 3 km is the sanity check. If GFS/ECMWF/ICON/GEM disagree with HRRR on the synoptic pattern, lean conservative.',
+      snow: 'HRRR for whether showers persist into your window; NAM 3 km confirms the broader snow-ending trend.'
     };
   }
   if(hoursOut <= 84){
     return {
       label: 'NAM bridge',
-      tempTitle: 'NWS/NBM and NAM',
-      windTitle: 'NAM 3 km, wait for HRRR',
+      tempTitle: 'NWS/NBM + NAM trend',
+      windTitle: 'NAM regional, globals synoptic',
       snowTitle: 'NAM precipitation shield',
-      temp: 'Use NWS/NBM and NAM for the cold-air trend. HRRR may not fully cover the window yet.',
-      wind: 'Use NAM 3 km and NWS for the regional wind pattern; wait for HRRR before locking the final call.',
-      snow: 'Use NAM to judge if the precipitation shield exits before your start. Recheck with HRRR once inside 48 hours.'
+      temp: 'NWS/NBM and NAM carry the cold-air trend at this range; HRRR does not fully cover the window yet.',
+      wind: 'NAM 3 km for the regional pattern with ECMWF/GFS/ICON/GEM as synoptic backdrop. Wait for HRRR before locking the final call.',
+      snow: 'NAM judges whether the precipitation shield exits before your start. Recheck with HRRR once inside 48 hours.'
     };
   }
   return {
     label: 'Global pattern',
-    tempTitle: 'ECMWF/GFS broad pattern',
-    windTitle: 'Pressure pattern only',
-    snowTitle: 'Storm timing uncertain',
-    temp: 'Use NWS/NBM, ECMWF, and GFS for the broad temperature pattern. Expect local details to move.',
-    wind: 'Use ECMWF/GFS for the big pressure pattern only; summit wind details are not ready yet.',
-    snow: 'Use global models for storm timing uncertainty. Treat exact snow amounts as low confidence until NAM/HRRR enter range.'
+    tempTitle: 'ECMWF + GFS broad pattern',
+    windTitle: 'Pressure pattern, ICON/GEM votes',
+    snowTitle: 'Globals only, GEM sees Pacific',
+    temp: 'ECMWF and GFS for the broad temperature pattern; ICON and GEM act as independent global votes. Expect local details to shift as mesoscale models enter range.',
+    wind: 'ECMWF/GFS for the big pressure pattern; if ICON and GEM agree, confidence rises. Summit-level wind detail is not ready yet.',
+    snow: 'All four globals (GFS/ECMWF/ICON/GEM) for storm timing; GEM often sees Pacific approach systems first. Treat exact amounts as low confidence until NAM/HRRR enter range.'
   };
 }
 
