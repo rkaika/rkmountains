@@ -176,6 +176,28 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 .chart-sub { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-bottom: 16px; }
 .chart-wrap { height: 210px; position: relative; }
 
+/* ── QUICK LINKS ── */
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center; }
+.links-lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.14em; text-transform: uppercase; margin-right: 4px; }
+.link-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; border: 1px solid var(--bdr); border-radius: 6px;
+  background: var(--card); color: var(--txt);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.03em;
+  text-decoration: none; white-space: nowrap;
+}
+.link-chip:hover { border-color: var(--bdr2); background: var(--surf); }
+.link-chip .ext { font-size: 9px; color: var(--faint); }
+.link-chip .caveat { font-size: 9px; color: var(--watch); margin-left: 2px; text-transform: lowercase; letter-spacing: 0.04em; }
+
+/* ── ASTRONOMY CARDS ── */
+.astro-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.astro { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 12px 14px; }
+.astro .lbl { font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.astro .val { font-family: var(--mono); font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+.astro .sub { font-size: 10px; color: var(--faint); margin-top: 4px; }
+.astro .moon-icon { font-size: 14px; margin-right: 4px; }
+
 /* ── GUIDANCE CARDS ── */
 .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px; }
 .guide-card { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 14px 16px; border-left: 4px solid var(--bdr2); }
@@ -240,10 +262,15 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 
 <div id="results" hidden>
   <div class="crumb" id="crumb"></div>
+  <div class="links" id="quick-links"></div>
   <div class="verdict" id="verdict"></div>
   <div class="inv-alert" id="inv-alert" hidden></div>
   <div class="met-grid" id="met-grid"></div>
   <div class="spread" id="spread"></div>
+
+  <div class="sec-lbl">Astronomy · climb day</div>
+  <div class="astro-grid" id="astro-grid"></div>
+
   <div class="source-note" id="table-source"></div>
   <div class="tbl-wrap">
     <table>
@@ -412,6 +439,47 @@ const MTNS = {
       { name:'Brewer Creek — Hotlum-Bolam',    lat:41.4420,  lon:-122.0920, elev:6990 },
     ]
   },
+};
+
+const MTN_LINKS = {
+  baker: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-north',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_baker/',
+    webcam: 'https://www.mtbaker.us/the-mountain/web-cams/'
+  },
+  rainier: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-central',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_rainier/',
+    nps: 'https://www.nps.gov/mora/planyourvisit/climbing.htm',
+    webcam: 'https://www.nps.gov/mora/learn/photosmultimedia/webcams.htm'
+  },
+  glacierPeak: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-north',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/glacier_peak/'
+  },
+  stHelens: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-south',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/st_helens/',
+    nps: 'https://www.fs.usda.gov/recarea/giffordpinchot/recreation/recarea/?recid=31176'
+  },
+  adams: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-south',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_adams/',
+    nps: 'https://www.fs.usda.gov/detail/giffordpinchot/passes-permits/?cid=fsbdev3_004876'
+  },
+  olympus: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/olympics',
+    nps: 'https://www.nps.gov/olym/planyourvisit/wilderness-trip-planner.htm'
+  },
+  shuksan: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-north',
+    webcam: 'https://www.mtbaker.us/the-mountain/web-cams/'
+  },
+  shasta: {
+    avalanche: 'https://www.shastaavalanche.org/',
+    volcano: 'https://volcanoes.usgs.gov/volcanoes/mount_shasta/',
+    nps: 'https://www.fs.usda.gov/recarea/stnf/recreation/recarea/?recid=6571'
+  }
 };
 
 const MODELS = ['gfs_seamless','ecmwf_ifs025','icon_seamless','gem_seamless','ncep_hrrr_conus','ncep_nam_conus'];
@@ -983,6 +1051,184 @@ function renderModelGuidance(start){
   );
 }
 
+function buildLinkChip(label, url, caveat){
+  const a = document.createElement('a');
+  a.className = 'link-chip';
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  const txt = document.createElement('span');
+  txt.textContent = label;
+  a.appendChild(txt);
+  if(caveat){
+    const c = document.createElement('span');
+    c.className = 'caveat';
+    c.textContent = '· ' + caveat;
+    a.appendChild(c);
+  }
+  const ext = document.createElement('span');
+  ext.className = 'ext';
+  ext.textContent = '↗';
+  a.appendChild(ext);
+  return a;
+}
+
+function renderQuickLinks(mtnKey, mtn){
+  const el = document.getElementById('quick-links');
+  if(!el) return;
+  const [lat, lon] = mtn.summit;
+  const extras = MTN_LINKS[mtnKey] || {};
+
+  const chips = [];
+
+  const lbl = document.createElement('span');
+  lbl.className = 'links-lbl';
+  lbl.textContent = 'Verify on';
+  chips.push(lbl);
+
+  chips.push(buildLinkChip('NWS forecast',
+    `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${lon}`));
+
+  chips.push(buildLinkChip('Windy',
+    `https://www.windy.com/?${lat},${lon},10`));
+
+  if(extras.nwac){
+    chips.push(buildLinkChip('NWAC avalanche', extras.nwac));
+  } else if(extras.avalanche){
+    chips.push(buildLinkChip('Shasta Avalanche', extras.avalanche));
+  }
+
+  chips.push(buildLinkChip('Pivotal Weather (HRRR)',
+    `https://www.pivotalweather.com/model.php?m=hrrr&p=sfc_wind_mph&rh=2024010100&fh=12&r=conus&dpdt=&mc=`));
+
+  if(extras.volcano){
+    chips.push(buildLinkChip('USGS volcano status', extras.volcano));
+  }
+  if(extras.nps){
+    chips.push(buildLinkChip('Climbing info', extras.nps));
+  }
+  if(extras.webcam){
+    chips.push(buildLinkChip('Webcam', extras.webcam));
+  }
+
+  chips.push(buildLinkChip('Mountain-Forecast',
+    `https://www.google.com/search?q=${encodeURIComponent('site:mountain-forecast.com ' + mtn.name)}`,
+    'close-in only'));
+
+  el.replaceChildren(...chips);
+}
+
+function julianDay(date){
+  return date.getTime() / 86400000 + 2440587.5;
+}
+
+function jdToDate(jd){
+  return new Date((jd - 2440587.5) * 86400000);
+}
+
+function solarEvents(date, lat, lon){
+  const dayNoon = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+  const J = julianDay(dayNoon);
+  const n = Math.floor(J - 2451545 + 0.0008);
+  const Jstar = n - lon/360;
+  const Mdeg = ((357.5291 + 0.98560028 * Jstar) % 360 + 360) % 360;
+  const M = Mdeg * Math.PI / 180;
+  const Cdeg = 1.9148*Math.sin(M) + 0.02*Math.sin(2*M) + 0.0003*Math.sin(3*M);
+  const lambdaDeg = ((Mdeg + Cdeg + 180 + 102.9372) % 360 + 360) % 360;
+  const lambda = lambdaDeg * Math.PI / 180;
+  const Jtransit = 2451545 + Jstar + 0.0053*Math.sin(M) - 0.0069*Math.sin(2*lambda);
+  const delta = Math.asin(Math.sin(lambda) * Math.sin(23.44 * Math.PI / 180));
+  const latRad = lat * Math.PI / 180;
+
+  function eventAt(altDeg){
+    const alt = altDeg * Math.PI / 180;
+    const num = Math.sin(alt) - Math.sin(latRad)*Math.sin(delta);
+    const den = Math.cos(latRad)*Math.cos(delta);
+    const cosOmega = num/den;
+    if(cosOmega > 1 || cosOmega < -1) return { rise:null, set:null };
+    const omegaDeg = Math.acos(cosOmega) * 180 / Math.PI;
+    return {
+      rise: jdToDate(Jtransit - omegaDeg/360),
+      set:  jdToDate(Jtransit + omegaDeg/360),
+    };
+  }
+
+  const std   = eventAt(-0.833);
+  const civil = eventAt(-6);
+  return { sunrise: std.rise, sunset: std.set, civilDawn: civil.rise, civilDusk: civil.set };
+}
+
+function moonPhase(date){
+  const synodic = 29.530588853;
+  const refNew  = 2451550.1;
+  const J = julianDay(date);
+  let phase = ((J - refNew) / synodic) % 1;
+  if(phase < 0) phase += 1;
+  const illum = (1 - Math.cos(phase * 2 * Math.PI)) / 2;
+  let name, icon;
+  if(phase < 0.03 || phase > 0.97){ name='New';            icon='🌑'; }
+  else if(phase < 0.22){            name='Waxing crescent';icon='🌒'; }
+  else if(phase < 0.28){            name='First quarter';  icon='🌓'; }
+  else if(phase < 0.47){            name='Waxing gibbous'; icon='🌔'; }
+  else if(phase < 0.53){            name='Full';           icon='🌕'; }
+  else if(phase < 0.72){            name='Waning gibbous'; icon='🌖'; }
+  else if(phase < 0.78){            name='Last quarter';   icon='🌗'; }
+  else {                            name='Waning crescent';icon='🌘'; }
+  return { phase, illum, name, icon };
+}
+
+function fmtClock(d){
+  if(!d || isNaN(d)) return '—';
+  return d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', hour12:false });
+}
+
+function buildAstroCard(label, val, sub, iconMarkup){
+  const card = document.createElement('div');
+  card.className = 'astro';
+  const l = document.createElement('div');
+  l.className = 'lbl'; l.textContent = label;
+  const v = document.createElement('div');
+  v.className = 'val';
+  if(iconMarkup){
+    const i = document.createElement('span');
+    i.className = 'moon-icon';
+    i.textContent = iconMarkup;
+    v.appendChild(i);
+  }
+  v.appendChild(document.createTextNode(val));
+  const s = document.createElement('div');
+  s.className = 'sub'; s.textContent = sub;
+  card.append(l, v, s);
+  return card;
+}
+
+function renderAstronomy(startStr, endStr, lat, lon){
+  const el = document.getElementById('astro-grid');
+  if(!el) return;
+  const start = new Date(startStr);
+  const end   = new Date(endStr);
+  const mid   = new Date((start.getTime() + end.getTime()) / 2);
+  const events = solarEvents(mid, lat, lon);
+  const moon = moonPhase(mid);
+
+  let dayLen = '—';
+  if(events.sunrise && events.sunset){
+    const ms = events.sunset - events.sunrise;
+    const h = Math.floor(ms / 3600000);
+    const m = Math.round((ms % 3600000) / 60000);
+    dayLen = `${h}h ${m}m`;
+  }
+
+  const dayLabel = mid.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' });
+
+  el.replaceChildren(
+    buildAstroCard('Sunrise',  fmtClock(events.sunrise), `${dayLabel} · civil dawn ${fmtClock(events.civilDawn)}`),
+    buildAstroCard('Sunset',   fmtClock(events.sunset),  `${dayLabel} · civil dusk ${fmtClock(events.civilDusk)}`),
+    buildAstroCard('Daylight', dayLen,                   'sunrise → sunset on climb day'),
+    buildAstroCard('Moon',     `${Math.round(moon.illum*100)}% lit`, moon.name, moon.icon),
+  );
+}
+
 async function loadForecast(){
   const mtnKey  = document.getElementById('sel-mtn').value;
   const mtn     = MTNS[mtnKey];
@@ -1032,6 +1278,8 @@ async function loadForecast(){
     renderAll(mtn, th, start, end, rows, s, nws);
     renderCharts(start, end, mtn.summit[2], mtn.thr);
     renderModelGuidance(new Date(start));
+    renderQuickLinks(mtnKey, mtn);
+    renderAstronomy(start, end, mtn.summit[0], mtn.summit[1]);
 
     document.getElementById('afd-card').innerHTML = '<div class="afd-hdr">Loading discussion…</div>';
     fetchNwsAfd(mtn.nws).then(afd => renderAfd(afd, mtn.nws));
