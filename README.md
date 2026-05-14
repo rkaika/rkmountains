@@ -103,6 +103,7 @@ Thresholds are listed as `W sustained wind go/watch`, `G gust go/watch`, and `P 
 | Mailbox Peak | 47.4624, -121.6393 | 4,841 ft | SEW | W 25/35, G 35/45, P 20/40 | nwac, wta |
 | Mt Shuksan | 48.8275, -121.6149 | 9,131 ft | SEW | W 20/30, G 30/40, P 20/35 | nwac, webcam |
 | Mt Shasta | 41.4092, -122.1944 | 14,179 ft | MFR | W 15/25, G 25/35, P 15/30 | avalanche, volcano, nps |
+| Mt Denali | 63.0692, -151.0070 | 20,310 ft | AFC | W 15/25, G 25/35, P 15/30 | nps |
 
 ## Supported Routes Reference
 
@@ -135,3 +136,5 @@ Phase split is the route-weighted planning split used by `mw2.html`: approach / 
 | Mt Shasta | Bunny Flat — Avalanche Gulch | 41.3537, -122.2336 | 6,950 ft | 225° | 18%/45%/8%/29% | yes |
 | Mt Shasta | Clear Creek TH | 41.3700, -122.1540 | 5,760 ft | 180° | 20%/44%/8%/28% | search fallback |
 | Mt Shasta | Brewer Creek — Hotlum-Bolam | 41.4420, -122.0920 | 6,990 ft | 45° | 18%/45%/8%/29% | search fallback |
+| Mt Denali | Kahiltna Base Camp — West Buttress | 62.9667, -151.1500 | 7,200 ft | 180° | 15%/60%/10%/15% | search fallback |
+| Mt Denali | Wonder Lake — Muldrow Glacier | 63.4775, -150.8728 | 2,000 ft | 0° | 40%/40%/8%/12% | search fallback |

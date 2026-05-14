@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mountain Weather — Cascade Range</title>
+<title>Mountain Weather</title>
 <meta name="color-scheme" content="dark light">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -259,7 +259,7 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 
 <header>
   <h1>Mountain Weather</h1>
-  <p>Cascade Range · NWS temperatures · Open-Meteo model comparison</p>
+  <p>NWS temperatures · Open-Meteo model comparison</p>
   <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
     <span class="theme-icon" aria-hidden="true">☾</span>
     <span class="theme-label">Dark</span>
@@ -493,6 +493,14 @@ const MTNS = {
       { name:'Brewer Creek — Hotlum-Bolam',    lat:41.4420,  lon:-122.0920, elev:6990 },
     ]
   },
+  denali: {
+    name: 'Mt Denali', summit: [63.0692, -151.0070, 20310], nws: 'AFC',
+    thr: { wGo:15, wWa:25, gGo:25, gWa:35, pGo:15, pWa:30 },
+    ths: [
+      { name:'Kahiltna Base Camp — West Buttress', lat:62.9667, lon:-151.1500, elev:7200 },
+      { name:'Wonder Lake — Muldrow Glacier',      lat:63.4775, lon:-150.8728, elev:2000 },
+    ]
+  },
 };
 
 const MTN_LINKS = {
@@ -549,6 +557,9 @@ const MTN_LINKS = {
     avalanche: 'https://www.shastaavalanche.org/',
     volcano: 'https://www.usgs.gov/volcanoes/mount-shasta',
     nps: 'https://www.fs.usda.gov/r05/shasta-trinity/recreation/mt-shasta-wilderness'
+  },
+  denali: {
+    nps: 'https://www.nps.gov/dena/planyourvisit/mountaineering.htm'
   }
 };
 
@@ -1761,11 +1772,22 @@ function loadPrefs(){
 
 function initForm(){
   const selMtn = document.getElementById('sel-mtn');
-  Object.entries(MTNS).forEach(([k,m])=>{
+  const WA_KEYS = new Set(['baker','rainier','campMuir','glacierPeak','stHelens','adams','olympus','mailbox','shuksan']);
+  const addOpt = ([k,m])=>{
     const o = document.createElement('option');
     o.value = k; o.textContent = m.name;
     selMtn.appendChild(o);
-  });
+  };
+  const entries = Object.entries(MTNS);
+  entries.filter(([k])=>WA_KEYS.has(k)).forEach(addOpt);
+  const others = entries.filter(([k])=>!WA_KEYS.has(k));
+  if (others.length) {
+    const sep = document.createElement('option');
+    sep.disabled = true;
+    sep.textContent = '──────────';
+    selMtn.appendChild(sep);
+    others.forEach(addOpt);
+  }
 
   function updateThs(k){
     const sel = document.getElementById('sel-th');
