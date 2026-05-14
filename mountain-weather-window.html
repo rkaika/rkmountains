@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PNW Climb Weather Window</title>
+  <style>
+    :root {
+      --ink: #172026;
+      --muted: #60707a;
+      --line: #d8e1e6;
+      --surface: #f6f8f9;
+      --snow: #e6f3f8;
+      --wind: #f5efe2;
+      --risk: #f8e7df;
+      --good: #e5f2e8;
+      --blue: #1e6f8a;
+      --orange: #ad611f;
+      --red: #9e3e31;
+      --green: #2f7442;
+      --shadow: 0 12px 30px rgba(23, 32, 38, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(180deg, rgba(246, 248, 249, 0.96), rgba(255, 255, 255, 0.98)),
+        radial-gradient(circle at 15% 0%, rgba(30, 111, 138, 0.18), transparent 34%),
+        radial-gradient(circle at 88% 8%, rgba(173, 97, 31, 0.12), transparent 28%);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0 44px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+      gap: 18px;
+      align-items: end;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 5vw, 4.4rem);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    p { margin: 0; }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    select,
+    input,
+    button {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 11px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    button {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.58;
+      cursor: wait;
+    }
+
+    .lede {
+      color: var(--muted);
+      max-width: 48rem;
+    }
+
+    .status {
+      border-left: 4px solid var(--blue);
+      padding-left: 14px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-7 { grid-column: span 7; }
+    .span-8 { grid-column: span 8; }
+    .span-12 { grid-column: span 12; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1.1fr 1.1fr 1fr 1fr 0.8fr;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .route-strip {
+      min-height: 210px;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.1)),
+        linear-gradient(150deg, #dfeef3 0 42%, #f8f3e8 42% 56%, #e7eee5 56% 100%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .route-strip::before {
+      content: "";
+      position: absolute;
+      inset: 34px -30px 0;
+      background:
+        linear-gradient(135deg, transparent 0 34%, rgba(23,32,38,0.12) 34.2% 34.8%, transparent 35%),
+        linear-gradient(28deg, transparent 0 47%, rgba(23,32,38,0.1) 47.2% 47.8%, transparent 48%);
+      clip-path: polygon(0 100%, 21% 55%, 36% 72%, 52% 24%, 70% 68%, 86% 44%, 100% 100%);
+      background-color: rgba(255,255,255,0.38);
+    }
+
+    .route-strip::after {
+      content: "";
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      bottom: 34px;
+      height: 4px;
+      background: repeating-linear-gradient(90deg, var(--ink) 0 14px, transparent 14px 23px);
+      transform: rotate(-8deg);
+      opacity: 0.5;
+    }
+
+    .mountain-name {
+      position: absolute;
+      left: 16px;
+      top: 14px;
+      font-size: 1.5rem;
+      font-weight: 900;
+      max-width: 70%;
+    }
+
+    .coord-note {
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      max-width: 82%;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 12px;
+      min-height: 104px;
+    }
+
+    .stat b {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .stat span {
+      display: block;
+      font-size: 1.38rem;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .stat small {
+      color: var(--muted);
+      display: block;
+      margin-top: 6px;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+      gap: 8px;
+    }
+
+    .hour {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+      min-height: 132px;
+    }
+
+    .hour strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .hour .temp {
+      font-size: 1.4rem;
+      font-weight: 900;
+      margin: 4px 0;
+    }
+
+    .hour small {
+      color: var(--muted);
+      display: block;
+    }
+
+    .guidance-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .guidance {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 150px;
+    }
+
+    .snow { background: var(--snow); }
+    .wind { background: var(--wind); }
+    .risk { background: var(--risk); }
+    .good { background: var(--good); }
+
+    .tag {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.74rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .tag-blue { background: var(--snow); color: var(--blue); }
+    .tag-orange { background: var(--wind); color: var(--orange); }
+    .tag-red { background: var(--risk); color: var(--red); }
+    .tag-green { background: var(--good); color: var(--green); }
+
+    ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+
+    li { margin: 5px 0; }
+
+    .mini {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .afd-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.86rem;
+      margin-bottom: 10px;
+    }
+
+    .afd-text {
+      max-height: 440px;
+      overflow: auto;
+      white-space: pre-wrap;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #101820;
+      color: #eef6f8;
+      padding: 14px;
+      font: 0.86rem/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    .error {
+      color: var(--red);
+      font-weight: 800;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 980px) {
+      header,
+      .controls,
+      .guidance-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .span-4,
+      .span-5,
+      .span-6,
+      .span-7,
+      .span-8,
+      .span-12 {
+        grid-column: span 12;
+      }
+
+      .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      main { width: min(100% - 20px, 1180px); }
+      .stat-grid { grid-template-columns: 1fr; }
+      .mountain-name { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1 id="appTitle">Climb Weather Window</h1>
+      <p class="lede">Pick a mountain, route/trailhead, and climbing window. The app fetches NWS hourly forecasts for the trailhead and upper mountain, then summarizes temperature, wind, snow signal, and which model family to lean on.</p>
+    </div>
+    <div class="status" id="status">Ready. Weather comes from api.weather.gov; model guidance is based on lead time to your selected start.</div>
+  </header>
+
+  <section class="grid">
+    <div class="panel span-12">
+      <div class="controls">
+        <div>
+          <label for="mountain">Mountain</label>
+          <select id="mountain"></select>
+        </div>
+        <div>
+          <label for="trailhead">Trailhead / Route</label>
+          <select id="trailhead"></select>
+        </div>
+        <div>
+          <label for="start">Start time</label>
+          <input id="start" type="datetime-local">
+        </div>
+        <div>
+          <label for="end">Expected end</label>
+          <input id="end" type="datetime-local">
+        </div>
+        <div>
+          <button id="fetch">Fetch window</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel span-5">
+      <h2>Route Reference</h2>
+      <div class="route-strip">
+        <div class="mountain-name" id="routeName"></div>
+        <div class="coord-note" id="coordNote"></div>
+      </div>
+    </div>
+
+    <div class="panel span-7">
+      <h2>Window Summary</h2>
+      <div class="stat-grid" id="stats">
+        <div class="stat"><b>Upper mountain</b><span>--</span><small>Select a window</small></div>
+        <div class="stat"><b>Trailhead</b><span>--</span><small>Select a window</small></div>
+        <div class="stat"><b>Wind</b><span>--</span><small>Select a window</small></div>
+        <div class="stat"><b>Snow signal</b><span>--</span><small>Select a window</small></div>
+      </div>
+    </div>
+
+    <div class="panel span-12">
+      <h2>Model Guidance For This Window</h2>
+      <div class="guidance-grid" id="modelGuidance">
+        <div class="guidance snow">
+          <span class="tag tag-blue">Temperature</span>
+          <h3>Pick a window first</h3>
+          <p class="mini">The recommendation changes as your start time gets closer.</p>
+        </div>
+        <div class="guidance wind">
+          <span class="tag tag-orange">Wind</span>
+          <h3>Pick a window first</h3>
+          <p class="mini">Wind guidance should always be checked at summit altitude.</p>
+        </div>
+        <div class="guidance risk">
+          <span class="tag tag-red">Snow</span>
+          <h3>Pick a window first</h3>
+          <p class="mini">Close-in shower timing is the part that matters most for alpine starts.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel span-6">
+      <h2>Upper Mountain Hourly</h2>
+      <div class="timeline" id="upperTimeline">
+        <p class="mini">No forecast loaded yet.</p>
+      </div>
+    </div>
+
+    <div class="panel span-6">
+      <h2>Trailhead Hourly</h2>
+      <div class="timeline" id="trailTimeline">
+        <p class="mini">No forecast loaded yet.</p>
+      </div>
+    </div>
+
+    <div class="panel span-12">
+      <h2>Interpretation Notes</h2>
+      <div class="guidance-grid">
+        <div class="guidance good">
+          <span class="tag tag-green">Baseline</span>
+          <h3>NWS first</h3>
+          <p class="mini">Use the NWS hourly data here as the official, human-edited baseline. For raw model maps, compare Windy layers at the same time, layer, and altitude.</p>
+        </div>
+        <div class="guidance snow">
+          <span class="tag tag-blue">Close-in</span>
+          <h3>HRRR inside 48 hours</h3>
+          <p class="mini">For a 1 am start, HRRR is usually the lead model for shower timing, wind shifts, and cloud detail once you are within about two days.</p>
+        </div>
+        <div class="guidance wind">
+          <span class="tag tag-orange">Cross-check</span>
+          <h3>NAM 3 km for context</h3>
+          <p class="mini">If HRRR and NAM agree that snow has ended and winds are manageable, confidence improves. If they disagree, make the plan more conservative.</p>
+        </div>
+      </div>
+      <p class="mini" style="margin-top: 12px;">Coordinates are precomputed route references, not official navigation data. NWS grid terrain is smoothed, so summit ridges can be colder, windier, or cloudier than the forecast grid cell.</p>
+    </div>
+
+    <div class="panel span-12">
+      <h2>NWS Area Forecast Discussion</h2>
+      <div class="afd-meta" id="afdMeta">Select a mountain to load the latest discussion.</div>
+      <pre class="afd-text" id="afdText">No discussion loaded yet.</pre>
+    </div>
+  </section>
+</main>
+
+<script>
+const MOUNTAINS = [
+  {
+    id: "baker",
+    name: "Mt Baker",
+    afdOffice: "SEW",
+    upper: { name: "Summit / upper mountain", lat: 48.7768, lon: -121.8145, elevFt: 10781 },
+    trailheads: [
+      { name: "Heliotrope Ridge / Coleman-Deming", lat: 48.80218056, lon: -121.894725, elevFt: 3700 },
+      { name: "Schriebers Meadow / Easton", lat: 48.7067849, lon: -121.8129229, elevFt: 3366 }
+    ]
+  },
+  {
+    id: "rainier",
+    name: "Mt Rainier",
+    afdOffice: "SEW",
+    upper: { name: "Summit / upper mountain", lat: 46.8523, lon: -121.7603, elevFt: 14411 },
+    trailheads: [
+      { name: "Paradise / Disappointment Cleaver", lat: 46.7860, lon: -121.7350, elevFt: 5400 },
+      { name: "White River / Emmons-Winthrop", lat: 46.9020, lon: -121.6427, elevFt: 4400 },
+      { name: "Mowich Lake / Liberty Ridge approach", lat: 46.9335, lon: -121.8638, elevFt: 4929 }
+    ]
+  },
+  {
+    id: "glacier",
+    name: "Glacier Peak",
+    afdOffice: "SEW",
+    upper: { name: "Summit / upper mountain", lat: 48.1129, lon: -121.1135, elevFt: 10541 },
+    trailheads: [
+      { name: "North Fork Sauk / White Pass", lat: 48.1680, lon: -121.1438, elevFt: 2100 },
+      { name: "Suiattle River / Sitkum approach", lat: 48.2520, lon: -121.1810, elevFt: 1600 }
+    ]
+  },
+  {
+    id: "st-helens",
+    name: "Mt St Helens",
+    afdOffice: "PQR",
+    upper: { name: "Summit / crater rim", lat: 46.1912, lon: -122.1944, elevFt: 8363 },
+    trailheads: [
+      { name: "Marble Mountain Sno-Park / Worm Flows", lat: 46.12982241, lon: -122.1711745, elevFt: 2700 },
+      { name: "Climber's Bivouac / Monitor Ridge", lat: 46.1471, lon: -122.1838, elevFt: 3700 }
+    ]
+  },
+  {
+    id: "adams",
+    name: "Mt Adams",
+    afdOffice: "PDT",
+    upper: { name: "Summit / upper mountain", lat: 46.2024, lon: -121.4909, elevFt: 12276 },
+    trailheads: [
+      { name: "Cold Springs / South Climb", lat: 46.1359, lon: -121.4977, elevFt: 5600 },
+      { name: "Morrison Creek / SW Chutes", lat: 46.1760, lon: -121.4540, elevFt: 4600 }
+    ]
+  },
+  {
+    id: "olympus",
+    name: "Mt Olympus",
+    afdOffice: "SEW",
+    upper: { name: "Summit / Blue Glacier", lat: 47.8021, lon: -123.7088, elevFt: 7980 },
+    trailheads: [
+      { name: "Hoh Rain Forest / Blue Glacier approach", lat: 47.8608, lon: -123.9343, elevFt: 600 }
+    ]
+  },
+  {
+    id: "shuksan",
+    name: "Mt Shuksan",
+    afdOffice: "SEW",
+    upper: { name: "Summit / upper mountain", lat: 48.8313, lon: -121.6026, elevFt: 9131 },
+    trailheads: [
+      { name: "Lake Ann / Fisher Chimneys", lat: 48.8477, lon: -121.6810, elevFt: 4700 },
+      { name: "White Salmon / Mt Baker Ski Area", lat: 48.8578, lon: -121.6667, elevFt: 4200 }
+    ]
+  },
+  {
+    id: "shasta",
+    name: "Mt Shasta",
+    afdOffice: "MFR",
+    upper: { name: "Summit / upper mountain", lat: 41.4092, lon: -122.1949, elevFt: 14179 },
+    trailheads: [
+      { name: "Bunny Flat / Avalanche Gulch", lat: 41.35373, lon: -122.23359, elevFt: 6950 },
+      { name: "Brewer Creek / Hotlum-Wintun", lat: 41.4420, lon: -122.0920, elevFt: 7280 },
+      { name: "Clear Creek", lat: 41.3700, lon: -122.1540, elevFt: 6500 }
+    ]
+  }
+];
+
+const els = {
+  mountain: document.querySelector("#mountain"),
+  trailhead: document.querySelector("#trailhead"),
+  start: document.querySelector("#start"),
+  end: document.querySelector("#end"),
+  fetch: document.querySelector("#fetch"),
+  status: document.querySelector("#status"),
+  routeName: document.querySelector("#routeName"),
+  coordNote: document.querySelector("#coordNote"),
+  stats: document.querySelector("#stats"),
+  modelGuidance: document.querySelector("#modelGuidance"),
+  upperTimeline: document.querySelector("#upperTimeline"),
+  trailTimeline: document.querySelector("#trailTimeline"),
+  afdMeta: document.querySelector("#afdMeta"),
+  afdText: document.querySelector("#afdText")
+};
+
+function pad(n) {
+  return String(n).padStart(2, "0");
+}
+
+function toLocalInputValue(date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function initTimes() {
+  const start = new Date();
+  start.setDate(start.getDate() + ((0 - start.getDay() + 7) % 7 || 7));
+  start.setHours(1, 0, 0, 0);
+  const end = new Date(start);
+  end.setHours(13, 0, 0, 0);
+  els.start.value = toLocalInputValue(start);
+  els.end.value = toLocalInputValue(end);
+}
+
+function populateMountains() {
+  els.mountain.innerHTML = MOUNTAINS.map(m => `<option value="${m.id}">${m.name}</option>`).join("");
+  els.mountain.value = "st-helens";
+  populateTrailheads();
+}
+
+function selectedMountain() {
+  return MOUNTAINS.find(m => m.id === els.mountain.value) || MOUNTAINS[0];
+}
+
+function selectedTrailhead() {
+  const mountain = selectedMountain();
+  return mountain.trailheads[Number(els.trailhead.value)] || mountain.trailheads[0];
+}
+
+function titleName(mountain) {
+  return mountain.name.replace(/^Mt /, "Mount ");
+}
+
+function populateTrailheads() {
+  const mountain = selectedMountain();
+  els.trailhead.innerHTML = mountain.trailheads.map((t, index) => `<option value="${index}">${t.name}</option>`).join("");
+  updateRouteReference();
+}
+
+function coordText(point) {
+  return `${point.lat.toFixed(4)}, ${point.lon.toFixed(4)} · ${Math.round(point.elevFt).toLocaleString()} ft`;
+}
+
+function updateRouteReference() {
+  const mountain = selectedMountain();
+  const trailhead = selectedTrailhead();
+  document.querySelector("#appTitle").textContent = titleName(mountain);
+  document.title = `${titleName(mountain)} Weather Window`;
+  els.routeName.textContent = `${mountain.name}: ${trailhead.name}`;
+  els.coordNote.textContent = `Trailhead ${coordText(trailhead)}. Upper reference ${coordText(mountain.upper)}.`;
+  loadAreaDiscussion(mountain);
+}
+
+let afdRequestId = 0;
+
+async function loadAreaDiscussion(mountain) {
+  const requestId = ++afdRequestId;
+  const office = mountain.afdOffice;
+  const productPage = `https://forecast.weather.gov/product.php?site=NWS&issuedby=${office}&product=AFD&format=CI&version=1&glossary=1`;
+  els.afdMeta.innerHTML = `Loading latest AFD for ${titleName(mountain)} from <b>${office}</b>...`;
+  els.afdText.textContent = "Loading discussion...";
+
+  try {
+    const listUrl = `https://api.weather.gov/products/types/AFD/locations/${office}`;
+    const listResponse = await fetch(listUrl, { headers: { "Accept": "application/geo+json" } });
+    if (!listResponse.ok) throw new Error(`AFD list request failed for ${office}`);
+    const listData = await listResponse.json();
+    const latest = (listData["@graph"] || [])[0];
+    if (!latest || !latest["@id"]) throw new Error(`No AFD product found for ${office}`);
+
+    const productResponse = await fetch(latest["@id"], { headers: { "Accept": "application/geo+json" } });
+    if (!productResponse.ok) throw new Error(`AFD product request failed for ${office}`);
+    const product = await productResponse.json();
+    if (requestId !== afdRequestId) return;
+
+    const issued = product.issuanceTime || latest.issuanceTime;
+    const issuedText = issued ? new Date(issued).toLocaleString() : "unknown issue time";
+    els.afdMeta.innerHTML = `
+      <span><b>${office}</b> · ${product.productName || "Area Forecast Discussion"}</span>
+      <span>Issued ${issuedText}</span>
+      <span><a href="${productPage}" target="_blank" rel="noreferrer">Open issuedby=${office} page</a></span>
+    `;
+    els.afdText.textContent = product.productText || "No discussion text returned.";
+  } catch (error) {
+    if (requestId !== afdRequestId) return;
+    els.afdMeta.innerHTML = `<span class="error">${error.message}</span> <a href="${productPage}" target="_blank" rel="noreferrer">Open issuedby=${office} page</a>`;
+    els.afdText.textContent = "The discussion could not be loaded from the NWS API.";
+  }
+}
+
+function parseWindMph(windSpeed) {
+  const nums = String(windSpeed || "").match(/\d+/g);
+  if (!nums) return null;
+  return Math.max(...nums.map(Number));
+}
+
+function formatHour(iso) {
+  return new Date(iso).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" });
+}
+
+function periodOverlaps(period, start, end) {
+  const pStart = new Date(period.startTime);
+  const pEnd = new Date(period.endTime);
+  return pStart < end && pEnd > start;
+}
+
+async function fetchPointForecast(point) {
+  const pointUrl = `https://api.weather.gov/points/${point.lat.toFixed(4)},${point.lon.toFixed(4)}`;
+  const pointResponse = await fetch(pointUrl, { headers: { "Accept": "application/geo+json" } });
+  if (!pointResponse.ok) throw new Error(`NWS point lookup failed for ${point.name}`);
+  const pointData = await pointResponse.json();
+  const hourlyUrl = pointData.properties.forecastHourly;
+  const gridUrl = pointData.properties.forecastGridData;
+
+  const [hourlyResponse, gridResponse] = await Promise.all([
+    fetch(hourlyUrl, { headers: { "Accept": "application/geo+json" } }),
+    fetch(gridUrl, { headers: { "Accept": "application/geo+json" } })
+  ]);
+  if (!hourlyResponse.ok) throw new Error(`NWS hourly forecast failed for ${point.name}`);
+  const hourly = await hourlyResponse.json();
+  const grid = gridResponse.ok ? await gridResponse.json() : null;
+
+  return {
+    point,
+    pointData,
+    hourly,
+    grid,
+    generatedAt: hourly.properties.generatedAt || hourly.properties.updateTime
+  };
+}
+
+function parseDurationHours(duration) {
+  const match = String(duration || "").match(/P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?/);
+  if (!match) return 0;
+  return (Number(match[1] || 0) * 24) + Number(match[2] || 0) + (Number(match[3] || 0) / 60);
+}
+
+function parseValidTime(validTime) {
+  const [startIso, duration] = String(validTime).split("/");
+  const start = new Date(startIso);
+  const end = new Date(start.getTime() + parseDurationHours(duration) * 3600 * 1000);
+  return { start, end };
+}
+
+function overlapFraction(aStart, aEnd, bStart, bEnd) {
+  const overlapMs = Math.max(0, Math.min(aEnd, bEnd) - Math.max(aStart, bStart));
+  const totalMs = Math.max(1, aEnd - aStart);
+  return overlapMs / totalMs;
+}
+
+function snowInchesFromGrid(grid, start, end) {
+  const values = grid?.properties?.snowfallAmount?.values || [];
+  let totalMm = 0;
+  for (const item of values) {
+    const interval = parseValidTime(item.validTime);
+    const fraction = overlapFraction(interval.start, interval.end, start, end);
+    totalMm += Number(item.value || 0) * fraction;
+  }
+  return totalMm * 0.0393701;
+}
+
+function summarizeForecast(bundle, start, end) {
+  const periods = (bundle.hourly.properties.periods || []).filter(p => periodOverlaps(p, start, end));
+  const temps = periods.map(p => p.temperature).filter(Number.isFinite);
+  const pops = periods.map(p => p.probabilityOfPrecipitation?.value).filter(v => v !== null && v !== undefined);
+  const winds = periods.map(p => parseWindMph(p.windSpeed)).filter(v => v !== null);
+  const snowHours = periods.filter(p => /snow|sleet|wintry/i.test(p.shortForecast || "")).length;
+  const precipHours = periods.filter(p => (p.probabilityOfPrecipitation?.value || 0) >= 30).length;
+  const forecasts = [...new Set(periods.map(p => p.shortForecast).filter(Boolean))].slice(0, 4);
+  const snowInches = snowInchesFromGrid(bundle.grid, start, end);
+
+  return {
+    periods,
+    minTemp: temps.length ? Math.min(...temps) : null,
+    maxTemp: temps.length ? Math.max(...temps) : null,
+    maxPop: pops.length ? Math.max(...pops) : null,
+    maxWind: winds.length ? Math.max(...winds) : null,
+    snowHours,
+    precipHours,
+    forecasts,
+    snowInches
+  };
+}
+
+function tempText(summary) {
+  if (summary.minTemp === null) return "--";
+  return summary.minTemp === summary.maxTemp ? `${summary.minTemp} F` : `${summary.minTemp}-${summary.maxTemp} F`;
+}
+
+function snowText(summary) {
+  if (summary.snowInches >= 0.05) return `${summary.snowInches.toFixed(1)} in`;
+  if (summary.snowHours > 0) return `${summary.snowHours} hr`;
+  return "Low";
+}
+
+function renderStats(upper, trail) {
+  const snowLabel = upper.snowInches >= 0.05 ? "NWS grid snow amount" : "Hours mentioning snow";
+  els.stats.innerHTML = `
+    <div class="stat snow"><b>Upper temperature</b><span>${tempText(upper)}</span><small>${upper.forecasts.join(", ") || "No hourly periods found"}</small></div>
+    <div class="stat good"><b>Trailhead temperature</b><span>${tempText(trail)}</span><small>${trail.forecasts.join(", ") || "No hourly periods found"}</small></div>
+    <div class="stat wind"><b>Upper wind</b><span>${upper.maxWind ?? "--"} mph</span><small>Max listed sustained/range value in window</small></div>
+    <div class="stat risk"><b>Snow signal</b><span>${snowText(upper)}</span><small>${snowLabel}; max PoP ${upper.maxPop ?? "--"}%</small></div>
+  `;
+}
+
+function renderTimeline(target, summary) {
+  if (!summary.periods.length) {
+    target.innerHTML = `<p class="mini error">No hourly NWS periods overlap this window. Try a nearer date or shorter window.</p>`;
+    return;
+  }
+
+  target.innerHTML = summary.periods.slice(0, 18).map(p => `
+    <div class="hour">
+      <strong>${formatHour(p.startTime)}</strong>
+      <div class="temp">${p.temperature} F</div>
+      <div>${p.shortForecast || "Forecast"}</div>
+      <small>PoP ${p.probabilityOfPrecipitation?.value ?? "--"}% · ${p.windDirection || ""} ${p.windSpeed || ""}</small>
+    </div>
+  `).join("");
+}
+
+function modelAdvice(start) {
+  const hoursOut = (start - new Date()) / 36e5;
+  if (hoursOut <= 0) {
+    return {
+      label: "Nowcast",
+      temp: "Use NWS hourly plus observed stations. HRRR is still useful, but radar/satellite and actual mountain reports take priority.",
+      wind: "Use HRRR/RAP for the next few hours, then verify against nearby high-elevation stations where available.",
+      snow: "Use radar, satellite, and HRRR. If showers are already over the mountain, treat model clearing with suspicion."
+    };
+  }
+  if (hoursOut <= 48) {
+    return {
+      label: "HRRR lead",
+      temp: "Use NWS hourly as baseline and HRRR for the final temp trend. Check Windy at 8000-9000 ft or summit altitude.",
+      wind: "Use HRRR first for 1 am timing and direction, then NAM 3 km as a sanity check. Inspect altitude/gust layers.",
+      snow: "Use HRRR for whether showers persist into the climb window. Use NAM 3 km to confirm the larger snow-ending trend."
+    };
+  }
+  if (hoursOut <= 84) {
+    return {
+      label: "NAM bridge",
+      temp: "Use NWS/NBM and NAM for the cold-air trend. HRRR may not fully cover the window yet.",
+      wind: "Use NAM 3 km and NWS for the regional wind pattern; wait for HRRR before locking the final call.",
+      snow: "Use NAM to judge if the precipitation shield exits before your start. Recheck with HRRR once inside 48 hours."
+    };
+  }
+  return {
+    label: "Global pattern",
+    temp: "Use NWS/NBM, ECMWF, and GFS for the broad temperature pattern. Expect local details to move.",
+    wind: "Use ECMWF/GFS for the big pressure pattern only; summit wind details are not ready yet.",
+    snow: "Use global models for storm timing uncertainty. Treat exact snow amounts as low confidence until NAM/HRRR enter range."
+  };
+}
+
+function renderModelGuidance(start) {
+  const advice = modelAdvice(start);
+  els.modelGuidance.innerHTML = `
+    <div class="guidance snow">
+      <span class="tag tag-blue">Temperature · ${advice.label}</span>
+      <h3>${advice.label === "HRRR lead" ? "NWS + HRRR first" : "Best model changes with lead time"}</h3>
+      <p class="mini">${advice.temp}</p>
+    </div>
+    <div class="guidance wind">
+      <span class="tag tag-orange">Wind · ${advice.label}</span>
+      <h3>${advice.label === "HRRR lead" ? "HRRR, then NAM 3 km" : "Check altitude/gust layers"}</h3>
+      <p class="mini">${advice.wind}</p>
+    </div>
+    <div class="guidance risk">
+      <span class="tag tag-red">Snow · ${advice.label}</span>
+      <h3>${advice.label === "HRRR lead" ? "HRRR timing, NAM context" : "Watch timing uncertainty"}</h3>
+      <p class="mini">${advice.snow}</p>
+    </div>
+  `;
+}
+
+function setBusy(isBusy) {
+  els.fetch.disabled = isBusy;
+  els.fetch.textContent = isBusy ? "Fetching..." : "Fetch window";
+}
+
+async function fetchWindow() {
+  const mountain = selectedMountain();
+  const trailhead = selectedTrailhead();
+  const start = new Date(els.start.value);
+  const end = new Date(els.end.value);
+
+  if (!els.start.value || !els.end.value || Number.isNaN(start.valueOf()) || Number.isNaN(end.valueOf())) {
+    els.status.innerHTML = `<span class="error">Choose both start and end times.</span>`;
+    return;
+  }
+
+  if (end <= start) {
+    els.status.innerHTML = `<span class="error">Expected end must be after start.</span>`;
+    return;
+  }
+
+  setBusy(true);
+  els.status.textContent = `Fetching NWS hourly forecasts for ${mountain.name} and ${trailhead.name}...`;
+  renderModelGuidance(start);
+
+  try {
+    const [upperBundle, trailBundle] = await Promise.all([
+      fetchPointForecast(mountain.upper),
+      fetchPointForecast(trailhead)
+    ]);
+
+    const upperSummary = summarizeForecast(upperBundle, start, end);
+    const trailSummary = summarizeForecast(trailBundle, start, end);
+    renderStats(upperSummary, trailSummary);
+    renderTimeline(els.upperTimeline, upperSummary);
+    renderTimeline(els.trailTimeline, trailSummary);
+
+    const generated = upperBundle.generatedAt ? new Date(upperBundle.generatedAt).toLocaleString() : "unknown generation time";
+    els.status.textContent = `Loaded ${mountain.name}. Upper forecast generated ${generated}. ${upperSummary.periods.length} upper-mountain hourly periods overlap your window.`;
+  } catch (error) {
+    els.status.innerHTML = `<span class="error">${error.message}</span>`;
+  } finally {
+    setBusy(false);
+  }
+}
+
+els.mountain.addEventListener("change", populateTrailheads);
+els.trailhead.addEventListener("change", updateRouteReference);
+els.fetch.addEventListener("click", fetchWindow);
+
+populateMountains();
+initTimes();
+updateRouteReference();
+renderModelGuidance(new Date(els.start.value));
+</script>
+</body>
+</html>
