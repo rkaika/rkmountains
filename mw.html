@@ -435,6 +435,9 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
     </div>
   </details>
 
+  <div class="sec-lbl">Recent precipitation · summit</div>
+  <div class="astro-grid" id="precip-history"></div>
+
   <div class="sec-lbl">Charts — model comparison · climb window highlighted</div>
   <div class="source-note" id="chart-source">Sources: wind, gust, freezing level, precipitation, snowfall, and cloud data from Open-Meteo models. Charts show two days before the climb start through two days after the climb end; HRRR and NAM appear only where their shorter forecast horizons have data.</div>
   <div class="chart-card">
@@ -466,9 +469,6 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 	  <div class="signal-grid" id="signal-grid"></div>
   <div class="context-grid" id="external-context"></div>
   <div class="spread" id="spread"></div>
-
-  <div class="sec-lbl">Recent precipitation · summit</div>
-  <div class="astro-grid" id="precip-history"></div>
 
   <div class="sec-lbl">Current observations · stations near mountain</div>
   <div class="station-grid" id="station-grid"></div>
@@ -2270,6 +2270,37 @@ function buildAstroCard(label, val, sub, iconMarkup){
   return card;
 }
 
+function computeSnowAccumulation(api, startStr){
+  const times = api?.hourly?.time;
+  if(!times || !times.length || !startStr) return null;
+
+  const snowMean = times.map((_, i) => {
+    const vals = MODELS
+      .map(m => api.hourly[`snowfall_${m}`]?.[i])
+      .filter(v => v !== null && v !== undefined && !isNaN(v));
+    return vals.length ? vals.reduce((a,b)=>a+b, 0) / vals.length : null;
+  });
+
+  const startMs = new Date(startStr).getTime();
+  let startIdx = -1;
+  for(let i = 0; i < times.length; i++){
+    if(new Date(times[i]).getTime() <= startMs) startIdx = i;
+    else break;
+  }
+  if(startIdx < 0) return null;
+
+  function sumHoursBefore(hours){
+    const from = Math.max(0, startIdx - hours);
+    let sum = 0;
+    for(let i = from; i < startIdx; i++){
+      if(snowMean[i] !== null) sum += snowMean[i];
+    }
+    return sum;
+  }
+
+  return { snow24: sumHoursBefore(24), snow48: sumHoursBefore(48), snow72: sumHoursBefore(72) };
+}
+
 function computePrecipHistory(api){
   const times = api?.hourly?.time;
   if(!times || !times.length) return null;
@@ -2321,13 +2352,14 @@ function computePrecipHistory(api){
   };
 }
 
-function renderPrecipHistory(api, point = {label:'Summit', elev:null}){
+function renderPrecipHistory(api, point = {label:'Summit', elev:null}, startStr = null){
   const el = document.getElementById('precip-history');
   if(!el) return;
   const h = computePrecipHistory(api);
   if(!h){ el.replaceChildren(); return; }
 
   const fmt = v => v < 0.005 ? '0.00 in' : v.toFixed(2) + ' in';
+  const fmtSnow = v => v < 0.05 ? '0.0 in' : v.toFixed(1) + ' in';
   const pointText = `${point.label.toLowerCase()}${point.elev ? ` · ${Math.round(point.elev).toLocaleString()} ft` : ''} · model mean`;
   const cards = [
     buildAstroCard('Last 24 h', fmt(h.total24), pointText),
@@ -2340,6 +2372,13 @@ function renderPrecipHistory(api, point = {label:'Summit', elev:null}){
     cards.push(buildAstroCard('Heaviest 12 h', fmt(h.peak12), `ending ${endLbl}`));
   } else {
     cards.push(buildAstroCard('Heaviest 12 h', fmt(h.peak12), 'no significant storm cycle'));
+  }
+
+  const snow = computeSnowAccumulation(api, startStr);
+  if(snow){
+    cards.push(buildAstroCard('Snow · last 24 h', fmtSnow(snow.snow24), 'model mean · ending climb start'));
+    cards.push(buildAstroCard('Snow · last 48 h', fmtSnow(snow.snow48), 'model mean · ending climb start'));
+    cards.push(buildAstroCard('Snow by climb day', fmtSnow(snow.snow72), 'model mean · 72 h before start'));
   }
 
   el.replaceChildren(...cards);
@@ -2548,7 +2587,7 @@ async function loadForecast(){
     renderCharts(start, end, mtn.summit[2], mtn.thr);
     renderModelGuidance(new Date(start));
     renderQuickLinks(mtnKey, mtn, th);
-    renderPrecipHistory(api);
+    renderPrecipHistory(api, {label:'Summit', elev:mtn.summit[2]}, start);
     renderStations(null, mtn.summit[2], 'loading');
     fetchNearestStations(mtn.summit[0], mtn.summit[1], mtn.summit[2])
       .then(stations => renderStations(stations, mtn.summit[2]));
