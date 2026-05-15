@@ -399,7 +399,7 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 	  <div class="route-profile" id="route-profile" hidden></div>
   </section>
   <div class="sec-toolbar">
-    <div class="sec-lbl">Pre-climb trend · 48h before start</div>
+    <div class="sec-lbl">Route weather timeline · 48h before → 12h after</div>
     <label class="mini-control">Point
       <select id="pretrend-point-select">
         <option value="summit">Summit</option>
@@ -1270,12 +1270,14 @@ function modelMeanRow(api, i){
   return row;
 }
 
-function parsePreClimbTrend(api, startStr){
+function parsePreClimbTrend(api, startStr, endStr){
   const start = new Date(startStr);
+  const end = new Date(endStr);
   const preStart = addHours(start, -48);
+  const postEnd = addHours(end, 12);
   return api.hourly.time.reduce((rows, t, i) => {
     const d = new Date(t);
-    if(d < preStart || d >= start) return rows;
+    if(d < preStart || d > postEnd) return rows;
     const diffHours = Math.round((start - d) / 36e5);
     if(diffHours % 3 !== 0) return rows;
     rows.push(modelMeanRow(api, i));
@@ -1310,14 +1312,14 @@ function trendSky(row, referenceFt){
   return { icon:'○', label:'clear' };
 }
 
-function setupPreTrendSelector(mtn, th, startStr, summitApi){
+function setupPreTrendSelector(mtn, th, startStr, endStr, summitApi){
   const select = document.getElementById('pretrend-point-select');
   if(!select) return;
   const points = routeWeatherPointOptions(mtn, th);
-  _pretrendState = {mtn, th, startStr, points, summitApi};
+  _pretrendState = {mtn, th, startStr, endStr, points, summitApi};
   select.value = 'summit';
   select.disabled = false;
-  renderPreClimbTrend(summitApi, startStr, mtn, mtn.thr, points.summit);
+  renderPreClimbTrend(summitApi, startStr, endStr, mtn, mtn.thr, points.summit);
 }
 
 async function updatePreTrendPoint(key){
@@ -1340,28 +1342,28 @@ async function updatePreTrendPoint(key){
         _pretrendCache.set(cacheKey, api);
       }
     }
-    renderPreClimbTrend(api, state.startStr, state.mtn, state.mtn.thr, point);
+    renderPreClimbTrend(api, state.startStr, state.endStr, state.mtn, state.mtn.thr, point);
   } catch(error) {
-    console.warn('Pre-climb trend point fetch failed:', error);
-    el.innerHTML = '<div class="pretrend-empty">Selected point trend unavailable.</div>';
+    console.warn('Route weather timeline point fetch failed:', error);
+    el.innerHTML = '<div class="pretrend-empty">Selected point timeline unavailable.</div>';
   } finally {
     if(select) select.disabled = false;
   }
 }
 
-function renderPreClimbTrend(api, startStr, mtn, thr, point = {label:'Summit', elev:mtn.summit[2]}){
+function renderPreClimbTrend(api, startStr, endStr, mtn, thr, point = {label:'Summit', elev:mtn.summit[2]}){
   const source = document.getElementById('pretrend-source');
   const el = document.getElementById('pretrend');
   if(!source || !el) return;
 
-  const rows = parsePreClimbTrend(api, startStr);
+  const rows = parsePreClimbTrend(api, startStr, endStr);
   const pointText = `${point.label.toLowerCase()}${point.elev ? ` · ${Math.round(point.elev).toLocaleString()} ft` : ''}`;
   source.innerHTML =
-    `<strong>Sources:</strong> Open-Meteo available-model mean at the ${pointText} coordinate, sampled every 3 hours before the selected start. `+
+    `<strong>Sources:</strong> Open-Meteo available-model mean at the ${pointText} coordinate, sampled every 3 hours from 48h before the selected start through 12h after the selected end. `+
     `Temps are model-grid values; compare against NWS point forecasts and recent observations.`;
 
   if(!rows.length){
-    el.innerHTML = '<div class="pretrend-empty">No model data available for the 48 hours before this climb start.</div>';
+    el.innerHTML = '<div class="pretrend-empty">No model data available for this route weather timeline.</div>';
     return;
   }
 
@@ -2531,7 +2533,7 @@ async function loadForecast(){
 
     const s = computeSummary(rows, mtn.thr, mtn.summit[2], nws);
     renderAll(mtnKey, mtn, th, start, end, rows, s, nws);
-    setupPreTrendSelector(mtn, th, start, api);
+    setupPreTrendSelector(mtn, th, start, end, api);
     fetchAndRenderRouteProfile(mtn, th, start, end, mtn.thr, {trail:nws.trail, summit:nws.upper})
       .catch(error => {
         console.warn('Route profile fetch failed:', error);

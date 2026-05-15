@@ -16,7 +16,7 @@ The page helps evaluate a selected mountain, trailhead/route, and climb window. 
 - **Climbing Window Guidance panel**: a Go / Watch / Caution verdict driven by wind, gust, and precipitation thresholds, followed by the sorted critical-criteria list (red → yellow → green) and a per-hour sparkline showing worst-of-three banding with P/W/G driver letters in cells that hit watch or caution.
 - **Summary cards (met grid)**: summit temperature, trailhead temperature, upper-mountain peak wind, upper-mountain peak gust, freezing level, precipitation probability, snow signal, and model spread — laid out directly below the verdict.
 - **Route profile weather**: NWS point forecasts for trailhead, curated route references, and summit/objective where available. Cards show point elevation, temperature range, precipitation probability, wind, gust when available, and snow signal. Points are planning anchors, not navigation data.
-- **Pre-climb trend**: a Mountain-Forecast-style 48-hour lookback before the selected start, sampled every 3 hours. It includes sky/precip signal, wind/gust/direction, precipitation probability and amount, model-grid temperature, wind chill, freezing level, and cloud cover. A selector switches the trend table between summit, route mid-point, and trailhead.
+- **Route Weather Timeline**: a Mountain-Forecast-style timeline from 48 hours before the selected start through 12 hours after the selected end, sampled every 3 hours. It includes sky/precip signal, wind/gust/direction, precipitation probability and amount, model-grid temperature, wind chill, freezing level, and cloud cover. A selector switches the timeline between summit, route mid-point, and trailhead.
 - **Hourly details**: collapsed by default; expands to hour-by-hour summit and trailhead temperatures alongside wind, gust, direction, freezing level, precipitation probability, sky cover, and notes.
 - **Model charts**: Open-Meteo model comparison charts for wind, gusts, freezing level, precipitation probability, and snowfall. Charts show two days before the climb start through two days after the climb end, with the selected climb window highlighted.
 - **Signal tiles**: Wet snow, Rain on snow, and Wind exposure cards with hover explanations and external reference links on the headline value.
@@ -33,7 +33,7 @@ The page helps evaluate a selected mountain, trailhead/route, and climb window. 
 - **Summit and trailhead temperatures**: NWS hourly point forecasts from `api.weather.gov`.
 - **Snow signal**: NWS grid forecast data, including snowfall amount where available.
 - **Wind, gusts, temperature, freezing level, precipitation, snowfall, and cloud cover**: Open-Meteo model data.
-- **Pre-climb trend and recent precipitation**: Open-Meteo model data using `past_days=3`, sampled before the selected climb start.
+- **Route Weather Timeline and recent precipitation**: Open-Meteo model data using `past_days=3`, sampled around the selected climb window.
 - **Forecast discussion**: NWS Area Forecast Discussion products from `api.weather.gov`.
 
 Open-Meteo model comparisons currently include:
@@ -57,7 +57,7 @@ Then:
 2. Set your climb start and expected end time.
 3. Click **Get Forecast**.
 4. Read **Climbing Window Guidance** first, then scan the summary cards and route profile weather.
-5. Use the **Pre-climb trend** selector to compare summit, mid-point, and trailhead conditions before the climb, open **Hourly details** only when you need exact values, then scan the model charts.
+5. Use the **Route Weather Timeline** selector to compare summit, mid-point, and trailhead conditions before, during, and shortly after the climb. Open **Hourly details** only when you need exact values, then scan the model charts.
 6. Scan signal tiles, external context, recent precipitation, observations, and the NWS Area Forecast Discussion.
 
 ## Shareable / Embeddable URLs
