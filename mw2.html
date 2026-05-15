@@ -62,7 +62,7 @@ html[data-theme="light"] {
   --dim:     #5f6b5b;
   --faint:   #7c8878;
   --go:      #277a38;
-  --watch:   #9a640d;
+  --watch:   #b8860b;
   --caution:    #c43d36;
   --blue:    #216da8;
   --btn-txt:  #ffffff;
@@ -120,65 +120,49 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 .climb-frame .sep { color: var(--bdr2); margin: 0 6px; }
 
 /* verdict */
-.verdict { display: flex; align-items: center; gap: 20px; padding: 18px 22px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--bdr2); background: var(--card); border-left: 5px solid; }
+.verdict { display: block; padding: 18px 22px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--bdr2); background: var(--card); border-left: 5px solid; }
 .verdict.v-go   { border-left-color: var(--go); }
 .verdict.v-watch{ border-left-color: var(--watch); }
 .verdict.v-caution { border-left-color: var(--caution); }
-.v-word { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; font-family: var(--mono); flex: 0 0 auto; white-space: nowrap; }
+.v-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; }
+.v-word { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; font-family: var(--mono); white-space: nowrap; margin-bottom: 12px; }
 .v-go   .v-word { color: var(--go); }
 .v-watch.v-word, .v-watch .v-word { color: var(--watch); }
 .v-caution .v-word { color: var(--caution); }
-.v-right { display: flex; flex-direction: column; gap: 6px; flex: 1 1 auto; min-width: 0; }
-.v-detail { font-size: 13px; color: var(--dim); line-height: 1.6; font-family: var(--mono); }
-.v-why { font-size: 12px; color: var(--faint); line-height: 1.55; font-family: var(--mono); }
-.v-why .pill { font-weight: 500; }
-.v-go .v-why .pill { color: var(--go); }
-.v-watch .v-why .pill { color: var(--watch); }
-.v-caution .v-why .pill { color: var(--caution); }
+.spark { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--bdr); display: flex; flex-direction: column; gap: 6px; }
+.spark-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
+.spark-row { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 2px; }
+.spark-cell { height: 28px; border-radius: 3px; background: var(--go); min-width: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; font-weight: 600; color: #fff; letter-spacing: 0.04em; }
+.spark-cell.watch { background: var(--watch); }
+.spark-cell.caution { background: var(--caution); }
+.spark-axis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9px; color: var(--faint); letter-spacing: 0.08em; }
+.spark-legend { font-family: var(--mono); font-size: 9px; color: var(--faint); letter-spacing: 0.06em; }
 
-	/* decision surface */
-	.decision-grid { display: grid; grid-template-columns: minmax(260px, 1.15fr) minmax(260px, 0.85fr); gap: 12px; margin-bottom: 14px; }
-	.advisor-panel, .dealbreaker-panel {
-	  background: var(--card); border: 1px solid var(--bdr); border-radius: 8px;
-	  padding: 16px 18px; min-width: 0;
-	}
-	.advisor-kicker, .dealbreaker-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 8px; }
-	.advisor-title { font-family: var(--serif); font-size: 30px; line-height: 1; font-weight: 400; font-style: italic; letter-spacing: -0.02em; margin-bottom: 10px; }
-	.advisor-title.go { color: var(--go); }
-	.advisor-title.watch { color: var(--watch); }
-	.advisor-title.caution { color: var(--caution); }
-	.advisor-copy { color: var(--dim); font-size: 13px; line-height: 1.6; max-width: 74ch; }
-	.advisor-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
-	.advisor-stat { border: 1px solid var(--bdr); border-radius: 6px; padding: 9px 10px; min-width: 0; }
-	.advisor-stat .lbl { font-family: var(--mono); color: var(--faint); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
-	.advisor-stat .val { font-family: var(--mono); font-weight: 600; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	/* critical criteria list (rendered inside verdict) */
 	.deal-list { display: flex; flex-direction: column; gap: 8px; }
+	@media (min-width: 900px) {
+	  .deal-list { display: block; columns: 2; column-gap: 28px; }
+	  .deal-item { break-inside: avoid; margin-bottom: 8px; }
+	  .deal-item:last-child { margin-bottom: 0; }
+	}
 	.deal-item { display: grid; grid-template-columns: 9px 1fr; gap: 9px; align-items: start; font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.45; }
 	.deal-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 3px; background: var(--go); }
 	.deal-item.watch .deal-dot { background: var(--watch); }
 	.deal-item.caution .deal-dot { background: var(--caution); }
-	.phase-timeline { border: 1px solid var(--bdr); border-radius: 8px; overflow: hidden; margin-bottom: 14px; background: var(--card); }
-	.phase-note { font-family: var(--mono); font-size: 10px; color: var(--faint); line-height: 1.5; padding: 10px 14px; border-bottom: 1px solid var(--bdr); background: var(--surf); }
-	.phase-track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); min-height: 116px; }
-	.phase { padding: 13px 14px; border-right: 1px solid var(--bdr); position: relative; }
-	.phase:last-child { border-right: none; }
-	.phase::before { content:''; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: var(--go); }
-	.phase.watch::before { background: var(--watch); }
-	.phase.caution::before { background: var(--caution); }
-	.phase .name { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 5px; }
-	.phase .time { font-family: var(--mono); color: var(--txt); font-size: 13px; font-weight: 600; margin-bottom: 8px; }
-	.phase .risk { font-size: 12px; color: var(--dim); line-height: 1.45; }
-	.phase-empty { font-family: var(--mono); font-size: 11px; color: var(--faint); padding: 12px 14px; }
 	.signal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 14px; }
-	.signal-card { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 12px 14px; border-top: 4px solid var(--go); min-width: 0; }
+	.signal-card { position: relative; background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 12px 14px; border-top: 4px solid var(--go); min-width: 0; }
 	.signal-card.watch { border-top-color: var(--watch); }
 	.signal-card.caution { border-top-color: var(--caution); }
 	.signal-card .lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
 	.signal-card .val { font-family: var(--mono); font-size: 18px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 5px; }
+	.signal-card .val a { color: inherit; text-decoration: none; border-bottom: 1px dotted currentColor; }
+	.signal-card .val a:hover { border-bottom-style: solid; }
 	.signal-card.go .val { color: var(--go); }
 	.signal-card.watch .val { color: var(--watch); }
 	.signal-card.caution .val { color: var(--caution); }
 	.signal-card .sub { color: var(--dim); font-size: 11px; line-height: 1.45; }
+	.signal-card[data-info]::after { content: attr(data-info); position: absolute; bottom: calc(100% + 6px); left: 0; right: 0; padding: 10px 12px; background: var(--card); border: 1px solid var(--bdr2); border-radius: 6px; font-family: var(--mono); font-size: 11px; color: var(--txt); line-height: 1.55; z-index: 10; white-space: normal; box-shadow: 0 6px 16px rgba(0,0,0,0.18); pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.12s ease, visibility 0.12s ease; }
+	.signal-card[data-info]:hover::after { opacity: 1; visibility: visible; }
 	.context-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-bottom: 14px; }
 	.context-card { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 13px 15px; border-left: 4px solid var(--bdr2); min-width: 0; }
 	.context-card.go { border-left-color: var(--go); }
@@ -199,7 +183,7 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 /* metric cards */
 .met-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
 .met { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 12px 14px; }
-.met .lbl { font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.met .lbl { font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; line-height: 1.3; min-height: 2.6em; }
 .met .val { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
 .met .sub { font-size: 10px; color: var(--faint); margin-top: 4px; }
 .met.go   .val { color: var(--go); }
@@ -308,14 +292,8 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
   .config select { min-width: 0; width: 100%; }
 	  .config label { width: 100%; }
 	  #results { padding: 14px 16px; }
-	  .verdict { align-items: flex-start; flex-direction: column; gap: 8px; padding: 16px 18px; }
+	  .verdict { padding: 16px 18px; }
 	  .v-word { font-size: 26px; }
-	  .v-detail { font-size: 12px; }
-	  .decision-grid { grid-template-columns: 1fr; }
-	  .advisor-stats { grid-template-columns: 1fr; }
-	  .phase-track { grid-template-columns: 1fr; }
-	  .phase { border-right: none; border-bottom: 1px solid var(--bdr); }
-	  .phase:last-child { border-bottom: none; }
 	}
 </style>
 </head>
@@ -353,14 +331,9 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
   <div class="links" id="quick-links"></div>
   <div class="verdict" id="verdict"></div>
   <div class="inv-alert" id="inv-alert" hidden></div>
-  <div class="decision-grid">
-    <section class="advisor-panel" id="advisor-panel"></section>
-    <section class="dealbreaker-panel" id="dealbreaker-panel"></section>
-		  </div>
-		  <div class="phase-timeline" id="phase-timeline"></div>
-		  <div class="signal-grid" id="signal-grid"></div>
-		  <div class="context-grid" id="external-context"></div>
-		  <div class="met-grid" id="met-grid"></div>
+  <div class="met-grid" id="met-grid"></div>
+  <div class="signal-grid" id="signal-grid"></div>
+  <div class="context-grid" id="external-context"></div>
   <div class="spread" id="spread"></div>
 
   <div class="sec-lbl">Detailed hourly table · climb window</div>
@@ -477,7 +450,7 @@ const MTNS = {
     name: 'Mt Baker', summit: [48.7767, -121.8144, 10781], nws: 'SEW',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:40 },
     ths: [
-      { name:'Heliotrope Ridge — Coleman Glacier', lat:48.80218056, lon:-121.894725, elev:3700, aspect:330, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/coleman-glacier-via-heliotrope-ridge-trail' },
+      { name:'Heliotrope Ridge — Coleman Glacier', lat:48.80218056, lon:-121.894725, elev:3700, miles:9, aspect:330, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/coleman-glacier-via-heliotrope-ridge-trail' },
       { name:'Shannon Creek — Easton Glacier',     lat:48.7067849,  lon:-121.8129229, elev:3350, aspect:180, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-baker-via-easton-glacier' },
       { name:'Boulder Ridge',                      lat:48.7870,     lon:-121.7470, elev:4200, aspect:90,  phase:[0.18,0.46,0.10,0.26] },
     ]
@@ -486,8 +459,8 @@ const MTNS = {
     name: 'Mt Rainier', summit: [46.8529, -121.7604, 14411], nws: 'SEW',
     thr: { wGo:15, wWa:25, gGo:25, gWa:35, pGo:15, pWa:30 },
     ths: [
-      { name:'Paradise — Muir Snowfield / DC route',   lat:46.7860, lon:-121.7350, elev:5400, aspect:180, phase:[0.25,0.40,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-rainier-standard-summit-route' },
-      { name:'White River — Emmons Glacier',           lat:46.9020, lon:-121.6427, elev:4250, aspect:45,  phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-rainier-via-emmons-glacier' },
+      { name:'Paradise — Muir Snowfield / DC route',   lat:46.7860, lon:-121.7350, elev:5400, miles:16, aspect:180, phase:[0.25,0.40,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-rainier-standard-summit-route' },
+      { name:'White River — Emmons Glacier',           lat:46.9020, lon:-121.6427, elev:4250, miles:17, aspect:45,  phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-rainier-via-emmons-glacier' },
       { name:'Mowich Lake — Tahoma Cleaver',           lat:46.9335, lon:-121.8638, elev:4929, aspect:270, phase:[0.25,0.42,0.08,0.25] },
       { name:'Carbon River — Willis Wall / Liberty',   lat:46.9940, lon:-121.9160, elev:1800, aspect:0,   phase:[0.25,0.45,0.08,0.22] },
     ]
@@ -496,7 +469,7 @@ const MTNS = {
     name: 'Camp Muir', summit: [46.8356, -121.7328, 10188], nws: 'SEW',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:40 },
     ths: [
-      { name:'Paradise — Muir Snowfield', lat:46.7860, lon:-121.7350, elev:5400, aspect:180, phase:[0.14,0.56,0.06,0.24], alltrails:'https://www.alltrails.com/trail/us/washington/camp-muir-route-via-skyline-trail' },
+      { name:'Paradise — Muir Snowfield', lat:46.7860, lon:-121.7350, elev:5400, miles:9, aspect:180, phase:[0.14,0.56,0.06,0.24], alltrails:'https://www.alltrails.com/trail/us/washington/camp-muir-route-via-skyline-trail' },
     ]
   },
   glacierPeak: {
@@ -511,15 +484,15 @@ const MTNS = {
     name: 'Mt St Helens', summit: [46.1912, -122.1944, 8366], nws: 'PQR',
     thr: { wGo:25, wWa:35, gGo:35, gWa:45, pGo:20, pWa:40 },
     ths: [
-      { name:'Marble Mountain Sno-Park — Worm Flows', lat:46.12982241, lon:-122.1711745, elev:2700, aspect:180, phase:[0.22,0.42,0.08,0.28], alltrails:'https://www.alltrails.com/trail/us/washington/mount-saint-helens-via-worm-flows-trail' },
-      { name:"Climbers Bivouac — Monitor Ridge",     lat:46.1471,     lon:-122.1838, elev:3800, aspect:180, phase:[0.18,0.44,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mount-saint-helens-summit-via-ptarmigan-trail' },
+      { name:'Marble Mountain Sno-Park — Worm Flows', lat:46.12982241, lon:-122.1711745, elev:2700, miles:12, aspect:180, phase:[0.22,0.42,0.08,0.28], alltrails:'https://www.alltrails.com/trail/us/washington/mount-saint-helens-via-worm-flows-trail' },
+      { name:"Climbers Bivouac — Monitor Ridge",     lat:46.1471,     lon:-122.1838, elev:3800, miles:10, aspect:180, phase:[0.18,0.44,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mount-saint-helens-summit-via-ptarmigan-trail' },
     ]
   },
   adams: {
     name: 'Mt Adams', summit: [46.2024, -121.4909, 12281], nws: 'PQR',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:40 },
     ths: [
-      { name:'Cold Springs — South Climb',      lat:46.1359, lon:-121.4977, elev:5575, aspect:180, phase:[0.18,0.45,0.08,0.29], alltrails:'https://www.alltrails.com/trail/us/washington/mount-adams-south-climb-trail' },
+      { name:'Cold Springs — South Climb',      lat:46.1359, lon:-121.4977, elev:5575, miles:12, aspect:180, phase:[0.18,0.45,0.08,0.29], alltrails:'https://www.alltrails.com/trail/us/washington/mount-adams-south-climb-trail' },
       { name:'Morrison Creek — SW Chutes',      lat:46.1760, lon:-121.4540, elev:4600, aspect:225, phase:[0.18,0.44,0.08,0.30] },
       { name:'Killen Creek — North Ridge',      lat:46.2890, lon:-121.5460, elev:4315, aspect:0,   phase:[0.22,0.45,0.08,0.25] },
     ]
@@ -528,23 +501,23 @@ const MTNS = {
     name: 'Mt Hood', summit: [45.3735, -121.6960, 11249], nws: 'PQR',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:40 },
     ths: [
-      { name:'Timberline — South Side / Hogsback', lat:45.3309, lon:-121.7113, elev:5960, aspect:180, phase:[0.12,0.50,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/oregon/mount-hood-from-timberline' },
-      { name:'Cloud Cap — Cooper Spur / Sunshine', lat:45.4019, lon:-121.6537, elev:5750, aspect:45, phase:[0.18,0.48,0.08,0.26] },
+      { name:'Timberline — South Side / Hogsback', lat:45.3309, lon:-121.7113, elev:5960, miles:8, aspect:180, phase:[0.12,0.50,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/oregon/mount-hood-from-timberline' },
+      { name:'Cloud Cap — Cooper Spur / Sunshine', lat:45.4019, lon:-121.6537, elev:5750, miles:7, aspect:45, phase:[0.18,0.48,0.08,0.26] },
     ]
   },
   olympus: {
     name: 'Mt Olympus', summit: [47.8013, -123.7108, 7980], nws: 'SEW',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
     ths: [
-      { name:'Hoh Rain Forest — Blue Glacier', lat:47.8608, lon:-123.9343, elev:575, aspect:270, phase:[0.45,0.30,0.05,0.20], alltrails:'https://www.alltrails.com/trail/us/washington/hoh-river-trail-to-blue-glacier-trail'  },
+      { name:'Hoh Rain Forest — Blue Glacier', lat:47.8608, lon:-123.9343, elev:575, miles:44, aspect:270, phase:[0.45,0.30,0.05,0.20], alltrails:'https://www.alltrails.com/trail/us/washington/hoh-river-trail-to-blue-glacier-trail'  },
     ]
   },
   mailbox: {
     name: 'Mailbox Peak', summit: [47.462405, -121.63926, 4841], nws: 'SEW',
     thr: { wGo:25, wWa:35, gGo:35, gWa:45, pGo:20, pWa:40 },
     ths: [
-      { name:'Mailbox Peak TH — New Trail', lat:47.466707, lon:-121.673491, elev:900, aspect:315, phase:[0.12,0.50,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mailbox-peak-new-trail--2' },
-      { name:'Mailbox Peak TH — Old Trail', lat:47.466707, lon:-121.673491, elev:900, aspect:315, phase:[0.08,0.56,0.06,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mailbox-peak-old-trail' },
+      { name:'Mailbox Peak TH — New Trail', lat:47.466707, lon:-121.673491, elev:900, miles:9.4, aspect:315, phase:[0.12,0.50,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mailbox-peak-new-trail--2' },
+      { name:'Mailbox Peak TH — Old Trail', lat:47.466707, lon:-121.673491, elev:900, miles:5.4, aspect:315, phase:[0.08,0.56,0.06,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mailbox-peak-old-trail' },
     ]
   },
   shuksan: {
@@ -559,7 +532,7 @@ const MTNS = {
     name: 'Mt Shasta', summit: [41.4092, -122.1944, 14179], nws: 'MFR',
     thr: { wGo:15, wWa:25, gGo:25, gWa:35, pGo:15, pWa:30 },
     ths: [
-      { name:'Bunny Flat — Avalanche Gulch',   lat:41.35373, lon:-122.23359, elev:6950, aspect:225, phase:[0.18,0.45,0.08,0.29], alltrails:'https://www.alltrails.com/trail/us/california/mount-shasta-via-avalanche-gulch-route' },
+      { name:'Bunny Flat — Avalanche Gulch',   lat:41.35373, lon:-122.23359, elev:6950, miles:11, aspect:225, phase:[0.18,0.45,0.08,0.29], alltrails:'https://www.alltrails.com/trail/us/california/mount-shasta-via-avalanche-gulch-route' },
       { name:'Clear Creek TH',                 lat:41.3700,  lon:-122.1540, elev:5760, aspect:180, phase:[0.20,0.44,0.08,0.28] },
       { name:'Brewer Creek — Hotlum-Bolam',    lat:41.4420,  lon:-122.0920, elev:6990, aspect:45,  phase:[0.18,0.45,0.08,0.29] },
     ]
@@ -1053,93 +1026,13 @@ function computeSummary(rows, thr, summitFt, nws){
 function fmtHHMM(timeStr){ return timeStr ? timeStr.slice(11,16) : ''; }
 function atSuffix(timeStr){ return timeStr ? ` · peak ${fmtHHMM(timeStr)}` : ''; }
 
-function verdictWhy(s, thr){
-  const checks = [
-    { val: s.peakWind,  at: s.peakWindAt,  go: thr.wGo, wa: thr.wWa, name: 'sustained wind', unit: ' mph' },
-    { val: s.peakGust,  at: s.peakGustAt,  go: thr.gGo, wa: thr.gWa, name: 'gusts',           unit: ' mph' },
-    { val: s.maxPrecip, at: s.maxPrecipAt, go: thr.pGo, wa: thr.pWa, name: 'precip',          unit: '%' },
-  ].filter(c => c.val !== null && c.val !== undefined);
-
-  const banded = checks.map(c => {
-    const v = c.val;
-    let band;
-    if(v <= c.go) band = 'go';
-    else if(v <= c.wa) band = 'watch';
-    else band = 'caution';
-    return { ...c, band };
-  });
-
-  function phrase(c){
-    const vStr = Math.round(c.val) + c.unit;
-    const atStr = c.at ? ` at ${fmtHHMM(c.at)}` : '';
-    if(c.band === 'caution') return `${c.name} ${vStr} &gt; caution ${c.wa}${c.unit}${atStr}`;
-    if(c.band === 'watch')   return `${c.name} ${vStr} in watch range (${c.go}–${c.wa}${c.unit})${atStr}`;
-    return `${c.name} ${vStr} (go &lt;${c.go}${c.unit})`;
-  }
-
-  if(s.verdict === 'caution'){
-    const drivers = banded.filter(c => c.band === 'caution').map(phrase).join('; ');
-    return `<span class="pill">Caution</span> because: ${drivers}.`;
-  }
-  if(s.verdict === 'watch'){
-    const drivers = banded.filter(c => c.band === 'watch').map(phrase).join('; ');
-    return `<span class="pill">Watch</span> because: ${drivers}.`;
-  }
-  const summary = banded.map(phrase).join('; ');
-  return `<span class="pill">Go</span> — all three pillars within thresholds: ${summary}.`;
-}
-
 function bandRank(band){ return band === 'caution' ? 2 : band === 'watch' ? 1 : 0; }
 function worstBand(bands){
   return bands.reduce((worst, band) => bandRank(band) > bandRank(worst) ? band : worst, 'go');
 }
 
-function rowBand(row, thr){
-  return worstBand([
-    metClass(row.wind_speed_10m, thr.wGo, thr.wWa) || 'go',
-    metClass(row.wind_gusts_10m, thr.gGo, thr.gWa) || 'go',
-    metClass(row.precipitation_probability, thr.pGo, thr.pWa) || 'go',
-  ]);
-}
-
 function countRows(rows, predicate){
   return rows.reduce((n, r) => n + (predicate(r) ? 1 : 0), 0);
-}
-
-function rowRiskScore(row, thr, summitFt){
-  const wind = row.wind_speed_10m !== null ? row.wind_speed_10m / Math.max(1, thr.wWa) : 0;
-  const gust = row.wind_gusts_10m !== null ? row.wind_gusts_10m / Math.max(1, thr.gWa) : 0;
-  const precip = row.precipitation_probability !== null ? row.precipitation_probability / Math.max(1, thr.pWa) : 0;
-  const spread = row.spread !== null ? row.spread / 18 : 0;
-  const flPenalty = row.fl_ft !== null && row.fl_ft > summitFt + 1000 && row.precipitation_probability >= thr.pGo ? 0.28 : 0;
-  const snowPenalty = row.snow_signal ? 0.18 : 0;
-  return (wind * 0.22) + (gust * 0.34) + (precip * 0.22) + (spread * 0.12) + flPenalty + snowPenalty;
-}
-
-function windowEndLabel(timeStr, hardEndStr){
-  if(!timeStr) return '';
-  if(hardEndStr && timeStr >= hardEndStr) return fmtHHMM(hardEndStr);
-  const d = new Date(timeStr);
-  d.setHours(d.getHours() + 1);
-  if(hardEndStr && dtlStr(d) > hardEndStr) return fmtHHMM(hardEndStr);
-  return fmtHHMM(dtlStr(d));
-}
-
-function rangeLabel(rows, hardEndStr){
-  if(!rows.length) return '—';
-  return `${fmtHHMM(rows[0].time)}-${windowEndLabel(rows[rows.length - 1].time, hardEndStr)}`;
-}
-
-function bestWindow(rows, thr, summitFt, preferredHours = 3){
-  if(!rows.length) return null;
-  const span = Math.min(preferredHours, rows.length);
-  let best = null;
-  for(let i = 0; i <= rows.length - span; i++){
-    const chunk = rows.slice(i, i + span);
-    const score = mean(chunk.map(r => rowRiskScore(r, thr, summitFt)));
-    if(best === null || score < best.score) best = { rows: chunk, score };
-  }
-  return best;
 }
 
 function windChillF(tempF, windMph){
@@ -1178,8 +1071,18 @@ function refreezeSignal(rows, nws){
   return { band:'caution', label:'Poor refreeze', body:'Temperatures stay warm enough that wet snow or punchy travel deserves attention.' };
 }
 
+function windChillDeal(wc){
+  if(wc.value === null || wc.value === undefined || isNaN(wc.value)){
+    return { band:'watch', text:'Lowest wind chill could not be calculated from available rows.' };
+  }
+  const val = Math.round(wc.value);
+  const at = wc.at ? ` at ${fmtHHMM(wc.at)}` : '';
+  if(wc.value <= 0)  return { band:'caution', text:`Lowest wind chill: ${val}°F${at}.` };
+  if(wc.value <= 25) return { band:'watch',   text:`Lowest wind chill: ${val}°F${at}.` };
+  return { band:'go', text:`Lowest wind chill: ${val}°F${at}.` };
+}
+
 function buildDecisionData(rows, s, thr, summitFt, nws, startStr){
-  const best = bestWindow(rows, thr, summitFt);
   const windChill = minWindChill(rows);
   const conf = confidenceLabel(s.avgSpread, startStr);
   const refreeze = refreezeSignal(rows, nws);
@@ -1189,121 +1092,19 @@ function buildDecisionData(rows, s, thr, summitFt, nws, startStr){
   const rainOnSnowHours = countRows(rows, r => r.precipitation_probability >= thr.pGo && r.fl_ft !== null && r.fl_ft > summitFt + 500);
   const whiteoutHours = countRows(rows, r => r.precipitation_probability >= thr.pGo && (r.cloud_cover >= 80 || r.snow_signal));
 
-  const hazardCandidates = [
-    { key:'wind', band: metClass(s.peakGust, thr.gGo, thr.gWa) || 'go', label:'Wind', body:`Upper-mountain gusts peak at ${s.peakGust !== null ? Math.round(s.peakGust) + ' mph' : 'unknown'}.` },
-    { key:'precip', band: metClass(s.maxPrecip, thr.pGo, thr.pWa) || 'go', label:'Precip', body:`Precipitation probability peaks at ${s.maxPrecip !== null ? Math.round(s.maxPrecip) + '%' : 'unknown'}.` },
-    { key:'refreeze', band: refreeze.band, label:'Surface', body: refreeze.body },
-    { key:'confidence', band: conf.band, label:'Confidence', body: conf.body },
-  ];
-  const primary = hazardCandidates.sort((a, b) => bandRank(b.band) - bandRank(a.band))[0];
-
   const deals = [];
   if(gustCautionHours) deals.push({ band:'caution', text:`Gusts exceed caution threshold for ${gustCautionHours} hour${gustCautionHours === 1 ? '' : 's'}.` });
-  else if(s.peakGust !== null) deals.push({ band: metClass(s.peakGust, thr.gGo, thr.gWa) || 'go', text:`Peak upper-mountain gust: ${Math.round(s.peakGust)} mph at ${fmtHHMM(s.peakGustAt)}.` });
   if(windCautionHours) deals.push({ band:'caution', text:`Sustained wind exceeds caution threshold for ${windCautionHours} hour${windCautionHours === 1 ? '' : 's'}.` });
   if(rainOnSnowHours) deals.push({ band:'caution', text:`Rain-on-snow setup possible for ${rainOnSnowHours} hour${rainOnSnowHours === 1 ? '' : 's'}: precip with freezing level above summit.` });
   if(whiteoutHours) deals.push({ band:'watch', text:`Whiteout/low-visibility ingredients show up for ${whiteoutHours} hour${whiteoutHours === 1 ? '' : 's'}.` });
   if(precipWatchHours && !rainOnSnowHours) deals.push({ band: metClass(s.maxPrecip, thr.pGo, thr.pWa) || 'watch', text:`Precipitation signal is elevated for ${precipWatchHours} hour${precipWatchHours === 1 ? '' : 's'}.` });
   if(s.flBelowSummit) deals.push({ band:'watch', text:'Freezing level drops below summit during the window.' });
+  deals.push(windChillDeal(windChill));
   deals.push({ band: refreeze.band, text:`${refreeze.label}: ${refreeze.body}` });
   deals.push({ band: conf.band, text:`Forecast confidence: ${conf.label}. ${conf.body}` });
 
-  return { best, windChill, conf, refreeze, primary, deals: deals.slice(0, 5) };
-}
-
-function renderDecisionSurface(rows, s, thr, summitFt, nws, startStr){
-  const data = buildDecisionData(rows, s, thr, summitFt, nws, startStr);
-  const advisor = document.getElementById('advisor-panel');
-  const deals = document.getElementById('dealbreaker-panel');
-  if(!advisor || !deals) return;
-
-  const bestLabel = data.best ? rangeLabel(data.best.rows) : '—';
-  const wcLabel = data.windChill.value !== null ? `${Math.round(data.windChill.value)}°F` : '—';
-  const hazardClass = data.primary.band;
-  const title = data.primary.band === 'go' ? 'Window looks usable' : data.primary.band === 'watch' ? `${data.primary.label} needs attention` : `${data.primary.label} is the critical criterion`;
-  const advisorCopy = `${data.primary.body} Best weather window inside your selected climb period is ${bestLabel}. Use the detailed table below to decide whether that window matches your actual summit and descent timing.`;
-
-  advisor.innerHTML = `
-    <div class="advisor-kicker">Route advisor</div>
-    <div class="advisor-title ${hazardClass}">${title}</div>
-    <div class="advisor-copy">${advisorCopy}</div>
-    <div class="advisor-stats">
-      <div class="advisor-stat"><div class="lbl">Best weather window</div><div class="val">${bestLabel}</div></div>
-      <div class="advisor-stat"><div class="lbl">Lowest wind chill</div><div class="val">${wcLabel}${data.windChill.at ? ' · ' + fmtHHMM(data.windChill.at) : ''}</div></div>
-      <div class="advisor-stat"><div class="lbl">Confidence</div><div class="val">${data.conf.label}</div></div>
-    </div>`;
-
-  deals.innerHTML = `
-    <div class="dealbreaker-kicker">Critical criteria</div>
-    <div class="deal-list">
-      ${data.deals.map(d => `<div class="deal-item ${d.band}"><span class="deal-dot"></span><span>${d.text}</span></div>`).join('')}
-    </div>`;
-}
-
-function phaseSummary(rows, thr, summitFt){
-  const peakGust = mx(rows.map(r => r.wind_gusts_10m));
-  const maxPrecip = mx(rows.map(r => r.precipitation_probability));
-  const minTemp = rows.map(r => r.summit_f).filter(v => v !== null && v !== undefined).reduce((best, v) => best === null || v < best ? v : best, null);
-  const bands = rows.map(r => rowBand(r, thr));
-  const band = worstBand(bands);
-  const flBelow = rows.some(r => r.fl_ft !== null && r.fl_ft < summitFt);
-  const snow = rows.some(r => r.snow_signal);
-  const notes = [
-    peakGust !== null ? `G ${Math.round(peakGust)} mph` : null,
-    maxPrecip !== null ? `${Math.round(maxPrecip)}% precip` : null,
-    minTemp !== null ? `${Math.round(minTemp)}°F summit` : null,
-    flBelow ? 'freezing level below summit' : null,
-    snow ? 'snow signal' : null,
-  ].filter(Boolean).join(' · ');
-  return { band, notes: notes || 'No standout hazard in this phase.' };
-}
-
-function phaseProfile(th){
-  const defaults = [0.22, 0.42, 0.08, 0.28];
-  const profile = Array.isArray(th?.phase) && th.phase.length === 4 ? th.phase : defaults;
-  const total = profile.reduce((a,b) => a + b, 0) || 1;
-  return profile.map(v => v / total);
-}
-
-function phaseProfileLabel(profile){
-  const names = ['approach', 'climb', 'summit', 'descent'];
-  return profile.map((v, i) => `${Math.round(v * 100)}% ${names[i]}`).join(' / ');
-}
-
-function splitPhases(rows, th){
-  const names = ['Approach', 'Climb', 'Summit block', 'Descent'];
-  const profile = phaseProfile(th);
-  let cursor = 0;
-  return names.map((name, idx) => {
-    const remainingRows = rows.length - cursor;
-    const remainingPhases = names.length - idx;
-    if(remainingRows <= 0) return { name, rows: [] };
-    const count = idx === names.length - 1
-      ? remainingRows
-      : Math.max(1, Math.min(remainingRows - remainingPhases + 1, Math.round(rows.length * profile[idx])));
-    const phaseRows = rows.slice(cursor, cursor + count);
-    cursor += count;
-    return { name, rows: phaseRows };
-  }).filter(p => p.rows.length);
-}
-
-function renderPhaseTimeline(rows, thr, summitFt, endStr, th){
-  const el = document.getElementById('phase-timeline');
-  if(!el) return;
-  if(!rows.length){
-    el.innerHTML = '<div class="phase-empty">No phase timeline available for this window.</div>';
-    return;
-  }
-  const profile = phaseProfile(th);
-  const phases = splitPhases(rows, th).map(p => ({ ...p, summary: phaseSummary(p.rows, thr, summitFt) }));
-  el.innerHTML = `<div class="phase-note">Route-weighted planning split for ${th.name}: ${phaseProfileLabel(profile)}. Adjust the selected window if your party's actual pacing differs.</div><div class="phase-track">
-    ${phases.map(p => `
-      <div class="phase ${p.summary.band}">
-        <div class="name">${p.name}</div>
-        <div class="time">${rangeLabel(p.rows, endStr)}</div>
-        <div class="risk">${p.summary.notes}</div>
-      </div>`).join('')}
-  </div>`;
+  deals.sort((a, b) => bandRank(b.band) - bandRank(a.band));
+  return { deals: deals.slice(0, 6) };
 }
 
 function circularMeanDeg(values){
@@ -1332,21 +1133,6 @@ function buildSignal(label, value, band, body){
   return { label, value, band: band || 'go', body };
 }
 
-function visibilitySignal(rows, thr){
-  const poorHours = countRows(rows, r =>
-    (r.precipitation_probability !== null && r.precipitation_probability >= thr.pGo && r.cloud_cover !== null && r.cloud_cover >= 80) ||
-    r.snow_signal
-  );
-  const maxCloud = mx(rows.map(r => r.cloud_cover));
-  if(poorHours >= 3){
-    return buildSignal('Visibility', 'Whiteout risk', 'caution', `${poorHours} hours combine precip/snow signal with heavy cloud cover.`);
-  }
-  if(poorHours >= 1){
-    return buildSignal('Visibility', 'Limited windows', 'watch', `${poorHours} hour${poorHours === 1 ? '' : 's'} may have low-visibility ingredients.`);
-  }
-  return buildSignal('Visibility', 'Mostly workable', 'go', `Peak cloud cover ${maxCloud !== null ? Math.round(maxCloud) + '%' : 'unknown'} in this window.`);
-}
-
 function rainOnSnowSignal(rows, thr, summitFt){
   const hours = countRows(rows, r => r.precipitation_probability >= thr.pGo && r.fl_ft !== null && r.fl_ft > summitFt + 500);
   if(hours >= 2) return buildSignal('Rain on snow', `${hours} hr setup`, 'caution', 'Precip overlaps a freezing level above the summit grid point.');
@@ -1371,14 +1157,6 @@ function wetSnowSignal(rows, startStr, endStr, lat, lon, summitFt){
   return buildSignal('Wet snow', 'Low signal', 'go', 'Selected window stays mostly cold or dark by this simple screen.');
 }
 
-function coldStressSignal(rows){
-  const wc = minWindChill(rows);
-  if(wc.value === null) return buildSignal('Cold stress', 'Unknown', 'watch', 'Wind chill could not be calculated from available rows.');
-  if(wc.value <= 0) return buildSignal('Cold stress', `${Math.round(wc.value)}°F`, 'caution', `Lowest wind chill around ${fmtHHMM(wc.at)}; manage exposed skin and slow transitions.`);
-  if(wc.value <= 15) return buildSignal('Cold stress', `${Math.round(wc.value)}°F`, 'watch', `Lowest wind chill around ${fmtHHMM(wc.at)}; cold stops and summit delays matter.`);
-  return buildSignal('Cold stress', `${Math.round(wc.value)}°F`, 'go', `Lowest wind chill around ${fmtHHMM(wc.at)}.`);
-}
-
 function windExposureSignal(rows, th, thr){
   const avgDir = circularMeanDeg(rows.map(r => r.wind_direction_10m));
   const peakGust = mx(rows.map(r => r.wind_gusts_10m));
@@ -1400,24 +1178,42 @@ function windExposureSignal(rows, th, thr){
   return buildSignal('Wind exposure', value, band, `${body} Peak gust ${peakGust !== null ? Math.round(peakGust) + ' mph' : 'unknown'}.`);
 }
 
+const SIGNAL_META = {
+  'Wet snow': {
+    info: 'Daytime warmth and solar exposure soften snow surfaces, can punch through crusts, and slow travel — especially on sun-facing aspects in spring. Flagged when daylight hours overlap warm summit temperatures or a freezing level above the summit.',
+    link: 'https://en.wikipedia.org/wiki/Avalanche'
+  },
+  'Rain on snow': {
+    info: 'Liquid rain falling on an existing snowpack rapidly weakens bonds, percolates to lower layers, and can trigger wet slides. Flagged when precipitation overlaps a freezing level above the summit grid point.',
+    link: 'https://en.wikipedia.org/wiki/Rain-on-snow_event'
+  },
+  'Wind exposure': {
+    info: 'Compares the route aspect against the prevailing wind direction in the window. Crosswind sections see transport without heavy loading; lee-side sections collect wind-loaded snow and can build slabs.',
+    link: 'https://en.wikipedia.org/wiki/Wind_slab'
+  }
+};
+
 function renderSignalGrid(rows, thr, summitFt, nws, startStr, endStr, mtn, th){
   const el = document.getElementById('signal-grid');
   if(!el) return;
-  const refreeze = refreezeSignal(rows, nws);
   const signals = [
-    buildSignal('Refreeze', refreeze.label, refreeze.band, refreeze.body),
     wetSnowSignal(rows, startStr, endStr, mtn.summit[0], mtn.summit[1], summitFt),
     rainOnSnowSignal(rows, thr, summitFt),
-    visibilitySignal(rows, thr),
-    coldStressSignal(rows),
     windExposureSignal(rows, th, thr),
   ];
-  el.innerHTML = signals.map(sig => `
-    <div class="signal-card ${sig.band}">
+  el.innerHTML = signals.map(sig => {
+    const meta = SIGNAL_META[sig.label] || {};
+    const infoAttr = meta.info ? ` data-info="${meta.info.replace(/"/g, '&quot;')}" title="${meta.info.replace(/"/g, '&quot;')}"` : '';
+    const valHtml = meta.link
+      ? `<a href="${meta.link}" target="_blank" rel="noreferrer">${sig.value}</a>`
+      : sig.value;
+    return `
+    <div class="signal-card ${sig.band}"${infoAttr}>
       <div class="lbl">${sig.label}</div>
-      <div class="val">${sig.value}</div>
+      <div class="val">${valHtml}</div>
       <div class="sub">${sig.body}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function escapeHtml(text){
@@ -1496,15 +1292,6 @@ function snowpackContextCard(mtn){
   );
 }
 
-function observationsContextCard(){
-  return externalCard(
-    'Current observations',
-    'Nearby stations below',
-    'watch',
-    'Prefer high-elevation, recent, wind-exposed stations. Low trailhead stations can miss summit wind and cooling.'
-  );
-}
-
 function renderExternalContextBase(mtnKey, mtn){
   const el = document.getElementById('external-context');
   if(!el) return;
@@ -1513,7 +1300,6 @@ function renderExternalContextBase(mtnKey, mtn){
     externalCard('NWS active alerts', 'Checking...', 'watch', 'Fetching official active alerts for the summit point.'),
     avalancheContextCard(extras),
     snowpackContextCard(mtn),
-    observationsContextCard(),
   ].join('');
 }
 
@@ -1608,31 +1394,60 @@ function renderClimbFrame(startStr, endStr, lat, lon){
     `End <strong>${endClock}</strong> · ${endRel}`;
 }
 
+function buildHourSpark(rows, thr){
+  if(!rows || !rows.length) return '';
+  const cells = rows.map(r => {
+    const pBand = metClass(r.precipitation_probability, thr.pGo, thr.pWa) || 'go';
+    const wBand = metClass(r.wind_speed_10m, thr.wGo, thr.wWa) || 'go';
+    const gBand = metClass(r.wind_gusts_10m, thr.gGo, thr.gWa) || 'go';
+    const cellBand = worstBand([pBand, wBand, gBand]);
+    const drivers = [];
+    if(cellBand !== 'go'){
+      if(pBand === cellBand) drivers.push('P');
+      if(wBand === cellBand) drivers.push('W');
+      if(gBand === cellBand) drivers.push('G');
+    }
+    const label = drivers.join('+');
+    const hour = fmtHHMM(r.time);
+    const p = r.precipitation_probability !== null && r.precipitation_probability !== undefined ? Math.round(r.precipitation_probability) + '%' : '—';
+    const w = r.wind_speed_10m !== null && r.wind_speed_10m !== undefined ? Math.round(r.wind_speed_10m) + ' mph' : '—';
+    const g = r.wind_gusts_10m !== null && r.wind_gusts_10m !== undefined ? Math.round(r.wind_gusts_10m) + ' mph' : '—';
+    const tt = `${hour} · P ${p} · W ${w} · G ${g}`;
+    return `<div class="spark-cell ${cellBand}" title="${tt}">${label}</div>`;
+  }).join('');
+  return `<div class="spark">`+
+    `<div class="spark-title">By the hour</div>`+
+    `<div class="spark-row">${cells}</div>`+
+    `<div class="spark-axis"><span>${fmtHHMM(rows[0].time)}</span><span>${fmtHHMM(rows[rows.length - 1].time)}</span></div>`+
+    `<div class="spark-legend">P = precip · W = wind · G = gust · letters show which metric pushed the cell into watch/caution</div>`+
+    `</div>`;
+}
+
 function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws){
   const verdictLabel = { go:'Go', watch:'Watch', caution:'Caution' };
   const summitFt = mtn.summit[2];
 
+  const elevGain = summitFt - th.elev;
+  const milesStr = (typeof th.miles === 'number' && th.miles > 0) ? ` · ${th.miles} mi RT` : '';
   document.getElementById('crumb').innerHTML =
-    `<strong>${mtn.name}</strong><span class="sep">›</span>${th.name} (${th.elev.toLocaleString()} ft TH)`+
-    `<span class="sep">›</span>${startStr.replace('T',' ')} – ${endStr.slice(11,16)} PDT`+
-    `<span class="sep">·</span>Summit ${summitFt.toLocaleString()} ft`;
+    `<strong>${mtn.name}</strong><span class="sep">›</span>${th.name}`+
+    `<span class="sep">·</span>${th.elev.toLocaleString()} ft → ${summitFt.toLocaleString()} ft (${elevGain.toLocaleString()} ft gain${milesStr})`+
+    `<span class="sep">·</span>${startStr.replace('T',' ')} – ${endStr.slice(11,16)} PDT`;
 
   renderClimbFrame(startStr, endStr, mtn.summit[0], mtn.summit[1]);
 
   const vEl = document.getElementById('verdict');
   vEl.className = `verdict v-${s.verdict}`;
 
-  const details = [
-    s.avgSummitTemp !== null ? `summit avg ${Math.round(s.avgSummitTemp)}°F` : null,
-    s.peakWind  !== null ? `wind peaks ${Math.round(s.peakWind)} mph` : null,
-    s.peakGust  !== null ? `gusts to ${Math.round(s.peakGust)}` : null,
-    s.maxFL     !== null ? `FL max ${Math.round(s.maxFL).toLocaleString()} ft` : null,
-    s.maxPrecip !== null ? `precip ${Math.round(s.maxPrecip)}%` : null,
-  ].filter(Boolean).join(' · ');
-
-	  const why = verdictWhy(s, mtn.thr);
-	  vEl.innerHTML = `<div class="v-word">${verdictLabel[s.verdict]}</div>`+
-	    `<div class="v-right"><div class="v-detail">${details}</div><div class="v-why">${why}</div></div>`;
+  const thr = mtn.thr;
+  const decision = buildDecisionData(rows, s, thr, summitFt, nws, startStr);
+  const dealsHtml = decision.deals.map(d => `<div class="deal-item ${d.band}"><span class="deal-dot"></span><span>${d.text}</span></div>`).join('');
+  const sparkHtml = buildHourSpark(rows, thr);
+  vEl.innerHTML =
+    `<div class="v-kicker">Guidance &amp; data</div>`+
+    `<div class="v-word">${verdictLabel[s.verdict]}</div>`+
+    `<div class="deal-list">${dealsHtml}</div>`+
+    sparkHtml;
 
   const inv = document.getElementById('inv-alert');
   if(s.anyInv){
@@ -1641,9 +1456,6 @@ function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws){
       `Open-Meteo freezing-level guidance suggests warm air aloft; compare against the NWS summit temperature and recent observations before committing.`;
 	  } else { inv.hidden = true; }
 
-	  const thr = mtn.thr;
-	  renderDecisionSurface(rows, s, thr, summitFt, nws, startStr);
-	  renderPhaseTimeline(rows, thr, summitFt, endStr, th);
 	  renderSignalGrid(rows, thr, summitFt, nws, startStr, endStr, mtn, th);
 	  renderExternalContext(mtnKey, mtn);
 
