@@ -242,6 +242,17 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 .pretrend-empty { padding: 12px 14px; font-family: var(--mono); font-size: 11px; color: var(--faint); }
 
 /* hourly table */
+.hourly-details { border: 1px solid var(--bdr); border-radius: 8px; margin: 18px 0 18px; background: var(--card); overflow: hidden; }
+.hourly-details summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: var(--faint); font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; user-select: none; }
+.hourly-details summary::-webkit-details-marker { display: none; }
+.hourly-details summary::before { content: '+'; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 1px solid var(--bdr2); border-radius: 50%; color: var(--dim); font-size: 13px; line-height: 1; letter-spacing: 0; }
+.hourly-details[open] summary::before { content: '-'; }
+.hourly-details summary::after { content:''; flex: 1; height: 1px; background: var(--bdr); }
+.hourly-details-hint { margin-left: auto; color: var(--faint); font-size: 9px; letter-spacing: 0.12em; }
+.hourly-details[open] .hourly-details-hint::before { content: 'click to collapse'; }
+.hourly-details:not([open]) .hourly-details-hint::before { content: 'click to expand'; }
+.hourly-details .source-note { margin: 0 14px 8px; }
+.hourly-details .tbl-wrap { border-left: none; border-right: none; border-bottom: none; border-radius: 0; }
 .tbl-wrap { overflow-x: auto; border: 1px solid var(--bdr); border-radius: 8px; }
 table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
 thead tr { background: var(--surf); }
@@ -399,40 +410,33 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
   </div>
   <div class="source-note" id="pretrend-source"></div>
   <div class="pretrend" id="pretrend"></div>
-	  <div class="signal-grid" id="signal-grid"></div>
-  <div class="context-grid" id="external-context"></div>
-  <div class="spread" id="spread"></div>
 
-  <div class="sec-lbl">Detailed hourly table · climb window</div>
-  <div class="source-note" id="table-source"></div>
-  <div class="tbl-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th class="r">Summit temp</th>
-          <th class="r">Trailhead temp</th>
-          <th class="r">Wind</th>
-          <th class="r">Gust</th>
-          <th>Dir</th>
-          <th class="r">Frz level</th>
-          <th class="r">Precip</th>
-          <th class="r">Sky</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody id="tbl-body"></tbody>
-    </table>
-  </div>
-
-  <div class="sec-lbl">Recent precipitation · summit</div>
-  <div class="astro-grid" id="precip-history"></div>
-
-  <div class="sec-lbl">Current observations · stations near mountain</div>
-  <div class="station-grid" id="station-grid"></div>
+  <details class="hourly-details">
+    <summary>Hourly details · climb window <span class="hourly-details-hint" aria-hidden="true"></span></summary>
+    <div class="source-note" id="table-source"></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th class="r">Summit temp</th>
+            <th class="r">Trailhead temp</th>
+            <th class="r">Wind</th>
+            <th class="r">Gust</th>
+            <th>Dir</th>
+            <th class="r">Frz level</th>
+            <th class="r">Precip</th>
+            <th class="r">Sky</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+    </div>
+  </details>
 
   <div class="sec-lbl">Charts — model comparison · climb window highlighted</div>
-  <div class="source-note" id="chart-source">Sources: wind, gust, freezing level, precipitation, and cloud data from Open-Meteo models. HRRR and NAM are shown where their shorter forecast horizons have data.</div>
+  <div class="source-note" id="chart-source">Sources: wind, gust, freezing level, precipitation, snowfall, and cloud data from Open-Meteo models. Charts show two days before the climb start through two days after the climb end; HRRR and NAM appear only where their shorter forecast horizons have data.</div>
   <div class="chart-card">
     <h3>Wind speed</h3>
     <div class="chart-sub">mph · sustained · dashed line = go threshold</div>
@@ -453,6 +457,21 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
     <div class="chart-sub">% · any precipitation</div>
     <div class="chart-wrap"><canvas id="chart-precip"></canvas></div>
   </div>
+  <div class="chart-card">
+    <h3>Snowfall</h3>
+    <div class="chart-sub">in/hr · model snowfall amount</div>
+    <div class="chart-wrap"><canvas id="chart-snowfall"></canvas></div>
+  </div>
+
+	  <div class="signal-grid" id="signal-grid"></div>
+  <div class="context-grid" id="external-context"></div>
+  <div class="spread" id="spread"></div>
+
+  <div class="sec-lbl">Recent precipitation · summit</div>
+  <div class="astro-grid" id="precip-history"></div>
+
+  <div class="sec-lbl">Current observations · stations near mountain</div>
+  <div class="station-grid" id="station-grid"></div>
 
   <div class="sec-lbl">Model guidance for this window</div>
   <div class="guide-grid" id="model-guidance">
@@ -782,6 +801,12 @@ function fmtTime(d){
   return d.toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Los_Angeles'});
 }
 
+function chartValue(v, opts={}){
+  if(v === null || v === undefined || isNaN(v)) return '—';
+  const decimals = opts.decimals ?? 0;
+  return Number(v).toFixed(decimals).replace(/\.?0+$/,'') + (opts.unit || '');
+}
+
 function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={}){
   if(!_apiData) return;
   const ctx = document.getElementById(canvasId);
@@ -874,16 +899,17 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
           bodyFont:{family:'JetBrains Mono',size:11},
           callbacks:{
             title:items=>fmtTime(new Date(items[0].parsed.x)),
-            label:item=>`${item.dataset.label.padEnd(6)} ${Math.round(item.parsed.y)}${opts.unit||''}`,
+            label:item=>`${item.dataset.label.padEnd(6)} ${chartValue(item.parsed.y, opts)}`,
           }
         }
       },
       scales:{
         x:{type:'time',time:{unit:'day',displayFormats:{day:'EEE d'}},
-           min: new Date(climbStart.getTime() - 24*3600*1000),
+           min: new Date(climbStart.getTime() - 48*3600*1000),
+           max: new Date(climbEnd.getTime() + 48*3600*1000),
            ticks:{color:theme.faint,font:{family:'JetBrains Mono',size:10}},
            grid:{color:theme.grid},border:{color:theme.bdr}},
-        y:{ticks:{color:theme.faint,font:{family:'JetBrains Mono',size:10},callback:v=>Math.round(v)+(opts.unit||'')},
+        y:{ticks:{color:theme.faint,font:{family:'JetBrains Mono',size:10},callback:v=>chartValue(v, opts)},
            grid:{color:theme.grid},border:{color:theme.bdr},...(opts.scaleOptions||{})},
       }
     },
@@ -898,6 +924,7 @@ function renderCharts(startStr, endStr, summitFt, thr){
   renderChart('chart-gust',     'wind_gusts_10m',         cStart, cEnd, summitFt, {unit:' mph', refLine:{value:thr.gGo, label:`Go (${thr.gGo} mph)`, color:'rgba(210,153,34,0.55)'}});
   renderChart('chart-freezing', 'freezing_level_height',  cStart, cEnd, summitFt, {unit:' ft', refLine:{value:summitFt, label:`Summit ${summitFt.toLocaleString()} ft`, color:'rgba(248,81,73,0.55)'}});
   renderChart('chart-precip',   'precipitation_probability', cStart, cEnd, summitFt, {unit:'%', scaleOptions:{min:0,max:100}});
+  renderChart('chart-snowfall', 'snowfall',               cStart, cEnd, summitFt, {unit:' in', decimals:2, scaleOptions:{min:0}});
 }
 
 async function fetchNwsAfd(office){
@@ -938,7 +965,7 @@ function renderAfd(result, office){
 
 
 const MODEL_NAMES = { gfs_seamless:'GFS', ecmwf_ifs025:'ECMWF', icon_seamless:'ICON', gem_seamless:'GEM', ncep_hrrr_conus:'HRRR', ncep_nam_conus:'NAM' };
-const VARS = ['temperature_2m','wind_speed_10m','wind_gusts_10m','wind_direction_10m','freezing_level_height','precipitation_probability','precipitation','cloud_cover'];
+const VARS = ['temperature_2m','wind_speed_10m','wind_gusts_10m','wind_direction_10m','freezing_level_height','precipitation_probability','precipitation','snowfall','cloud_cover'];
 
 function pad2(n){ return String(n).padStart(2,'0'); }
 function dtlStr(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
