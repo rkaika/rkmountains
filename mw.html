@@ -2416,8 +2416,8 @@ function renderPrecipHistory(api, point = {label:'Summit', elev:null}, startStr 
 
   const snow = computeSnowAccumulation(api, startStr);
   if(snow){
-    cards.push(buildAstroCard('Snow · last 24 h', fmtSnow(snow.snow24), 'model mean · ending climb start'));
-    cards.push(buildAstroCard('Snow · last 48 h', fmtSnow(snow.snow48), 'model mean · ending climb start'));
+    cards.push(buildAstroCard('Snow · last 24 h', fmtSnow(snow.snow24), 'model mean · 24 h before start'));
+    cards.push(buildAstroCard('Snow · last 48 h', fmtSnow(snow.snow48), 'model mean · 48 h before start'));
     cards.push(buildAstroCard('Snow by climb day', fmtSnow(snow.snow72), 'model mean · 72 h before start'));
   }
 
