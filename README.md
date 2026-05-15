@@ -19,7 +19,7 @@ The page helps evaluate a selected mountain, trailhead/route, and climb window. 
 - **Route Weather Timeline**: a Mountain-Forecast-style timeline from 48 hours before the selected start through 12 hours after the selected end, sampled every 3 hours. It includes sky/precip signal, wind/gust/direction, precipitation probability and amount, model-grid temperature, wind chill, freezing level, and cloud cover. A selector switches the timeline between summit, route mid-point, and trailhead.
 - **Hourly details**: collapsed by default; expands to hour-by-hour summit and trailhead temperatures alongside wind, gust, direction, freezing level, precipitation probability, sky cover, and notes.
 - **Model charts**: Open-Meteo model comparison charts for wind, gusts, freezing level, precipitation probability, and snowfall. Charts show two days before the climb start through two days after the climb end, with the selected climb window highlighted.
-- **Signal tiles**: Wet snow, Rain on snow, and Wind exposure cards with hover explanations and external reference links on the headline value.
+- **Signal tiles**: Wet snow, Rain on snow, and Wind exposure cards with hover explanations and Avalanche.org reference links on the headline value.
 - **External context**: NWS active alerts, regional avalanche forecast, and SNOTEL/NRCS snowpack pointers.
 - **Recent precipitation**: recent model-mean precipitation totals at the summit. Climb-day civil light, sunrise/sunset, and moon illumination are shown compactly in the Climbing Window Guidance bullets.
 - **Current observations**: nearby station observations, including elevation-aware notes where available.

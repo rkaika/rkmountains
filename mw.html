@@ -1639,16 +1639,21 @@ function windExposureSignal(rows, th, thr){
 
 const SIGNAL_META = {
   'Wet snow': {
-    info: 'Daytime warmth and solar exposure soften snow surfaces, can punch through crusts, and slow travel — especially on sun-facing aspects in spring. Flagged when daylight hours overlap warm summit temperatures or a freezing level above the summit.',
-    link: 'https://en.wikipedia.org/wiki/Avalanche'
+    info: 'Daytime warmth and solar exposure soften snow surfaces, can punch through crusts, and slow travel - especially on sun-facing aspects in spring. Look for rollerballs, pinwheels, wet loose activity, and sloppy boot penetration.',
+    link: 'https://avalanche.org/avalanche-encyclopedia/avalanche/avalanche-type/wet-avalanche/'
   },
   'Rain on snow': {
-    info: 'Liquid rain falling on an existing snowpack rapidly weakens bonds, percolates to lower layers, and can trigger wet slides. Flagged when precipitation overlaps a freezing level above the summit grid point.',
-    link: 'https://en.wikipedia.org/wiki/Rain-on-snow_event'
+    info: 'Rain adds load and liquid water to the snowpack, often weakening surface snow or deeper layers quickly. Look for rain reaching snow surfaces, rapid warming, wet loose activity, rollerballs, and saturated punchy snow.',
+    link: 'https://avalanche.org/avalanche-encyclopedia/snowpack/snowpack-observations/signs-of-instability-red-flags/rapid-warming/rain-on-snow/'
   },
   'Wind exposure': {
-    info: 'Compares the route aspect against the prevailing wind direction in the window. Crosswind sections see transport without heavy loading; lee-side sections collect wind-loaded snow and can build slabs.',
-    link: 'https://en.wikipedia.org/wiki/Wind_slab'
+    info: 'Compares route aspect with prevailing wind. Windward terrain is often scoured; cross-loaded gullies and lee slopes can collect slabby drifts. Look for blowing snow, pillows, cornices, hollow snow, cracks, and changing snow depth.',
+    link: 'https://avalanche.org/avalanche-encyclopedia/terrain/slope-characteristics/wind-exposure/',
+    links: {
+      'Windward': 'https://avalanche.org/avalanche-encyclopedia/terrain/slope-characteristics/wind-exposure/windward/',
+      'Crosswind': 'https://avalanche.org/avalanche-encyclopedia/terrain/slope-characteristics/wind-exposure/cross-loaded/',
+      'Lee side': 'https://avalanche.org/avalanche-encyclopedia/terrain/slope-characteristics/wind-exposure/leeward/'
+    }
   }
 };
 
@@ -1663,8 +1668,9 @@ function renderSignalGrid(rows, thr, summitFt, nws, startStr, endStr, mtn, th){
   el.innerHTML = signals.map(sig => {
     const meta = SIGNAL_META[sig.label] || {};
     const infoAttr = meta.info ? ` data-info="${meta.info.replace(/"/g, '&quot;')}" title="${meta.info.replace(/"/g, '&quot;')}"` : '';
-    const valHtml = meta.link
-      ? `<a href="${meta.link}" target="_blank" rel="noreferrer">${sig.value}</a>`
+    const link = (meta.links && meta.links[sig.value]) || meta.link;
+    const valHtml = link
+      ? `<a href="${link}" target="_blank" rel="noreferrer">${sig.value}</a>`
       : sig.value;
     return `
     <div class="signal-card ${sig.band}"${infoAttr}>
