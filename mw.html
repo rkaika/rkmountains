@@ -342,6 +342,13 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 .guide-foot { font-family: var(--mono); font-size: 11px; color: var(--faint); line-height: 1.7; margin-top: 6px; margin-bottom: 4px; }
 
 /* ── AFD ── */
+.local-guidance { background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 14px 16px 16px; margin-bottom: 16px; }
+.local-guidance-hdr { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.local-guidance-name { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--txt); font-weight: 400; }
+.local-guidance-link { font-family: var(--mono); font-size: 11px; color: var(--blue); text-decoration: none; border-bottom: 1px dotted currentColor; }
+.local-guidance-link:hover { border-bottom-style: solid; }
+.local-guidance-frame { width: 100%; height: 600px; border: 1px solid var(--bdr); border-radius: 6px; background: var(--bg); }
+.local-guidance-note { font-family: var(--mono); font-size: 10px; color: var(--faint); margin-top: 8px; line-height: 1.5; }
 .afd-card { background: var(--card); border: 1px solid var(--bdr); padding: 20px 24px; font-family: var(--mono); font-size: 12px; line-height: 1.75; white-space: pre-wrap; color: var(--dim); max-height: 440px; overflow-y: auto; border-radius: 8px; margin-bottom: 16px; }
 .afd-card::-webkit-scrollbar { width: 6px; }
 .afd-card::-webkit-scrollbar-track { background: var(--bg); }
@@ -516,6 +523,18 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
     </div>
   </div>
   <p class="guide-foot">Coordinates are precomputed route references, not official navigation data. NWS grid terrain is smoothed, so summit ridges can be colder, windier, or cloudier than the forecast grid cell.</p>
+
+  <div id="local-guidance-section" hidden>
+    <div class="sec-lbl">Local mountain guidance</div>
+    <div class="local-guidance">
+      <div class="local-guidance-hdr">
+        <span class="local-guidance-name" id="local-guidance-name"></span>
+        <a class="local-guidance-link" id="local-guidance-link" target="_blank" rel="noopener">Open in new tab ↗</a>
+      </div>
+      <iframe class="local-guidance-frame" id="local-guidance-frame" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" loading="lazy" referrerpolicy="no-referrer"></iframe>
+      <div class="local-guidance-note">If the embed appears blank, the source site is blocking iframes — use the link above to open it directly.</div>
+    </div>
+  </div>
 
   <div class="sec-lbl">NWS area forecast discussion</div>
   <div class="afd-card" id="afd-card">
@@ -741,6 +760,10 @@ const MTN_LINKS = {
   }
 };
 
+const LOCAL_GUIDANCE = {
+  stHelens: { name: 'MSH Institute · Current Conditions', url: 'https://www.mshinstitute.org/current-conditions' },
+};
+
 const MODELS = ['gfs_seamless','ecmwf_ifs025','icon_seamless','gem_seamless','ncep_hrrr_conus','ncep_nam_conus'];
 const MODEL_COLORS = {
   gfs_seamless:'#79c0ff', ecmwf_ifs025:'#ffa657',
@@ -925,6 +948,23 @@ function renderCharts(startStr, endStr, summitFt, thr){
   renderChart('chart-freezing', 'freezing_level_height',  cStart, cEnd, summitFt, {unit:' ft', refLine:{value:summitFt, label:`Summit ${summitFt.toLocaleString()} ft`, color:'rgba(248,81,73,0.55)'}});
   renderChart('chart-precip',   'precipitation_probability', cStart, cEnd, summitFt, {unit:'%', scaleOptions:{min:0,max:100}});
   renderChart('chart-snowfall', 'snowfall',               cStart, cEnd, summitFt, {unit:' in', decimals:2, scaleOptions:{min:0}});
+}
+
+function renderLocalGuidance(mtnKey){
+  const section = document.getElementById('local-guidance-section');
+  if(!section) return;
+  const cfg = LOCAL_GUIDANCE[mtnKey];
+  const frame = document.getElementById('local-guidance-frame');
+  if(!cfg){
+    section.hidden = true;
+    if(frame) frame.src = 'about:blank';
+    return;
+  }
+  section.hidden = false;
+  document.getElementById('local-guidance-name').textContent = cfg.name;
+  const link = document.getElementById('local-guidance-link');
+  link.href = cfg.url;
+  if(frame.src !== cfg.url) frame.src = cfg.url;
 }
 
 async function fetchNwsAfd(office){
@@ -2591,6 +2631,7 @@ async function loadForecast(){
     renderStations(null, mtn.summit[2], 'loading');
     fetchNearestStations(mtn.summit[0], mtn.summit[1], mtn.summit[2])
       .then(stations => renderStations(stations, mtn.summit[2]));
+    renderLocalGuidance(mtnKey);
 
     document.getElementById('afd-card').innerHTML = '<div class="afd-hdr">Loading discussion…</div>';
     fetchNwsAfd(mtn.nws).then(afd => renderAfd(afd, mtn.nws));
