@@ -450,99 +450,99 @@ const MTNS = {
     name: 'Mt Baker', summit: [48.7767, -121.8144, 10781], nws: 'SEW',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:40 },
     ths: [
-      { name:'Heliotrope Ridge — Coleman Glacier', lat:48.80218056, lon:-121.894725, elev:3700, miles:9, aspect:330, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/coleman-glacier-via-heliotrope-ridge-trail' },
-      { name:'Shannon Creek — Easton Glacier',     lat:48.7067849,  lon:-121.8129229, elev:3350, aspect:180, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-baker-via-easton-glacier' },
-      { name:'Boulder Ridge',                      lat:48.7870,     lon:-121.7470, elev:4200, aspect:90,  phase:[0.18,0.46,0.10,0.26] },
+      { slug:'coleman', name:'Heliotrope Ridge — Coleman Glacier', lat:48.80218056, lon:-121.894725, elev:3700, miles:9, aspect:330, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/coleman-glacier-via-heliotrope-ridge-trail' },
+      { slug:'easton', name:'Shannon Creek — Easton Glacier',     lat:48.7067849,  lon:-121.8129229, elev:3350, aspect:180, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-baker-via-easton-glacier' },
+      { slug:'boulder', name:'Boulder Ridge',                      lat:48.7870,     lon:-121.7470, elev:4200, aspect:90,  phase:[0.18,0.46,0.10,0.26] },
     ]
   },
   rainier: {
     name: 'Mt Rainier', summit: [46.8529, -121.7604, 14411], nws: 'SEW',
     thr: { wGo:15, wWa:25, gGo:25, gWa:35, pGo:15, pWa:30 },
     ths: [
-      { name:'Paradise — Muir Snowfield / DC route',   lat:46.7860, lon:-121.7350, elev:5400, miles:16, aspect:180, phase:[0.25,0.40,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-rainier-standard-summit-route' },
-      { name:'White River — Emmons Glacier',           lat:46.9020, lon:-121.6427, elev:4250, miles:17, aspect:45,  phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-rainier-via-emmons-glacier' },
-      { name:'Mowich Lake — Tahoma Cleaver',           lat:46.9335, lon:-121.8638, elev:4929, aspect:270, phase:[0.25,0.42,0.08,0.25] },
-      { name:'Carbon River — Willis Wall / Liberty',   lat:46.9940, lon:-121.9160, elev:1800, aspect:0,   phase:[0.25,0.45,0.08,0.22] },
+      { slug:'dc', name:'Paradise — Muir Snowfield / DC route',   lat:46.7860, lon:-121.7350, elev:5400, miles:16, aspect:180, phase:[0.25,0.40,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-rainier-standard-summit-route' },
+      { slug:'emmons', name:'White River — Emmons Glacier',           lat:46.9020, lon:-121.6427, elev:4250, miles:17, aspect:45,  phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/mount-rainier-via-emmons-glacier' },
+      { slug:'tahoma', name:'Mowich Lake — Tahoma Cleaver',           lat:46.9335, lon:-121.8638, elev:4929, aspect:270, phase:[0.25,0.42,0.08,0.25] },
+      { slug:'liberty', name:'Carbon River — Willis Wall / Liberty',   lat:46.9940, lon:-121.9160, elev:1800, aspect:0,   phase:[0.25,0.45,0.08,0.22] },
     ]
   },
   campMuir: {
     name: 'Camp Muir', summit: [46.8356, -121.7328, 10188], nws: 'SEW',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:40 },
     ths: [
-      { name:'Paradise — Muir Snowfield', lat:46.7860, lon:-121.7350, elev:5400, miles:9, aspect:180, phase:[0.14,0.56,0.06,0.24], alltrails:'https://www.alltrails.com/trail/us/washington/camp-muir-route-via-skyline-trail' },
+      { slug:'paradise', name:'Paradise — Muir Snowfield', lat:46.7860, lon:-121.7350, elev:5400, miles:9, aspect:180, phase:[0.14,0.56,0.06,0.24], alltrails:'https://www.alltrails.com/trail/us/washington/camp-muir-route-via-skyline-trail' },
     ]
   },
   glacierPeak: {
     name: 'Glacier Peak', summit: [48.1127, -121.1137, 10541], nws: 'SEW',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
     ths: [
-      { name:'Suiattle River — Sitkum Glacier',     lat:48.2520, lon:-121.1810, elev:1850, aspect:315, phase:[0.35,0.38,0.07,0.20] },
-      { name:'N Fork Sauk — White Chuck Glacier',   lat:48.1680, lon:-121.1438, elev:2200, aspect:270, phase:[0.35,0.38,0.07,0.20] },
+      { slug:'sitkum', name:'Suiattle River — Sitkum Glacier',     lat:48.2520, lon:-121.1810, elev:1850, aspect:315, phase:[0.35,0.38,0.07,0.20] },
+      { slug:'whitechuck', name:'N Fork Sauk — White Chuck Glacier',   lat:48.1680, lon:-121.1438, elev:2200, aspect:270, phase:[0.35,0.38,0.07,0.20] },
     ]
   },
   stHelens: {
     name: 'Mt St Helens', summit: [46.1912, -122.1944, 8366], nws: 'PQR',
     thr: { wGo:25, wWa:35, gGo:35, gWa:45, pGo:20, pWa:40 },
     ths: [
-      { name:'Marble Mountain Sno-Park — Worm Flows', lat:46.12982241, lon:-122.1711745, elev:2700, miles:12, aspect:180, phase:[0.22,0.42,0.08,0.28], alltrails:'https://www.alltrails.com/trail/us/washington/mount-saint-helens-via-worm-flows-trail' },
-      { name:"Climbers Bivouac — Monitor Ridge",     lat:46.1471,     lon:-122.1838, elev:3800, miles:10, aspect:180, phase:[0.18,0.44,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mount-saint-helens-summit-via-ptarmigan-trail' },
+      { slug:'wormflows', name:'Marble Mountain Sno-Park — Worm Flows', lat:46.12982241, lon:-122.1711745, elev:2700, miles:12, aspect:180, phase:[0.22,0.42,0.08,0.28], alltrails:'https://www.alltrails.com/trail/us/washington/mount-saint-helens-via-worm-flows-trail' },
+      { slug:'monitor', name:"Climbers Bivouac — Monitor Ridge",     lat:46.1471,     lon:-122.1838, elev:3800, miles:10, aspect:180, phase:[0.18,0.44,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mount-saint-helens-summit-via-ptarmigan-trail' },
     ]
   },
   adams: {
     name: 'Mt Adams', summit: [46.2024, -121.4909, 12281], nws: 'PQR',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:40 },
     ths: [
-      { name:'Cold Springs — South Climb',      lat:46.1359, lon:-121.4977, elev:5575, miles:12, aspect:180, phase:[0.18,0.45,0.08,0.29], alltrails:'https://www.alltrails.com/trail/us/washington/mount-adams-south-climb-trail' },
-      { name:'Morrison Creek — SW Chutes',      lat:46.1760, lon:-121.4540, elev:4600, aspect:225, phase:[0.18,0.44,0.08,0.30] },
-      { name:'Killen Creek — North Ridge',      lat:46.2890, lon:-121.5460, elev:4315, aspect:0,   phase:[0.22,0.45,0.08,0.25] },
+      { slug:'southclimb', name:'Cold Springs — South Climb',      lat:46.1359, lon:-121.4977, elev:5575, miles:12, aspect:180, phase:[0.18,0.45,0.08,0.29], alltrails:'https://www.alltrails.com/trail/us/washington/mount-adams-south-climb-trail' },
+      { slug:'swchutes', name:'Morrison Creek — SW Chutes',      lat:46.1760, lon:-121.4540, elev:4600, aspect:225, phase:[0.18,0.44,0.08,0.30] },
+      { slug:'northridge', name:'Killen Creek — North Ridge',      lat:46.2890, lon:-121.5460, elev:4315, aspect:0,   phase:[0.22,0.45,0.08,0.25] },
     ]
   },
   hood: {
     name: 'Mt Hood', summit: [45.3735, -121.6960, 11249], nws: 'PQR',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:40 },
     ths: [
-      { name:'Timberline — South Side / Hogsback', lat:45.3309, lon:-121.7113, elev:5960, miles:8, aspect:180, phase:[0.12,0.50,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/oregon/mount-hood-from-timberline' },
-      { name:'Cloud Cap — Cooper Spur / Sunshine', lat:45.4019, lon:-121.6537, elev:5750, miles:7, aspect:45, phase:[0.18,0.48,0.08,0.26] },
+      { slug:'hogsback', name:'Timberline — South Side / Hogsback', lat:45.3309, lon:-121.7113, elev:5960, miles:8, aspect:180, phase:[0.12,0.50,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/oregon/mount-hood-from-timberline' },
+      { slug:'cooperspur', name:'Cloud Cap — Cooper Spur / Sunshine', lat:45.4019, lon:-121.6537, elev:5750, miles:7, aspect:45, phase:[0.18,0.48,0.08,0.26] },
     ]
   },
   olympus: {
     name: 'Mt Olympus', summit: [47.8013, -123.7108, 7980], nws: 'SEW',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
     ths: [
-      { name:'Hoh Rain Forest — Blue Glacier', lat:47.8608, lon:-123.9343, elev:575, miles:44, aspect:270, phase:[0.45,0.30,0.05,0.20], alltrails:'https://www.alltrails.com/trail/us/washington/hoh-river-trail-to-blue-glacier-trail'  },
+      { slug:'hoh', name:'Hoh Rain Forest — Blue Glacier', lat:47.8608, lon:-123.9343, elev:575, miles:44, aspect:270, phase:[0.45,0.30,0.05,0.20], alltrails:'https://www.alltrails.com/trail/us/washington/hoh-river-trail-to-blue-glacier-trail'  },
     ]
   },
   mailbox: {
     name: 'Mailbox Peak', summit: [47.462405, -121.63926, 4841], nws: 'SEW',
     thr: { wGo:25, wWa:35, gGo:35, gWa:45, pGo:20, pWa:40 },
     ths: [
-      { name:'Mailbox Peak TH — New Trail', lat:47.466707, lon:-121.673491, elev:900, miles:9.4, aspect:315, phase:[0.12,0.50,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mailbox-peak-new-trail--2' },
-      { name:'Mailbox Peak TH — Old Trail', lat:47.466707, lon:-121.673491, elev:900, miles:5.4, aspect:315, phase:[0.08,0.56,0.06,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mailbox-peak-old-trail' },
+      { slug:'new', name:'Mailbox Peak TH — New Trail', lat:47.466707, lon:-121.673491, elev:900, miles:9.4, aspect:315, phase:[0.12,0.50,0.08,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mailbox-peak-new-trail--2' },
+      { slug:'old', name:'Mailbox Peak TH — Old Trail', lat:47.466707, lon:-121.673491, elev:900, miles:5.4, aspect:315, phase:[0.08,0.56,0.06,0.30], alltrails:'https://www.alltrails.com/trail/us/washington/mailbox-peak-old-trail' },
     ]
   },
   shuksan: {
     name: 'Mt Shuksan', summit: [48.8275, -121.6149, 9131], nws: 'SEW',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
     ths: [
-      { name:'Artist Point — Price / Sulfide Glacier', lat:48.8460, lon:-121.6920, elev:5200, aspect:180, phase:[0.18,0.45,0.08,0.29] },
-      { name:'Shannon Ridge — NW Couloir',             lat:48.8880, lon:-121.6920, elev:3200, aspect:315, phase:[0.22,0.45,0.08,0.25] },
+      { slug:'sulfide', name:'Artist Point — Price / Sulfide Glacier', lat:48.8460, lon:-121.6920, elev:5200, aspect:180, phase:[0.18,0.45,0.08,0.29] },
+      { slug:'nwcouloir', name:'Shannon Ridge — NW Couloir',             lat:48.8880, lon:-121.6920, elev:3200, aspect:315, phase:[0.22,0.45,0.08,0.25] },
     ]
   },
   shasta: {
     name: 'Mt Shasta', summit: [41.4092, -122.1944, 14179], nws: 'MFR',
     thr: { wGo:15, wWa:25, gGo:25, gWa:35, pGo:15, pWa:30 },
     ths: [
-      { name:'Bunny Flat — Avalanche Gulch',   lat:41.35373, lon:-122.23359, elev:6950, miles:11, aspect:225, phase:[0.18,0.45,0.08,0.29], alltrails:'https://www.alltrails.com/trail/us/california/mount-shasta-via-avalanche-gulch-route' },
-      { name:'Clear Creek TH',                 lat:41.3700,  lon:-122.1540, elev:5760, aspect:180, phase:[0.20,0.44,0.08,0.28] },
-      { name:'Brewer Creek — Hotlum-Bolam',    lat:41.4420,  lon:-122.0920, elev:6990, aspect:45,  phase:[0.18,0.45,0.08,0.29] },
+      { slug:'avygulch', name:'Bunny Flat — Avalanche Gulch',   lat:41.35373, lon:-122.23359, elev:6950, miles:11, aspect:225, phase:[0.18,0.45,0.08,0.29], alltrails:'https://www.alltrails.com/trail/us/california/mount-shasta-via-avalanche-gulch-route' },
+      { slug:'clearcreek', name:'Clear Creek TH',                 lat:41.3700,  lon:-122.1540, elev:5760, aspect:180, phase:[0.20,0.44,0.08,0.28] },
+      { slug:'hotlum', name:'Brewer Creek — Hotlum-Bolam',    lat:41.4420,  lon:-122.0920, elev:6990, aspect:45,  phase:[0.18,0.45,0.08,0.29] },
     ]
   },
   denali: {
     name: 'Mt Denali', summit: [63.0692, -151.0070, 20310], nws: 'AFC',
     thr: { wGo:15, wWa:25, gGo:25, gWa:35, pGo:15, pWa:30 },
     ths: [
-      { name:'Kahiltna Base Camp — West Buttress', lat:62.9667, lon:-151.1500, elev:7200, aspect:180, phase:[0.15,0.60,0.10,0.15] },
-      { name:'Wonder Lake — Muldrow Glacier',      lat:63.4775, lon:-150.8728, elev:2000, aspect:0,   phase:[0.40,0.40,0.08,0.12] },
+      { slug:'wb', name:'Kahiltna Base Camp — West Buttress', lat:62.9667, lon:-151.1500, elev:7200, aspect:180, phase:[0.15,0.60,0.10,0.15] },
+      { slug:'muldrow', name:'Wonder Lake — Muldrow Glacier',      lat:63.4775, lon:-150.8728, elev:2000, aspect:0,   phase:[0.40,0.40,0.08,0.12] },
     ]
   },
 };
@@ -2186,6 +2186,7 @@ function initForm(){
   inpEnd.value   = dtlStr(sun);
 
   document.getElementById('btn-go').addEventListener('click', loadForecast);
+  document.getElementById('btn-go').addEventListener('click', writeUrlFromForm);
 
   const prefs = loadPrefs();
   const mtnKey = prefs && MTNS[prefs.mtn] ? prefs.mtn : 'stHelens';
@@ -2200,6 +2201,49 @@ function initForm(){
     if(prefs.start) inpStart.value = prefs.start;
     if(prefs.end)   inpEnd.value   = prefs.end;
   }
+
+  const urlState = applyUrlParams(selMtn, updateThs, inpStart, inpEnd);
+  if(urlState.allValid){
+    setTimeout(()=>document.getElementById('btn-go').click(), 50);
+  }
+}
+
+function applyUrlParams(selMtn, updateThs, inpStart, inpEnd){
+  const params = new URLSearchParams(window.location.search);
+  const m = params.get('m');
+  const r = params.get('r');
+  const start = params.get('start');
+  const end = params.get('end');
+  const dtRe = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+  let mtnOk = false, routeOk = false, startOk = false, endOk = false;
+  if(m && MTNS[m]){
+    selMtn.value = m;
+    updateThs(m);
+    mtnOk = true;
+  }
+  if(r){
+    const mtnKey = selMtn.value;
+    const idx = (MTNS[mtnKey]?.ths || []).findIndex(t => t.slug === r);
+    if(idx >= 0){
+      document.getElementById('sel-th').value = idx;
+      routeOk = true;
+    }
+  }
+  if(start && dtRe.test(start)){ inpStart.value = start; startOk = true; }
+  if(end && dtRe.test(end)){ inpEnd.value = end; endOk = true; }
+  return { allValid: mtnOk && routeOk && startOk && endOk };
+}
+
+function writeUrlFromForm(){
+  const mtn = document.getElementById('sel-mtn').value;
+  const thIdx = parseInt(document.getElementById('sel-th').value) || 0;
+  const slug = MTNS[mtn]?.ths[thIdx]?.slug;
+  const start = document.getElementById('inp-start').value;
+  const end = document.getElementById('inp-end').value;
+  if(!mtn || !slug || !start || !end) return;
+  const params = new URLSearchParams({ m: mtn, r: slug, start, end });
+  const newUrl = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+  window.history.replaceState(null, '', newUrl);
 }
 
 initThemeToggle();

@@ -1,18 +1,21 @@
 # RK Mountains
 
-Small static mountaineering weather tools for comparing climb windows on Cascade and west-coast volcano routes.
+Small static mountaineering weather tool for comparing climb windows on west-coast and Alaska routes.
 
 ## Main Page
 
-Open `mw2.html` (or just `index.html`, which redirects there) to use the mountaineering-focused mountain weather dashboard. Open `mw1.html` for the original version.
+Open `mw2.html` (or `index.html`, which redirects there) to use the mountaineering weather dashboard.
 
 The page helps evaluate a selected mountain, trailhead/route, and climb window. It combines official NWS point forecasts with raw model guidance so you can compare the human-edited baseline against multiple numerical models.
 
 ## What Is On The Page
 
-- **Mountain and route controls**: choose a peak, trailhead/route, climb start, and climb end.
-- **Go / Watch / Caution verdict**: a quick decision aid based on wind, gust, and precipitation thresholds for the selected mountain.
-- **Summary cards**: summit temperature, trailhead temperature, peak wind, peak gust, freezing level, precipitation probability, snow signal, and model spread.
+- **Mountain and route controls**: choose a peak, trailhead/route, climb start, and climb end. Washington peaks group at the top of the dropdown; others (OR/CA/AK) sit below a separator.
+- **Crumb header**: name → route, trailhead elevation → summit elevation with computed gain, round-trip miles when known, and the selected climb window.
+- **Guidance & data panel**: a Go / Watch / Caution verdict driven by wind, gust, and precipitation thresholds, followed by the sorted critical-criteria list (red → yellow → green) and a per-hour sparkline showing worst-of-three banding with P/W/G driver letters in cells that hit watch or caution.
+- **Summary cards (met grid)**: summit temperature, trailhead temperature, peak wind, peak gust, freezing level, precipitation probability, snow signal, and model spread — laid out directly below the verdict.
+- **Signal tiles**: Wet snow, Rain on snow, and Wind exposure cards with hover explanations and external reference links on the headline value.
+- **External context**: NWS active alerts, regional avalanche forecast, and SNOTEL/NRCS snowpack pointers.
 - **Hourly table**: hour-by-hour summit and trailhead temperatures alongside wind, gust, direction, freezing level, precipitation probability, sky cover, and notes.
 - **Model charts**: Open-Meteo model comparison charts for wind, gusts, freezing level, and precipitation probability.
 - **Model guidance for this window**: lead-time-aware advice on which models to lean on (Nowcast / HRRR lead ≤48 h / NAM bridge ≤84 h / Global pattern beyond), updating based on the selected climb start.
@@ -40,18 +43,33 @@ HRRR and NAM have shorter forecast horizons than the global models, so they only
 
 ## How To Use It
 
-Use the hosted GitHub Pages version:
-
-- [Latest dashboard](https://rkaika.github.io/rkmountains/)
-- [Mountaineering-focused dashboard](https://rkaika.github.io/rkmountains/mw2.html)
-- [Original dashboard](https://rkaika.github.io/rkmountains/mw1.html)
+Use the hosted GitHub Pages version: [rkaika.github.io/rkmountains](https://rkaika.github.io/rkmountains/).
 
 Then:
 
 1. Select a mountain and route/trailhead.
 2. Set your climb start and expected end time.
 3. Click **Get Forecast**.
-4. Read the NWS summit/trailhead temperatures first, then compare the route advisor, critical criteria, phase timeline, model spread, wind/gust charts, freezing level, precipitation, observations, and NWS discussion.
+4. Read the Guidance & data panel (verdict + critical criteria + by-the-hour sparkline) first, then scan the summary cards, signal tiles, external context, hourly table, model charts, freezing-level and precipitation trends, observations, and the NWS Area Forecast Discussion.
+
+## Shareable / Embeddable URLs
+
+The dashboard accepts four query parameters. When all four are present and valid, the forecast loads automatically — no need to click **Get Forecast**. Clicking **Get Forecast** also writes the current selections back to the URL so the page can be shared or bookmarked.
+
+| Param  | Value                                  | Example              |
+|--------|----------------------------------------|----------------------|
+| `m`    | MTNS key (mountain)                    | `hood`               |
+| `r`    | Route slug (within that mountain)      | `hogsback`           |
+| `start`| Climb start, `YYYY-MM-DDTHH:MM` (local) | `2026-05-14T04:00`  |
+| `end`  | Climb end, `YYYY-MM-DDTHH:MM` (local)   | `2026-05-14T16:00`  |
+
+Example:
+
+```
+https://rkaika.github.io/rkmountains/mw2.html?m=hood&r=hogsback&start=2026-05-14T04:00&end=2026-05-14T16:00
+```
+
+Mountain keys: `baker`, `rainier`, `campMuir`, `glacierPeak`, `stHelens`, `adams`, `hood`, `olympus`, `mailbox`, `shuksan`, `shasta`, `denali`. Route slugs are listed in the **Supported Routes Reference** table below.
 
 To run it locally instead:
 
@@ -76,8 +94,7 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 ## Files
 
 - `index.html`: redirects to `mw2.html` (default entry point).
-- `mw1.html`: original unified mountain weather dashboard.
-- `mw2.html`: mountaineering-focused dashboard.
+- `mw2.html`: mountaineering weather dashboard.
 - `mountain-weather-window.html`: earlier NWS-focused weather-window prototype.
 
 ## Planned Improvements
@@ -107,34 +124,36 @@ Thresholds are listed as `W sustained wind go/watch`, `G gust go/watch`, and `P 
 
 ## Supported Routes Reference
 
-Phase split is the route-weighted planning split used by `mw2.html`: approach / climb / summit block / descent. Route aspect is approximate and is used only for wind-exposure hints.
+Route aspect is approximate and is used for wind-exposure hints. Round-trip miles are shown where well-documented; routes without RT data show `—` and the dashboard's crumb header gracefully omits the miles segment.
 
-| Objective | Route/trailhead | Coordinate | Elevation | Route aspect | Phase split | AllTrails |
-|---|---|---:|---:|---:|---|---|
-| Mt Baker | Heliotrope Ridge — Coleman Glacier | 48.8022, -121.8947 | 3,700 ft | 330° | 20%/45%/10%/25% | yes |
-| Mt Baker | Shannon Creek — Easton Glacier | 48.7068, -121.8129 | 3,350 ft | 180° | 20%/45%/10%/25% | yes |
-| Mt Baker | Boulder Ridge | 48.7870, -121.7470 | 4,200 ft | 90° | 18%/46%/10%/26% | search fallback |
-| Mt Rainier | Paradise — Muir Snowfield / DC route | 46.7860, -121.7350 | 5,400 ft | 180° | 25%/40%/10%/25% | yes |
-| Mt Rainier | White River — Emmons Glacier | 46.9020, -121.6427 | 4,250 ft | 45° | 20%/45%/10%/25% | yes |
-| Mt Rainier | Mowich Lake — Tahoma Cleaver | 46.9335, -121.8638 | 4,929 ft | 270° | 25%/42%/8%/25% | search fallback |
-| Mt Rainier | Carbon River — Willis Wall / Liberty | 46.9940, -121.9160 | 1,800 ft | 0° | 25%/45%/8%/22% | search fallback |
-| Camp Muir | Paradise — Muir Snowfield | 46.7860, -121.7350 | 5,400 ft | 180° | 14%/56%/6%/24% | yes |
-| Glacier Peak | Suiattle River — Sitkum Glacier | 48.2520, -121.1810 | 1,850 ft | 315° | 35%/38%/7%/20% | search fallback |
-| Glacier Peak | N Fork Sauk — White Chuck Glacier | 48.1680, -121.1438 | 2,200 ft | 270° | 35%/38%/7%/20% | search fallback |
-| Mt St Helens | Marble Mountain Sno-Park — Worm Flows | 46.1298, -122.1712 | 2,700 ft | 180° | 22%/42%/8%/28% | yes |
-| Mt St Helens | Climbers Bivouac — Monitor Ridge | 46.1471, -122.1838 | 3,800 ft | 180° | 18%/44%/8%/30% | yes |
-| Mt Adams | Cold Springs — South Climb | 46.1359, -121.4977 | 5,575 ft | 180° | 18%/45%/8%/29% | yes |
-| Mt Adams | Morrison Creek — SW Chutes | 46.1760, -121.4540 | 4,600 ft | 225° | 18%/44%/8%/30% | search fallback |
-| Mt Adams | Killen Creek — North Ridge | 46.2890, -121.5460 | 4,315 ft | 0° | 22%/45%/8%/25% | search fallback |
-| Mt Hood | Timberline — South Side / Hogsback | 45.3309, -121.7113 | 5,960 ft | 180° | 12%/50%/8%/30% | yes |
-| Mt Hood | Cloud Cap — Cooper Spur / Sunshine | 45.4019, -121.6537 | 5,750 ft | 45° | 18%/48%/8%/26% | search fallback |
-| Mt Olympus | Hoh Rain Forest — Blue Glacier | 47.8608, -123.9343 | 575 ft | 270° | 45%/30%/5%/20% | yes |
-| Mailbox Peak | Mailbox Peak TH — New Trail | 47.4667, -121.6735 | 900 ft | 315° | 12%/50%/8%/30% | yes |
-| Mailbox Peak | Mailbox Peak TH — Old Trail | 47.4667, -121.6735 | 900 ft | 315° | 8%/56%/6%/30% | yes |
-| Mt Shuksan | Artist Point — Price / Sulfide Glacier | 48.8460, -121.6920 | 5,200 ft | 180° | 18%/45%/8%/29% | search fallback |
-| Mt Shuksan | Shannon Ridge — NW Couloir | 48.8880, -121.6920 | 3,200 ft | 315° | 22%/45%/8%/25% | search fallback |
-| Mt Shasta | Bunny Flat — Avalanche Gulch | 41.3537, -122.2336 | 6,950 ft | 225° | 18%/45%/8%/29% | yes |
-| Mt Shasta | Clear Creek TH | 41.3700, -122.1540 | 5,760 ft | 180° | 20%/44%/8%/28% | search fallback |
-| Mt Shasta | Brewer Creek — Hotlum-Bolam | 41.4420, -122.0920 | 6,990 ft | 45° | 18%/45%/8%/29% | search fallback |
-| Mt Denali | Kahiltna Base Camp — West Buttress | 62.9667, -151.1500 | 7,200 ft | 180° | 15%/60%/10%/15% | search fallback |
-| Mt Denali | Wonder Lake — Muldrow Glacier | 63.4775, -150.8728 | 2,000 ft | 0° | 40%/40%/8%/12% | search fallback |
+The **Slug** column is the value to pass as the `r` URL parameter (scoped to the mountain `m`).
+
+| Objective (`m`) | Route/trailhead | Slug (`r`) | Coordinate | Elevation | Route aspect | Miles RT | AllTrails |
+|---|---|---|---:|---:|---:|---:|---|
+| `baker` | Heliotrope Ridge — Coleman Glacier | `coleman` | 48.8022, -121.8947 | 3,700 ft | 330° | 9 | yes |
+| `baker` | Shannon Creek — Easton Glacier | `easton` | 48.7068, -121.8129 | 3,350 ft | 180° | — | yes |
+| `baker` | Boulder Ridge | `boulder` | 48.7870, -121.7470 | 4,200 ft | 90° | — | search fallback |
+| `rainier` | Paradise — Muir Snowfield / DC route | `dc` | 46.7860, -121.7350 | 5,400 ft | 180° | 16 | yes |
+| `rainier` | White River — Emmons Glacier | `emmons` | 46.9020, -121.6427 | 4,250 ft | 45° | 17 | yes |
+| `rainier` | Mowich Lake — Tahoma Cleaver | `tahoma` | 46.9335, -121.8638 | 4,929 ft | 270° | — | search fallback |
+| `rainier` | Carbon River — Willis Wall / Liberty | `liberty` | 46.9940, -121.9160 | 1,800 ft | 0° | — | search fallback |
+| `campMuir` | Paradise — Muir Snowfield | `paradise` | 46.7860, -121.7350 | 5,400 ft | 180° | 9 | yes |
+| `glacierPeak` | Suiattle River — Sitkum Glacier | `sitkum` | 48.2520, -121.1810 | 1,850 ft | 315° | — | search fallback |
+| `glacierPeak` | N Fork Sauk — White Chuck Glacier | `whitechuck` | 48.1680, -121.1438 | 2,200 ft | 270° | — | search fallback |
+| `stHelens` | Marble Mountain Sno-Park — Worm Flows | `wormflows` | 46.1298, -122.1712 | 2,700 ft | 180° | 12 | yes |
+| `stHelens` | Climbers Bivouac — Monitor Ridge | `monitor` | 46.1471, -122.1838 | 3,800 ft | 180° | 10 | yes |
+| `adams` | Cold Springs — South Climb | `southclimb` | 46.1359, -121.4977 | 5,575 ft | 180° | 12 | yes |
+| `adams` | Morrison Creek — SW Chutes | `swchutes` | 46.1760, -121.4540 | 4,600 ft | 225° | — | search fallback |
+| `adams` | Killen Creek — North Ridge | `northridge` | 46.2890, -121.5460 | 4,315 ft | 0° | — | search fallback |
+| `hood` | Timberline — South Side / Hogsback | `hogsback` | 45.3309, -121.7113 | 5,960 ft | 180° | 8 | yes |
+| `hood` | Cloud Cap — Cooper Spur / Sunshine | `cooperspur` | 45.4019, -121.6537 | 5,750 ft | 45° | 7 | search fallback |
+| `olympus` | Hoh Rain Forest — Blue Glacier | `hoh` | 47.8608, -123.9343 | 575 ft | 270° | 44 | yes |
+| `mailbox` | Mailbox Peak TH — New Trail | `new` | 47.4667, -121.6735 | 900 ft | 315° | 9.4 | yes |
+| `mailbox` | Mailbox Peak TH — Old Trail | `old` | 47.4667, -121.6735 | 900 ft | 315° | 5.4 | yes |
+| `shuksan` | Artist Point — Price / Sulfide Glacier | `sulfide` | 48.8460, -121.6920 | 5,200 ft | 180° | — | search fallback |
+| `shuksan` | Shannon Ridge — NW Couloir | `nwcouloir` | 48.8880, -121.6920 | 3,200 ft | 315° | — | search fallback |
+| `shasta` | Bunny Flat — Avalanche Gulch | `avygulch` | 41.3537, -122.2336 | 6,950 ft | 225° | 11 | yes |
+| `shasta` | Clear Creek TH | `clearcreek` | 41.3700, -122.1540 | 5,760 ft | 180° | — | search fallback |
+| `shasta` | Brewer Creek — Hotlum-Bolam | `hotlum` | 41.4420, -122.0920 | 6,990 ft | 45° | — | search fallback |
+| `denali` | Kahiltna Base Camp — West Buttress | `wb` | 62.9667, -151.1500 | 7,200 ft | 180° | — | search fallback |
+| `denali` | Wonder Lake — Muldrow Glacier | `muldrow` | 63.4775, -150.8728 | 2,000 ft | 0° | — | search fallback |
