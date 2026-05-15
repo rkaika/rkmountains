@@ -152,6 +152,7 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 	.deal-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 3px; background: var(--go); }
 	.deal-item.watch .deal-dot { background: var(--watch); }
 	.deal-item.caution .deal-dot { background: var(--caution); }
+	.deal-item.neutral .deal-dot { background: var(--bdr2); }
 	.signal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 14px; }
 	.signal-card { position: relative; background: var(--card); border: 1px solid var(--bdr); border-radius: 8px; padding: 12px 14px; border-top: 4px solid var(--go); min-width: 0; }
 	.signal-card.watch { border-top-color: var(--watch); }
@@ -226,8 +227,9 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 .pretrend-cell { min-height: 42px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 7px 8px; border-right: 1px solid var(--bdr); font-family: var(--mono); font-size: 12px; color: var(--txt); line-height: 1.25; }
 .pretrend-cell:last-child { border-right: none; }
 .pretrend-cell small { display: block; color: var(--faint); font-size: 9px; margin-top: 3px; }
+.pretrend-time-cell { background: var(--day-bg); box-shadow: inset 0 -2px 0 var(--day-line); }
 .pretrend-time { font-size: 13px; color: var(--txt); }
-.pretrend-date { color: var(--faint); font-size: 9px; margin-top: 2px; }
+.pretrend-date { color: var(--day-text); font-size: 9px; margin-top: 2px; }
 .pretrend-sky { gap: 3px; flex-direction: column; font-size: 11px; }
 .pretrend-icon { font-size: 19px; line-height: 1; color: var(--dim); }
 .pretrend-wind { font-size: 12px; }
@@ -422,9 +424,6 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
       <tbody id="tbl-body"></tbody>
     </table>
   </div>
-
-  <div class="sec-lbl">Astronomy · climb day</div>
-  <div class="astro-grid" id="astro-grid"></div>
 
   <div class="sec-lbl">Recent precipitation · summit</div>
   <div class="astro-grid" id="precip-history"></div>
@@ -1342,10 +1341,18 @@ function renderPreClimbTrend(api, startStr, mtn, thr, point = {label:'Summit', e
   const cell = value => `<div class="pretrend-cell">${value}</div>`;
   const dayFmt = new Intl.DateTimeFormat([], {weekday:'short', month:'numeric', day:'numeric'});
   const timeFmt = new Intl.DateTimeFormat([], {hour:'numeric'});
+  const dayTints = [
+    {bg:'rgba(88, 166, 255, 0.08)', line:'rgba(88, 166, 255, 0.32)', text:'rgba(88, 166, 255, 0.9)'},
+    {bg:'rgba(63, 185, 80, 0.08)', line:'rgba(63, 185, 80, 0.30)', text:'rgba(63, 185, 80, 0.86)'},
+    {bg:'rgba(210, 153, 34, 0.09)', line:'rgba(210, 153, 34, 0.34)', text:'rgba(210, 153, 34, 0.92)'},
+    {bg:'rgba(188, 140, 255, 0.08)', line:'rgba(188, 140, 255, 0.30)', text:'rgba(188, 140, 255, 0.88)'},
+    {bg:'rgba(255, 123, 114, 0.07)', line:'rgba(255, 123, 114, 0.28)', text:'rgba(255, 123, 114, 0.84)'},
+  ];
   const referenceFt = point.elev || mtn.summit[2];
   const timeRow = rows.map(r => {
     const d = new Date(r.time);
-    return cell(`<div><div class="pretrend-time">${timeFmt.format(d)}</div><div class="pretrend-date">${dayFmt.format(d)}</div></div>`);
+    const tint = dayTints[d.getDay() % dayTints.length];
+    return `<div class="pretrend-cell pretrend-time-cell" style="--day-bg:${tint.bg};--day-line:${tint.line};--day-text:${tint.text}"><div><div class="pretrend-time">${timeFmt.format(d)}</div><div class="pretrend-date">${dayFmt.format(d)}</div></div></div>`;
   }).join('');
   const skyRow = rows.map(r => {
     const sky = trendSky(r, referenceFt);
@@ -1494,7 +1501,18 @@ function windChillDeal(wc){
   return { band:'go', text:`Lowest wind chill: ${val}°F${at}.` };
 }
 
-function buildDecisionData(rows, s, thr, summitFt, nws, startStr){
+function compactAstronomyDeal(startStr, endStr, lat, lon){
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  const mid = new Date((start.getTime() + end.getTime()) / 2);
+  const events = solarEvents(mid, lat, lon);
+  const moon = moonPhase(mid);
+  const civil = events.civilDawn && events.civilDusk ? `civil light ${fmtClock(events.civilDawn)}–${fmtClock(events.civilDusk)}` : 'civil light unavailable';
+  const sun = events.sunrise && events.sunset ? `sun ${fmtClock(events.sunrise)}–${fmtClock(events.sunset)}` : 'sun timing unavailable';
+  return { band:'neutral', text:`Light: ${civil} · ${sun} · moon ${Math.round(moon.illum * 100)}% lit.` };
+}
+
+function buildDecisionData(rows, s, thr, summitFt, nws, startStr, endStr, lat, lon){
   const windChill = minWindChill(rows);
   const conf = confidenceLabel(s.avgSpread, startStr);
   const refreeze = refreezeSignal(rows, nws);
@@ -1516,7 +1534,7 @@ function buildDecisionData(rows, s, thr, summitFt, nws, startStr){
   deals.push({ band: conf.band, text:`Forecast confidence: ${conf.label}. ${conf.body}` });
 
   deals.sort((a, b) => bandRank(b.band) - bandRank(a.band));
-  return { deals: deals.slice(0, 6) };
+  return { deals: [...deals.slice(0, 6), compactAstronomyDeal(startStr, endStr, lat, lon)] };
 }
 
 function circularMeanDeg(values){
@@ -1852,7 +1870,7 @@ function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws){
   vEl.className = `verdict v-${s.verdict}`;
 
   const thr = mtn.thr;
-  const decision = buildDecisionData(rows, s, thr, summitFt, nws, startStr);
+  const decision = buildDecisionData(rows, s, thr, summitFt, nws, startStr, endStr, mtn.summit[0], mtn.summit[1]);
   const dealsHtml = decision.deals.map(d => `<div class="deal-item ${d.band}"><span class="deal-dot"></span><span>${d.text}</span></div>`).join('');
   const sparkHtml = buildHourSpark(rows, thr);
   vEl.innerHTML =
@@ -2217,33 +2235,6 @@ function buildAstroCard(label, val, sub, iconMarkup){
   return card;
 }
 
-function renderAstronomy(startStr, endStr, lat, lon){
-  const el = document.getElementById('astro-grid');
-  if(!el) return;
-  const start = new Date(startStr);
-  const end   = new Date(endStr);
-  const mid   = new Date((start.getTime() + end.getTime()) / 2);
-  const events = solarEvents(mid, lat, lon);
-  const moon = moonPhase(mid);
-
-  let dayLen = '—';
-  if(events.sunrise && events.sunset){
-    const ms = events.sunset - events.sunrise;
-    const h = Math.floor(ms / 3600000);
-    const m = Math.round((ms % 3600000) / 60000);
-    dayLen = `${h}h ${m}m`;
-  }
-
-  const dayLabel = mid.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' });
-
-  el.replaceChildren(
-    buildAstroCard('Sunrise',  fmtClock(events.sunrise), `${dayLabel} · civil dawn ${fmtClock(events.civilDawn)}`),
-    buildAstroCard('Sunset',   fmtClock(events.sunset),  `${dayLabel} · civil dusk ${fmtClock(events.civilDusk)}`),
-    buildAstroCard('Daylight', dayLen,                   'sunrise → sunset on climb day'),
-    buildAstroCard('Moon',     `${Math.round(moon.illum*100)}% lit`, moon.name, moon.icon),
-  );
-}
-
 function computePrecipHistory(api){
   const times = api?.hourly?.time;
   if(!times || !times.length) return null;
@@ -2522,7 +2513,6 @@ async function loadForecast(){
     renderCharts(start, end, mtn.summit[2], mtn.thr);
     renderModelGuidance(new Date(start));
     renderQuickLinks(mtnKey, mtn, th);
-    renderAstronomy(start, end, mtn.summit[0], mtn.summit[1]);
     renderPrecipHistory(api);
     renderStations(null, mtn.summit[2], 'loading');
     fetchNearestStations(mtn.summit[0], mtn.summit[1], mtn.summit[2])

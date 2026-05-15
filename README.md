@@ -4,7 +4,7 @@ Small static mountaineering weather tool for comparing climb windows on west-coa
 
 ## Main Page
 
-Open `mw2.html` (or `index.html`, which redirects there) to use the mountaineering weather dashboard.
+Open `mw.html` (or `index.html`, which redirects there) to use the mountaineering weather dashboard.
 
 The page helps evaluate a selected mountain, trailhead/route, and climb window. It combines official NWS point forecasts with raw model guidance so you can compare the human-edited baseline against multiple numerical models.
 
@@ -12,11 +12,16 @@ The page helps evaluate a selected mountain, trailhead/route, and climb window. 
 
 - **Mountain and route controls**: choose a peak, trailhead/route, climb start, and climb end. Washington peaks group at the top of the dropdown; others (OR/CA/AK) sit below a separator.
 - **Crumb header**: name → route, trailhead elevation → summit elevation with computed gain, round-trip miles when known, and the selected climb window.
-- **Guidance & data panel**: a Go / Watch / Caution verdict driven by wind, gust, and precipitation thresholds, followed by the sorted critical-criteria list (red → yellow → green) and a per-hour sparkline showing worst-of-three banding with P/W/G driver letters in cells that hit watch or caution.
-- **Summary cards (met grid)**: summit temperature, trailhead temperature, peak wind, peak gust, freezing level, precipitation probability, snow signal, and model spread — laid out directly below the verdict.
+- **Selected climbing window group**: a visually grouped block for the core climb-window decision surfaces: verdict, summary metric cards, and route profile weather.
+- **Climbing Window Guidance panel**: a Go / Watch / Caution verdict driven by wind, gust, and precipitation thresholds, followed by the sorted critical-criteria list (red → yellow → green) and a per-hour sparkline showing worst-of-three banding with P/W/G driver letters in cells that hit watch or caution.
+- **Summary cards (met grid)**: summit temperature, trailhead temperature, upper-mountain peak wind, upper-mountain peak gust, freezing level, precipitation probability, snow signal, and model spread — laid out directly below the verdict.
+- **Route profile weather**: NWS point forecasts for trailhead, curated route references, and summit/objective where available. Cards show point elevation, temperature range, precipitation probability, wind, gust when available, and snow signal. Points are planning anchors, not navigation data.
+- **Pre-climb trend**: a Mountain-Forecast-style 48-hour lookback before the selected start, sampled every 3 hours. It includes sky/precip signal, wind/gust/direction, precipitation probability and amount, model-grid temperature, wind chill, freezing level, and cloud cover. A selector switches the trend table between summit, route mid-point, and trailhead.
 - **Signal tiles**: Wet snow, Rain on snow, and Wind exposure cards with hover explanations and external reference links on the headline value.
 - **External context**: NWS active alerts, regional avalanche forecast, and SNOTEL/NRCS snowpack pointers.
 - **Hourly table**: hour-by-hour summit and trailhead temperatures alongside wind, gust, direction, freezing level, precipitation probability, sky cover, and notes.
+- **Recent precipitation**: recent model-mean precipitation totals at the summit. Climb-day civil light, sunrise/sunset, and moon illumination are shown compactly in the Climbing Window Guidance bullets.
+- **Current observations**: nearby station observations, including elevation-aware notes where available.
 - **Model charts**: Open-Meteo model comparison charts for wind, gusts, freezing level, and precipitation probability.
 - **Model guidance for this window**: lead-time-aware advice on which models to lean on (Nowcast / HRRR lead ≤48 h / NAM bridge ≤84 h / Global pattern beyond), updating based on the selected climb start.
 - **Interpretation notes**: how to read the NWS baseline, when HRRR leads, how to cross-check globals against mesoscale, and what Model Spread means for confidence.
@@ -27,7 +32,8 @@ The page helps evaluate a selected mountain, trailhead/route, and climb window. 
 
 - **Summit and trailhead temperatures**: NWS hourly point forecasts from `api.weather.gov`.
 - **Snow signal**: NWS grid forecast data, including snowfall amount where available.
-- **Wind, gusts, freezing level, precipitation, and cloud cover**: Open-Meteo model data.
+- **Wind, gusts, temperature, freezing level, precipitation, and cloud cover**: Open-Meteo model data.
+- **Pre-climb trend and recent precipitation**: Open-Meteo model data using `past_days=3`, sampled before the selected climb start.
 - **Forecast discussion**: NWS Area Forecast Discussion products from `api.weather.gov`.
 
 Open-Meteo model comparisons currently include:
@@ -50,7 +56,9 @@ Then:
 1. Select a mountain and route/trailhead.
 2. Set your climb start and expected end time.
 3. Click **Get Forecast**.
-4. Read the Guidance & data panel (verdict + critical criteria + by-the-hour sparkline) first, then scan the summary cards, signal tiles, external context, hourly table, model charts, freezing-level and precipitation trends, observations, and the NWS Area Forecast Discussion.
+4. Read **Climbing Window Guidance** first, then scan the summary cards and route profile weather.
+5. Use the **Pre-climb trend** selector to compare summit, mid-point, and trailhead conditions before the climb.
+6. Scan signal tiles, external context, detailed hourly table, recent precipitation, observations, model charts, and the NWS Area Forecast Discussion.
 
 ## Shareable / Embeddable URLs
 
@@ -66,7 +74,7 @@ The dashboard accepts four query parameters. When all four are present and valid
 Example:
 
 ```
-https://rkaika.github.io/rkmountains/mw2.html?m=hood&r=hogsback&start=2026-05-14T04:00&end=2026-05-14T16:00
+https://rkaika.github.io/rkmountains/mw.html?m=hood&r=hogsback&start=2026-05-14T04:00&end=2026-05-14T16:00
 ```
 
 Mountain keys: `baker`, `rainier`, `campMuir`, `glacierPeak`, `stHelens`, `adams`, `hood`, `olympus`, `mailbox`, `shuksan`, `shasta`, `denali`. Route slugs are listed in the **Supported Routes Reference** table below.
@@ -93,8 +101,11 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 
 ## Files
 
-- `index.html`: redirects to `mw2.html` (default entry point).
-- `mw2.html`: mountaineering weather dashboard.
+- `index.html`: redirects to `mw.html` (default entry point).
+- `mw.html`: current mountaineering weather dashboard.
+- `mw3.html`: latest experimental/source copy used before promoting to `mw.html`.
+- `mw2.html`: prior dashboard version kept for comparison.
+- `mw1.html`: earlier dashboard version kept for comparison.
 - `mountain-weather-window.html`: earlier NWS-focused weather-window prototype.
 
 ## Planned Improvements
