@@ -1325,6 +1325,38 @@ function parsePreClimbTrend(api, startStr, endStr){
   }, []);
 }
 
+function scrollPreTrendToCurrentWindow(el, rows, startStr, endStr){
+  if(!el || !rows.length) return;
+
+  const now = new Date();
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  const preStart = addHours(start, -48);
+  const postEnd = addHours(end, 12);
+
+  if(now < preStart){
+    el.scrollLeft = 0;
+    return;
+  }
+
+  const targetTime = now > postEnd ? postEnd : now;
+  let targetIndex = 0;
+  for(let i = 0; i < rows.length; i++){
+    if(new Date(rows[i].time) <= targetTime) targetIndex = i;
+    else break;
+  }
+
+  requestAnimationFrame(() => {
+    const targetCell = el.querySelector(`.pretrend-time-cell[data-trend-index="${targetIndex}"]`);
+    if(!targetCell) return;
+
+    const labelWidth = el.querySelector('.pretrend-label')?.offsetWidth || 0;
+    const maxScroll = Math.max(0, el.scrollWidth - el.clientWidth);
+    const desiredScroll = Math.max(0, targetCell.offsetLeft - labelWidth - 8);
+    el.scrollLeft = Math.min(desiredScroll, maxScroll);
+  });
+}
+
 function routeWeatherPointOptions(mtn, th){
   const summit = {key:'summit', label:'Summit', name:mtn.name, lat:mtn.summit[0], lon:mtn.summit[1], elev:mtn.summit[2]};
   const trail = {key:'trail', label:'Trailhead', name:th.name, lat:th.lat, lon:th.lon, elev:th.elev};
@@ -1418,10 +1450,10 @@ function renderPreClimbTrend(api, startStr, endStr, mtn, thr, point = {label:'Su
     {bg:'rgba(255, 123, 114, 0.07)', line:'rgba(255, 123, 114, 0.28)', text:'rgba(255, 123, 114, 0.84)'},
   ];
   const referenceFt = point.elev || mtn.summit[2];
-  const timeRow = rows.map(r => {
+  const timeRow = rows.map((r, index) => {
     const d = new Date(r.time);
     const tint = dayTints[d.getDay() % dayTints.length];
-    return `<div class="pretrend-cell pretrend-time-cell" style="--day-bg:${tint.bg};--day-line:${tint.line};--day-text:${tint.text}"><div><div class="pretrend-time">${timeFmt.format(d)}</div><div class="pretrend-date">${dayFmt.format(d)}</div></div></div>`;
+    return `<div class="pretrend-cell pretrend-time-cell" data-trend-index="${index}" style="--day-bg:${tint.bg};--day-line:${tint.line};--day-text:${tint.text}"><div><div class="pretrend-time">${timeFmt.format(d)}</div><div class="pretrend-date">${dayFmt.format(d)}</div></div></div>`;
   }).join('');
   const skyRow = rows.map(r => {
     const sky = trendSky(r, referenceFt);
@@ -1463,6 +1495,7 @@ function renderPreClimbTrend(api, startStr, endStr, mtn, thr, point = {label:'Su
       <div class="pretrend-row"><div class="pretrend-label">Frz lvl</div>${freezeRow}</div>
       <div class="pretrend-row"><div class="pretrend-label">Cloud</div>${cloudRow}</div>
     </div>`;
+  scrollPreTrendToCurrentWindow(el, rows, startStr, endStr);
 }
 
 function mxAt(rows, key){
