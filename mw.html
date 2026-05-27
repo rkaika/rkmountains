@@ -2685,8 +2685,6 @@ function savePrefs(){
     localStorage.setItem(PREFS_KEY, JSON.stringify({
       mtn:   document.getElementById('sel-mtn').value,
       th:    document.getElementById('sel-th').value,
-      start: document.getElementById('inp-start').value,
-      end:   document.getElementById('inp-end').value,
     }));
   } catch(e) {}
 }
@@ -2696,6 +2694,21 @@ function loadPrefs(){
     const raw = localStorage.getItem(PREFS_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch(e) { return null; }
+}
+
+function nextSaturdayFrom(date){
+  const dToSat = (6 - date.getDay() + 7) % 7 || 7;
+  const sat = new Date(date);
+  sat.setDate(date.getDate() + dToSat);
+  return sat;
+}
+
+function defaultClimbWindow(now = new Date()){
+  const start = nextSaturdayFrom(now);
+  start.setHours(22, 0, 0, 0);
+  const end = new Date(start);
+  end.setHours(start.getHours() + 12);
+  return {start, end};
 }
 
 function initForm(){
@@ -2729,18 +2742,12 @@ function initForm(){
 
   selMtn.addEventListener('change', ()=>updateThs(selMtn.value));
 
-  const now = new Date();
-  const dToSat = (6-now.getDay()+7)%7||7;
-  const sat = new Date(now);
-  sat.setDate(now.getDate()+dToSat);
-  sat.setHours(22,0,0,0);
-  const sun = new Date(sat);
-  sun.setHours(sat.getHours()+12);
+  const defaultWindow = defaultClimbWindow();
 
   const inpStart = document.getElementById('inp-start');
   const inpEnd   = document.getElementById('inp-end');
-  inpStart.value = dtlStr(sat);
-  inpEnd.value   = dtlStr(sun);
+  inpStart.value = dtlStr(defaultWindow.start);
+  inpEnd.value   = dtlStr(defaultWindow.end);
 
   document.getElementById('btn-go').addEventListener('click', loadForecast);
   document.getElementById('btn-go').addEventListener('click', writeUrlFromForm);
@@ -2758,8 +2765,6 @@ function initForm(){
     if(prefs.th !== undefined && selTh.querySelector(`option[value="${prefs.th}"]`)){
       selTh.value = prefs.th;
     }
-    if(prefs.start) inpStart.value = prefs.start;
-    if(prefs.end)   inpEnd.value   = prefs.end;
   }
 
   const urlState = applyUrlParams(selMtn, updateThs, inpStart, inpEnd);
