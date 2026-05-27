@@ -2,12 +2,299 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Mountain Weather</title>
-<meta http-equiv="refresh" content="0; url=mw.html">
-<link rel="canonical" href="mw.html">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RK Mountains</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f7f9f8;
+    --panel: #ffffff;
+    --ink: #101820;
+    --text: #25333d;
+    --muted: #66747f;
+    --line: #dbe4e8;
+    --glacier: #2f6f86;
+    --forest: #2f5f45;
+    --amber: #a86425;
+    --shadow: 0 18px 48px rgba(16, 24, 32, 0.10);
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      linear-gradient(180deg, rgba(247, 249, 248, 0.74), rgba(247, 249, 248, 0.98)),
+      radial-gradient(circle at 20% 0%, rgba(47, 111, 134, 0.16), transparent 34%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+
+  a { color: inherit; }
+
+  .page {
+    width: min(1120px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 3rem 0 4rem;
+  }
+
+  header {
+    padding: 2rem 0 2.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    color: var(--glacier);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0.65rem 0 0.75rem;
+    color: var(--ink);
+    font-size: clamp(3rem, 9vw, 6.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.07em;
+  }
+
+  .intro {
+    max-width: 720px;
+    margin: 0;
+    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+    color: var(--muted);
+  }
+
+  main {
+    display: grid;
+    gap: 2.25rem;
+    padding-top: 2.5rem;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--ink);
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    letter-spacing: -0.035em;
+  }
+
+  .section-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    display: grid;
+    gap: 0.8rem;
+    min-height: 220px;
+    padding: 1.25rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 0 rgba(16, 24, 32, 0.03);
+    text-decoration: none;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(47, 111, 134, 0.42);
+    box-shadow: var(--shadow);
+  }
+
+  .card.primary {
+    background: linear-gradient(145deg, #ffffff 0%, #eef7f8 100%);
+  }
+
+  .card.field {
+    background:
+      linear-gradient(180deg, rgba(16, 24, 32, 0.08), rgba(16, 24, 32, 0.68)),
+      url("assets/baker-easton/hero.jpg") center 40% / cover no-repeat;
+    color: #fff;
+    border-color: rgba(16, 24, 32, 0.2);
+  }
+
+  .tag {
+    width: fit-content;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: 0.25rem 0.55rem;
+    color: var(--glacier);
+    font-size: 0.74rem;
+    font-weight: 850;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .field .tag {
+    color: #cce8f0;
+  }
+
+  .card h3 {
+    margin: auto 0 0;
+    color: var(--ink);
+    font-size: clamp(1.55rem, 4vw, 2.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+  }
+
+  .field h3 {
+    color: #fff;
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .field p {
+    color: #e2eef2;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.25rem;
+  }
+
+  .meta span {
+    border-radius: 999px;
+    background: rgba(47, 111, 134, 0.09);
+    color: var(--glacier);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .field .meta span {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+  }
+
+  .placeholder {
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+    padding: 1rem;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.52);
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 760px) {
+    .page {
+      width: min(100% - 1.5rem, 1120px);
+      padding-top: 1.4rem;
+    }
+
+    header {
+      padding-top: 1.25rem;
+    }
+
+    .section-head {
+      display: block;
+    }
+
+    .section-note {
+      margin-top: 0.25rem;
+    }
+
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .card {
+      min-height: 210px;
+    }
+  }
+</style>
 </head>
 <body>
-<p>Redirecting to <a href="mw.html">mw.html</a>…</p>
-<script>location.replace('mw.html');</script>
+  <div class="page">
+    <header>
+      <div class="eyebrow">RK Mountains</div>
+      <h1>Mountain planning tools and field guides.</h1>
+      <p class="intro">A home base for weather windows, climb planning notes, field guides, and other resources for west-coast mountain objectives.</p>
+    </header>
+
+    <main>
+      <section aria-labelledby="tools-heading">
+        <div class="section-head">
+          <h2 id="tools-heading">Tools</h2>
+          <p class="section-note">Interactive resources for planning and checking conditions.</p>
+        </div>
+        <div class="card-grid">
+          <a class="card primary" href="mw.html">
+            <span class="tag">Weather</span>
+            <h3>Mountain Weather Dashboard</h3>
+            <p>Compare NWS forecasts, model guidance, wind, precipitation, route timeline, and climb-window signals.</p>
+            <div class="meta">
+              <span>NWS</span>
+              <span>Open-Meteo</span>
+              <span>Climb windows</span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section aria-labelledby="guides-heading">
+        <div class="section-head">
+          <h2 id="guides-heading">Field Guides</h2>
+          <p class="section-note">Route-specific notes and practical planning references.</p>
+        </div>
+        <div class="card-grid">
+          <a class="card field" href="mount-baker-easton.html">
+            <span class="tag">Mount Baker</span>
+            <h3>Easton Route Field Guide</h3>
+            <p>Park Butte Trailhead, Sandy Camp, Easton Glacier, weather checks, logistics, trip plans, prep, and descent notes.</p>
+            <div class="meta">
+              <span>10,778 ft</span>
+              <span>Sandy Camp</span>
+              <span>Glacier route</span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section aria-labelledby="resources-heading">
+        <div class="section-head">
+          <h2 id="resources-heading">More Resources</h2>
+          <p class="section-note">A place to add future references, checklists, and route notes.</p>
+        </div>
+        <div class="placeholder">More links can go here as the guide library grows.</div>
+      </section>
+    </main>
+
+    <footer>
+      Verify current weather, road status, permits, avalanche conditions, route conditions, and your team's readiness before any climb.
+    </footer>
+  </div>
 </body>
 </html>

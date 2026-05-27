@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mount Baker Easton Route Field Guide</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #101820;
+    --text: #22303a;
+    --muted: #64727d;
+    --faint: #8b979f;
+    --line: #d9e1e6;
+    --line-strong: #b9c7d0;
+    --paper: #f7f9f8;
+    --panel: #ffffff;
+    --ice: #e8f3f6;
+    --glacier: #2f6f86;
+    --forest: #2f5f45;
+    --amber: #b56b24;
+    --rust: #9a4631;
+    --night: #0d1820;
+    --shadow: 0 14px 40px rgba(16, 24, 32, 0.10);
+    --radius: 8px;
+    --content: 1120px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+  }
+
+  img { max-width: 100%; display: block; }
+
+  a { color: var(--glacier); text-underline-offset: 0.18em; }
+
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    letter-spacing: 0.02em;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(247, 249, 248, 0.94);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topbar-inner {
+    max-width: var(--content);
+    margin: 0 auto;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .brand {
+    color: var(--ink);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .brand span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .jump-nav {
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+    padding-bottom: 0.1rem;
+  }
+
+  .jump-nav a {
+    white-space: nowrap;
+    color: var(--text);
+    text-decoration: none;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 999px;
+    padding: 0.38rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .hero {
+    min-height: min(760px, 92vh);
+    display: grid;
+    align-items: end;
+    position: relative;
+    color: #fff;
+    background:
+      linear-gradient(180deg, rgba(13, 24, 32, 0.24) 0%, rgba(13, 24, 32, 0.64) 56%, rgba(13, 24, 32, 0.94) 100%),
+      url("assets/baker-easton/hero.jpg") center 42% / cover no-repeat;
+  }
+
+  .hero-content {
+    width: min(var(--content), calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 7rem 0 2.5rem;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: #b7dcea;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 2rem;
+    height: 2px;
+    background: currentColor;
+  }
+
+  h1 {
+    margin: 1rem 0 1rem;
+    max-width: 920px;
+    color: #fff;
+    font-size: clamp(3rem, 11vw, 7.2rem);
+    line-height: 0.9;
+    letter-spacing: -0.07em;
+  }
+
+  .hero-copy {
+    max-width: 760px;
+    color: #e6f0f2;
+    font-size: clamp(1.05rem, 2.4vw, 1.4rem);
+    line-height: 1.55;
+  }
+
+  .hero-note {
+    margin-top: 1.25rem;
+    max-width: 760px;
+    color: #d4e6ea;
+    font-size: 0.95rem;
+  }
+
+  .quick-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    margin-top: 2rem;
+  }
+
+  .quick-stat {
+    padding: 1rem 1rem 0 0;
+  }
+
+  .quick-stat b {
+    display: block;
+    color: #fff;
+    font-size: clamp(1.35rem, 3.4vw, 2.1rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .quick-stat span {
+    display: block;
+    margin-top: 0.35rem;
+    color: #c4d9de;
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  main { padding: 0 1rem 4rem; }
+
+  section {
+    max-width: var(--content);
+    margin: 0 auto;
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  section:last-child { border-bottom: 0; }
+
+  .section-kicker {
+    color: var(--rust);
+    text-transform: uppercase;
+    font-weight: 850;
+    letter-spacing: 0.16em;
+    font-size: 0.76rem;
+  }
+
+  h2 {
+    margin: 0.45rem 0 1rem;
+    color: var(--ink);
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 1.02;
+    letter-spacing: -0.055em;
+  }
+
+  h3 {
+    margin: 0;
+    color: var(--ink);
+    font-size: 1.16rem;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .lead {
+    max-width: 780px;
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  }
+
+  .notice {
+    margin-top: 1.4rem;
+    padding: 1rem;
+    border-left: 5px solid var(--forest);
+    background: #ecf5ef;
+    border-radius: var(--radius);
+    color: #1f4633;
+    font-weight: 650;
+  }
+
+  .grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1rem;
+    box-shadow: 0 1px 0 rgba(16, 24, 32, 0.02);
+  }
+
+  .card strong,
+  .stat strong {
+    color: var(--ink);
+  }
+
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1rem;
+  }
+
+  .stat .label {
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 0.74rem;
+    font-weight: 850;
+    letter-spacing: 0.1em;
+  }
+
+  .stat .value {
+    margin-top: 0.4rem;
+    color: var(--ink);
+    font-size: 1.7rem;
+    font-weight: 850;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  .stat p {
+    margin: 0.55rem 0 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .route-map {
+    margin-top: 2rem;
+    overflow: hidden;
+    border-radius: var(--radius);
+    border: 1px solid var(--line-strong);
+    background: var(--night);
+    box-shadow: var(--shadow);
+  }
+
+  .route-map img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+
+  .caption {
+    padding: 0.75rem 0.9rem;
+    color: #dbe7eb;
+    background: var(--night);
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+
+  .timeline {
+    margin-top: 2rem;
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .step-num {
+    width: 3rem;
+    height: 3rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--ice);
+    color: var(--glacier);
+    font-weight: 900;
+  }
+
+  .step-body {
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .step-body p {
+    margin: 0.35rem 0 0;
+    color: var(--muted);
+  }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .photo {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+  }
+
+  .photo img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .photo figcaption {
+    padding: 0.8rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .weather-list {
+    margin-top: 1.5rem;
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .weather-link {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.85rem;
+    align-items: start;
+    padding: 1rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .weather-link .alt {
+    min-width: 5.2rem;
+    color: var(--glacier);
+    font-weight: 900;
+  }
+
+  .weather-link span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.75fr);
+    gap: 1.5rem;
+    align-items: start;
+    margin-top: 1.5rem;
+  }
+
+  .callout {
+    background: var(--night);
+    color: #e7f2f5;
+    border-radius: var(--radius);
+    padding: 1.15rem;
+  }
+
+  .callout h3 { color: #fff; }
+
+  .callout a { color: #9dd2e8; }
+
+  .callout p,
+  .callout li {
+    color: #cfdee3;
+  }
+
+  ul.clean,
+  ol.clean {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .clean li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .clean li:last-child { border-bottom: 0; }
+
+  .callout .clean li {
+    border-bottom-color: rgba(255, 255, 255, 0.13);
+  }
+
+  .plan {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .day {
+    display: grid;
+    grid-template-columns: 4.3rem 1fr;
+    gap: 0.8rem;
+    align-items: baseline;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .day b {
+    color: var(--glacier);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .checklist {
+    counter-reset: item;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .checklist li {
+    counter-increment: item;
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1rem 1rem 1rem 3.25rem;
+  }
+
+  .checklist li::before {
+    content: counter(item, decimal-leading-zero);
+    position: absolute;
+    left: 1rem;
+    top: 1.1rem;
+    color: var(--rust);
+    font-weight: 900;
+    font-size: 0.78rem;
+  }
+
+  .compact-note {
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .footer {
+    background: var(--night);
+    color: #cfdee3;
+    padding: 3rem 1rem;
+  }
+
+  .footer-inner {
+    max-width: var(--content);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 2rem;
+  }
+
+  .footer h2 {
+    color: #fff;
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .footer a { color: #9dd2e8; }
+
+  .source-list {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .source-list a {
+    display: block;
+    padding: 0.5rem 0;
+  }
+
+  @media (max-width: 840px) {
+    body { font-size: 16px; }
+
+    .topbar { position: static; }
+
+    .topbar-inner {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .jump-nav {
+      width: 100%;
+      padding-bottom: 0.2rem;
+    }
+
+    .hero {
+      min-height: auto;
+      background-position: center top;
+    }
+
+    .hero-content {
+      padding: 3.25rem 0 1.25rem;
+    }
+
+    h1 {
+      font-size: clamp(3.1rem, 18vw, 5rem);
+      line-height: 0.95;
+    }
+
+    .quick-stats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+    }
+
+    .quick-stat {
+      padding-top: 0.9rem;
+    }
+
+    section {
+      padding: 3rem 0;
+    }
+
+    .grid-2,
+    .grid-3,
+    .grid-4,
+    .split,
+    .footer-inner {
+      grid-template-columns: 1fr;
+    }
+
+    .photo-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .checklist {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 430px) {
+    main { padding-left: 0.85rem; padding-right: 0.85rem; }
+
+    .hero-content {
+      width: calc(100% - 1.7rem);
+    }
+
+    .eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+    }
+
+    .quick-stat b {
+      font-size: 1.22rem;
+    }
+
+    .weather-link {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+
+    .step {
+      grid-template-columns: 2.4rem 1fr;
+      gap: 0.75rem;
+    }
+
+    .step-num {
+      width: 2.4rem;
+      height: 2.4rem;
+    }
+
+    .day {
+      grid-template-columns: 1fr;
+      gap: 0.1rem;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .hero-content {
+      padding-top: 2.4rem;
+    }
+
+    .quick-stats {
+      display: none;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">Mount Baker <span>Easton Route Field Guide</span></div>
+      <nav class="jump-nav" aria-label="Page sections">
+        <a href="#route">Route</a>
+        <a href="#weather">Weather</a>
+        <a href="#logistics">Logistics</a>
+        <a href="#plans">Plans</a>
+        <a href="#prep">Prep</a>
+        <a href="#return">Return</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="hero-content">
+      <div class="eyebrow mono">What to expect when climbing Mount Baker</div>
+      <h1>Easton Route</h1>
+      <p class="hero-copy">
+        A south-side climb from Park Butte Trailhead to Sandy Camp, then up the Easton Glacier to Grant Peak. The numbers are approximate because campsites and tracks shift. Plan around the main tasks: reach camp efficiently, manage glacier travel, summit only if conditions allow, and leave enough margin for the descent.
+      </p>
+      <p class="hero-note">
+        Conditions, road access, glacier navigation, and weather change quickly on Baker. Re-verify everything before departure.
+      </p>
+      <div class="quick-stats" aria-label="Route summary">
+        <div class="quick-stat"><b>3,300 ft</b><span>Park Butte Trailhead</span></div>
+        <div class="quick-stat"><b>6,000-6,500 ft</b><span>Sandy Camp band</span></div>
+        <div class="quick-stat"><b>10,778 ft</b><span>Grant Peak summit goal</span></div>
+        <div class="quick-stat"><b>Return margin</b><span>Protect time and energy</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="route">
+      <div class="section-kicker mono">01 / Goal</div>
+      <h2>Use the three main elevations to plan the climb.</h2>
+      <p class="lead">
+        Start at Park Butte Trailhead, camp around Sandy Camp, and climb to Grant Peak via the Easton Glacier. These are planning numbers, not exact measurements: campsites vary, tracks shift, and this is a busy route.
+      </p>
+      <div class="notice">Primary objective: get the full team back safely, even if that means turning around below the summit.</div>
+
+      <div class="grid grid-3" style="margin-top:1.5rem">
+        <div class="stat">
+          <div class="label mono">Waypoint 1</div>
+          <div class="value">Park Butte TH</div>
+          <p>3,300 ft. Schreiber's Meadow start, reasonable number of parking spots, Northwest Forest Pass or America the Beautiful required.</p>
+        </div>
+        <div class="stat">
+          <div class="label mono">Waypoint 2</div>
+          <div class="value">Sandy Camp</div>
+          <p>6,000-6,500 ft. About 4 miles from the trailhead with roughly 2,700-3,200 ft of elevation gain.</p>
+        </div>
+        <div class="stat">
+          <div class="label mono">Waypoint 3</div>
+          <div class="value">Grant Peak</div>
+          <p>10,778 ft. About 3 miles above camp with roughly 4,000-4,500 ft of additional elevation gain.</p>
+        </div>
+      </div>
+
+      <figure class="route-map">
+        <img src="assets/baker-easton/route-map.jpg" alt="Three-dimensional map view of the Easton Glacier route on Mount Baker from the south side.">
+        <figcaption class="caption">Route overview. Treat this as planning context, not navigation. Glacier travel requires current routefinding, rope systems, and hazard assessment.</figcaption>
+      </figure>
+    </section>
+
+    <section id="approaches">
+      <div class="section-kicker mono">02 / Approaches</div>
+      <h2>Confirm you are using the south-side access.</h2>
+      <div class="grid grid-3">
+        <div class="card">
+          <h3>Northern approaches</h3>
+          <p>From Heliotrope Ridge Trail or Ptarmigan Ridge Trail: Coleman Glacier, North Ridge, and Park Glacier.</p>
+        </div>
+        <div class="card">
+          <h3>Eastern approach</h3>
+          <p>The Boulder Glacier Route begins with the Boulder Ridge Trail.</p>
+        </div>
+        <div class="card">
+          <h3>Southern approaches</h3>
+          <p>Easton Glacier and Squak routes are accessed from Park Butte and Scott Paul Trails. This page focuses on the Easton.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="sequence">
+      <div class="section-kicker mono">03 / Route Sequence</div>
+      <h2>Work through the route in clear segments.</h2>
+      <p class="lead">
+        Think through the route from the trailhead through Schreiber's Meadow, the creek crossing around 3,700 ft, Sandy Camp, possible camping sites, the upper glacier, crater area, summit, views, and the full return.
+      </p>
+
+      <div class="timeline">
+        <div class="step">
+          <div class="step-num mono">1</div>
+          <div class="step-body">
+            <h3>Park Butte Trailhead, 3,300 ft</h3>
+            <p>Busy trailhead, restroom at the corner, pass required. Start organized: boots, layers, water, sunscreen, and glacier gear packed so nothing gets lost in the lot.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">2</div>
+          <div class="step-body">
+            <h3>Schreiber's Meadow</h3>
+            <p>Easy trail movement at first. Use this time to settle pace and keep the team together before the terrain and load start to matter more.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">3</div>
+          <div class="step-body">
+            <h3>Creek crossing around 3,700 ft</h3>
+            <p>Expect a seasonal crossing. Move deliberately, protect feet from soaking early, and do not let a simple obstacle scatter the group.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">4</div>
+          <div class="step-body">
+            <h3>Sandy Camp, 6,000-6,500 ft</h3>
+            <p>Many possible campsites and many other parties. Build camp cleanly, melt/filter water as needed, organize summit gear before dark, and protect sleep.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">5</div>
+          <div class="step-body">
+            <h3>Easton Glacier and upper mountain</h3>
+            <p>Rope team efficiency matters. Keep spacing, manage slack, watch bridges and crevasse patterns, and communicate before stopping or changing pace.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">6</div>
+          <div class="step-body">
+            <h3>Crater, summit, and views</h3>
+            <p>Take photos and orient yourself, then keep moving. Weather, softening snow, fatigue, and the descent still affect the plan.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="photo-grid">
+        <figure class="photo">
+          <img src="assets/baker-easton/schreibers-meadow.jpg" alt="Trail through Schreiber's Meadow approaching Mount Baker.">
+          <figcaption>Schreiber's Meadow: easy trail terrain where the team can settle into rhythm.</figcaption>
+        </figure>
+        <figure class="photo">
+          <img src="assets/baker-easton/creek-crossing.jpg" alt="Snow-covered creek crossing on the approach to Mount Baker.">
+          <figcaption>Creek crossing around 3,700 ft: keep it calm, dry, and together.</figcaption>
+        </figure>
+        <figure class="photo">
+          <img src="assets/baker-easton/sandy-camp.jpg" alt="Tent platforms at Sandy Camp on Mount Baker.">
+          <figcaption>Sandy Camp: busy, exposed, and operationally important for the summit push.</figcaption>
+        </figure>
+        <figure class="photo">
+          <img src="assets/baker-easton/crater-summit.jpg" alt="Snow route near the upper Mount Baker summit area.">
+          <figcaption>Upper mountain: save focus for the glacier and the final summit terrain.</figcaption>
+        </figure>
+        <figure class="photo">
+          <img src="assets/baker-easton/summit-view.jpg" alt="View from Mount Baker over the North Cascades.">
+          <figcaption>Summit view: take the moment, then account for the descent.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="weather">
+      <div class="section-kicker mono">04 / Weather</div>
+      <h2>Check weather by elevation, not just by mountain name.</h2>
+      <p class="lead">
+        Compare forecasts at trailhead, camp, and summit elevations. Look for the pattern across all three, then decide whether the climb window is actually usable.
+      </p>
+      <div class="weather-list">
+        <a class="weather-link" href="https://www.windy.com" target="_blank" rel="noopener">
+          <div class="alt mono">Trailhead</div>
+          <div><strong>7-day forecast for Park Butte Trailhead</strong><span>Windy: Mazama Park weather forecast.</span></div>
+        </a>
+        <a class="weather-link" href="https://www.windy.com" target="_blank" rel="noopener">
+          <div class="alt mono">Camp</div>
+          <div><strong>7-day forecast for Mount Baker at 6,800 ft</strong><span>Windy: Baker Pass weather forecast. Use this for Sandy Camp exposure and overnight comfort.</span></div>
+        </a>
+        <a class="weather-link" href="https://www.windy.com" target="_blank" rel="noopener">
+          <div class="alt mono">Summit</div>
+          <div><strong>7-day forecast for Mount Baker at 10,000 ft</strong><span>Windy: Mount Baker, compare forecasts. Watch wind, cloud cap, precipitation timing, and freezing level.</span></div>
+        </a>
+        <a class="weather-link" href="https://www.mountain-forecast.com/peaks/Mount-Baker" target="_blank" rel="noopener">
+          <div class="alt mono">3285 m</div>
+          <div><strong>Mount Baker weather forecast</strong><span>Mountain-Forecast.com summit-level context at 3,285 m.</span></div>
+        </a>
+      </div>
+    </section>
+
+    <section id="logistics">
+      <div class="section-kicker mono">05 / Getting There</div>
+      <h2>Drive, signal, road, parking, pass, restroom.</h2>
+      <div class="split">
+        <div>
+          <p class="lead">
+            The drive to Park Butte Trailhead is roughly 2.5 hours. Trailhead road conditions can change, so check Mount Baker-Snoqualmie road and trail conditions before committing.
+          </p>
+          <ul class="clean" style="margin-top:1rem">
+            <li><strong>Cell signal:</strong> expect to lose service about 40 minutes before the trailhead.</li>
+            <li><strong>Last town:</strong> Concrete.</li>
+            <li><strong>Parking:</strong> reasonable number of spots, but it is a busy place.</li>
+            <li><strong>Pass:</strong> Northwest Forest Pass or America the Beautiful.</li>
+            <li><strong>Restroom:</strong> at the corner of the trailhead area.</li>
+          </ul>
+        </div>
+        <aside class="callout">
+          <h3>Last useful stops</h3>
+          <ul class="clean">
+            <li><strong>Grandy Creek Grocery</strong><br>39952 State Rte 20, Concrete, WA 98237</li>
+            <li><strong>Hamilton Cafe &amp; Store</strong><br>541 Maple St, Hamilton, WA 98255</li>
+            <li><strong>Mt. Baker-Snoqualmie NF</strong><br>Verify current road, trailhead, and pass requirements.</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section id="plans">
+      <div class="section-kicker mono">06 / Trip Plans</div>
+      <h2>Choose the schedule that fits conditions and team pace.</h2>
+      <div class="grid grid-3" style="margin-top:1.5rem">
+        <div class="card plan">
+          <h3>Plan One</h3>
+          <div class="day"><b>Day 1</b><span>Sandy Camp and snow skills.</span></div>
+          <div class="day"><b>Day 2</b><span>Summit and back.</span></div>
+        </div>
+        <div class="card plan">
+          <h3>Plan Two</h3>
+          <div class="day"><b>Day 1</b><span>Sandy Camp.</span></div>
+          <div class="day"><b>Day 2</b><span>Snow skills.</span></div>
+          <div class="day"><b>Day 3</b><span>Summit and back.</span></div>
+        </div>
+        <div class="card plan">
+          <h3>Plan Three</h3>
+          <div class="day"><b>Day 1</b><span>Sandy Camp and snow skills.</span></div>
+          <div class="day"><b>Day 2</b><span>Summit and back to camp.</span></div>
+          <div class="day"><b>Day 3</b><span>Pack camp and hike out.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="prep">
+      <div class="section-kicker mono">07 / Apart From The Hike</div>
+      <h2>Prepare before you drive to the trailhead.</h2>
+      <p class="lead">
+        Rest, packing discipline, practice, time management, efficiency, teamwork, and confidence all matter. Solve small problems at home instead of at camp or during the summit start.
+      </p>
+      <ol class="checklist">
+        <li>Taper off and get rest a week before your climb.</li>
+        <li>Pack your backpack. Check and re-check gear. Do not overpack.</li>
+        <li>Know how to set up your tent, put crampons on, and get your harness on.</li>
+        <li>Practice getting ready in the dark. Then practice getting ready in the dark again.</li>
+        <li>Know how to use the blue bag before you need it.</li>
+        <li>Optimize gear, process, packing, and setup.</li>
+        <li>Rest, hydrate, stretch. Repeat.</li>
+        <li>Plan ahead, give yourself buffer time, and arrive early.</li>
+        <li>Take charge of your time. Do not rely on being handed time by guides or the group.</li>
+        <li>Efficiency, teamwork, and good luck are vital to success.</li>
+        <li>Show confidence in yourself, your training, and your teammates.</li>
+      </ol>
+    </section>
+
+    <section id="mental">
+      <div class="section-kicker mono">08 / Mental Game</div>
+      <h2>Have a plan for the long, repetitive parts.</h2>
+      <div class="split">
+        <div>
+          <p class="lead">
+            Expect steady, repetitive movement for hours. Break the day into manageable sections and use what worked on your long endurance training hikes.
+          </p>
+          <ul class="clean" style="margin-top:1rem">
+            <li>Count 50-100 steps, then repeat.</li>
+            <li>Prepare positive slogans to tell yourself.</li>
+            <li>Remind yourself why you are doing this.</li>
+            <li>You have done the training. You can do this.</li>
+            <li>Trust your gear, the rope lead or guide, and fellow climbers.</li>
+          </ul>
+        </div>
+        <aside class="callout">
+          <h3>Plan the post-climb basics</h3>
+          <p>Have food, drinks, dry layers, and a bathroom plan for after the climb. Those details matter when the team is tired.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="return">
+      <div class="section-kicker mono">09 / Return</div>
+      <h2>Budget time and energy for the full descent.</h2>
+      <div class="grid grid-3" style="margin-top:1.5rem">
+        <div class="stat">
+          <div class="label mono">Descent</div>
+          <div class="value">All 7,000 ft</div>
+          <p>Plan to descend all the way to the trailhead, or at minimum return to camp with enough energy to pack out.</p>
+        </div>
+        <div class="stat">
+          <div class="label mono">Load</div>
+          <div class="value">Likely heavier</div>
+          <p>Fatigue, water, wet gear, and packed camp can make the return feel bigger than expected.</p>
+        </div>
+        <div class="stat">
+          <div class="label mono">After</div>
+          <div class="value">Drive or stay</div>
+          <p>Drive home safely or stay the night: car camp or book a hotel close by.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="section-kicker mono">References</div>
+        <h2>Use this as a planning brief, then verify current conditions.</h2>
+        <p>
+          Use this page as a planning brief for the Easton Route, then verify current conditions, route choices, permits, road status, and weather before using it for a real climb.
+        </p>
+      </div>
+      <div class="source-list">
+        <a href="https://www.mountaineers.org/activities/routes-places/mount-baker-easton-glacier" target="_blank" rel="noopener">Mountaineers - Mount Baker via Easton Route</a>
+        <a href="https://www.summitpost.org/easton-glacier/155616" target="_blank" rel="noopener">SummitPost - Mount Baker via Easton Route</a>
+        <a href="https://www.fs.usda.gov/r6/mbs" target="_blank" rel="noopener">Mt. Baker-Snoqualmie National Forest</a>
+        <a href="https://www.windy.com" target="_blank" rel="noopener">Windy forecast comparison</a>
+        <a href="https://www.mountain-forecast.com/peaks/Mount-Baker" target="_blank" rel="noopener">Mountain-Forecast - Mount Baker</a>
+        <p class="compact-note">
+          Photo credits: Will Najar, Ryan Mcguire, Jennifer Hargiss Murray, No Gluten, No Problem, and Melissa Lopez from Easton Glacier trip posts in May and June 2022.
+        </p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
