@@ -228,6 +228,10 @@ header p { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-
 .pretrend-cell:last-child { border-right: none; }
 .pretrend-cell small { display: block; color: var(--faint); font-size: 9px; margin-top: 3px; }
 .pretrend-time-cell { background: var(--day-bg); box-shadow: inset 0 -2px 0 var(--day-line); }
+.pretrend-cell.pretrend-window { background: rgba(88, 166, 255, 0.10); box-shadow: inset 0 2px 0 rgba(88, 166, 255, 0.55), inset 0 -2px 0 rgba(88, 166, 255, 0.55); }
+.pretrend-cell.pretrend-window-start { border-left: 2px solid rgba(88, 166, 255, 0.82); }
+.pretrend-cell.pretrend-window-end { border-right: 2px solid rgba(88, 166, 255, 0.82); }
+.pretrend-time-cell.pretrend-window { background: linear-gradient(rgba(88, 166, 255, 0.18), rgba(88, 166, 255, 0.18)), var(--day-bg); }
 .pretrend-time { font-size: 13px; color: var(--txt); }
 .pretrend-date { color: var(--day-text); font-size: 9px; margin-top: 2px; }
 .pretrend-sky { gap: 3px; flex-direction: column; font-size: 11px; }
@@ -1439,7 +1443,24 @@ function renderPreClimbTrend(api, startStr, endStr, mtn, thr, point = {label:'Su
     return;
   }
 
-  const cell = value => `<div class="pretrend-cell">${value}</div>`;
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  const windowColumns = rows.map((r, index) => {
+    const cellStart = new Date(r.time);
+    const cellEnd = index < rows.length - 1 ? new Date(rows[index + 1].time) : addHours(cellStart, 3);
+    return cellStart < end && cellEnd > start;
+  });
+  const firstWindowColumn = windowColumns.indexOf(true);
+  const lastWindowColumn = windowColumns.lastIndexOf(true);
+  const windowClass = index => {
+    if(!windowColumns[index]) return '';
+    return [
+      'pretrend-window',
+      index === firstWindowColumn ? 'pretrend-window-start' : '',
+      index === lastWindowColumn ? 'pretrend-window-end' : '',
+    ].filter(Boolean).join(' ');
+  };
+  const cell = (value, className = '') => `<div class="pretrend-cell ${className}">${value}</div>`;
   const dayFmt = new Intl.DateTimeFormat([], {weekday:'short', month:'numeric', day:'numeric'});
   const timeFmt = new Intl.DateTimeFormat([], {hour:'numeric'});
   const dayTints = [
@@ -1453,36 +1474,36 @@ function renderPreClimbTrend(api, startStr, endStr, mtn, thr, point = {label:'Su
   const timeRow = rows.map((r, index) => {
     const d = new Date(r.time);
     const tint = dayTints[d.getDay() % dayTints.length];
-    return `<div class="pretrend-cell pretrend-time-cell" data-trend-index="${index}" style="--day-bg:${tint.bg};--day-line:${tint.line};--day-text:${tint.text}"><div><div class="pretrend-time">${timeFmt.format(d)}</div><div class="pretrend-date">${dayFmt.format(d)}</div></div></div>`;
+    return `<div class="pretrend-cell pretrend-time-cell ${windowClass(index)}" data-trend-index="${index}" style="--day-bg:${tint.bg};--day-line:${tint.line};--day-text:${tint.text}"><div><div class="pretrend-time">${timeFmt.format(d)}</div><div class="pretrend-date">${dayFmt.format(d)}</div></div></div>`;
   }).join('');
-  const skyRow = rows.map(r => {
+  const skyRow = rows.map((r, index) => {
     const sky = trendSky(r, referenceFt);
-    return cell(`<div class="pretrend-sky"><span class="pretrend-icon">${sky.icon}</span><span>${sky.label}</span></div>`);
+    return cell(`<div class="pretrend-sky"><span class="pretrend-icon">${sky.icon}</span><span>${sky.label}</span></div>`, windowClass(index));
   }).join('');
-  const windRow = rows.map(r => {
+  const windRow = rows.map((r, index) => {
     const windBand = routePointBand({peakWind:r.wind_speed_10m, peakGust:r.wind_gusts_10m, maxPop:0}, thr);
     const gust = r.wind_gusts_10m !== null ? ` / ${Math.round(r.wind_gusts_10m)}` : '';
-    return `<div class="pretrend-cell pretrend-wind ${windBand}"><div><strong>${rnd(r.wind_speed_10m,0)}</strong>${gust}<small>${windDir(r.wind_direction_10m)}</small></div></div>`;
+    return `<div class="pretrend-cell pretrend-wind ${windBand} ${windowClass(index)}"><div><strong>${rnd(r.wind_speed_10m,0)}</strong>${gust}<small>${windDir(r.wind_direction_10m)}</small></div></div>`;
   }).join('');
-  const precipRow = rows.map(r => {
+  const precipRow = rows.map((r, index) => {
     const band = metClass(r.precipitation_probability, thr.pGo, thr.pWa);
     const precip = r.precipitation !== null && r.precipitation >= 0.005 ? `${r.precipitation.toFixed(2)} in` : 'trace';
-    return `<div class="pretrend-cell pretrend-pop ${band}"><div>${rnd(r.precipitation_probability,0)}%<small>${precip}</small></div></div>`;
+    return `<div class="pretrend-cell pretrend-pop ${band} ${windowClass(index)}"><div>${rnd(r.precipitation_probability,0)}%<small>${precip}</small></div></div>`;
   }).join('');
-  const tempRow = rows.map(r => {
+  const tempRow = rows.map((r, index) => {
     const band = r.temperature_2m !== null && r.temperature_2m > 32 ? 'watch' : '';
-    return `<div class="pretrend-cell pretrend-temp ${band}">${tempFmt(r.temperature_2m)}</div>`;
+    return `<div class="pretrend-cell pretrend-temp ${band} ${windowClass(index)}">${tempFmt(r.temperature_2m)}</div>`;
   }).join('');
-  const chillRow = rows.map(r => {
+  const chillRow = rows.map((r, index) => {
     const chill = windChillF(r.temperature_2m, r.wind_speed_10m);
     const band = chill !== null && chill <= 10 ? 'watch' : '';
-    return `<div class="pretrend-cell pretrend-temp ${band}">${tempFmt(chill)}</div>`;
+    return `<div class="pretrend-cell pretrend-temp ${band} ${windowClass(index)}">${tempFmt(chill)}</div>`;
   }).join('');
-  const freezeRow = rows.map(r => {
+  const freezeRow = rows.map((r, index) => {
     const below = r.freezing_level_height !== null && r.freezing_level_height < referenceFt ? ' ↓' : '';
-    return `<div class="pretrend-cell pretrend-freeze">${r.freezing_level_height !== null ? Math.round(r.freezing_level_height).toLocaleString() + below : '—'}</div>`;
+    return `<div class="pretrend-cell pretrend-freeze ${windowClass(index)}">${r.freezing_level_height !== null ? Math.round(r.freezing_level_height).toLocaleString() + below : '—'}</div>`;
   }).join('');
-  const cloudRow = rows.map(r => cell(`${rnd(r.cloud_cover,0)}%`)).join('');
+  const cloudRow = rows.map((r, index) => cell(`${rnd(r.cloud_cover,0)}%`, windowClass(index))).join('');
 
   el.innerHTML = `
     <div class="pretrend-grid" style="--trend-cols:${rows.length}">
