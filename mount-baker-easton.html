@@ -83,6 +83,24 @@
     letter-spacing: 0.12em;
   }
 
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .back-link {
+    color: var(--glacier);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .back-link:hover { text-decoration: underline; }
+
   .jump-nav {
     display: flex;
     gap: 0.35rem;
@@ -376,13 +394,15 @@
     line-height: 1.45;
   }
 
-  .weather-list {
+  .weather-list,
+  .resource-list {
     margin-top: 1.5rem;
     display: grid;
     gap: 0.85rem;
   }
 
-  .weather-link {
+  .weather-link,
+  .resource-link {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 0.85rem;
@@ -395,13 +415,15 @@
     color: var(--text);
   }
 
-  .weather-link .alt {
+  .weather-link .alt,
+  .resource-link .alt {
     min-width: 5.2rem;
     color: var(--glacier);
     font-weight: 900;
   }
 
-  .weather-link span {
+  .weather-link span,
+  .resource-link span {
     display: block;
     color: var(--muted);
     font-size: 0.92rem;
@@ -598,6 +620,12 @@
   @media (max-width: 430px) {
     main { padding-left: 0.85rem; padding-right: 0.85rem; }
 
+    .brand-row {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
     .hero-content {
       width: calc(100% - 1.7rem);
     }
@@ -611,7 +639,8 @@
       font-size: 1.22rem;
     }
 
-    .weather-link {
+    .weather-link,
+    .resource-link {
       grid-template-columns: 1fr;
       gap: 0.25rem;
     }
@@ -646,7 +675,10 @@
 <body>
   <div class="topbar">
     <div class="topbar-inner">
-      <div class="brand">Mount Baker <span>Easton Route Field Guide</span></div>
+      <div class="brand-row">
+        <a class="back-link" href="index.html">Back to index</a>
+        <div class="brand">Mount Baker <span>Easton Route Field Guide</span></div>
+      </div>
       <nav class="jump-nav" aria-label="Page sections">
         <a href="#route">Route</a>
         <a href="#weather">Weather</a>
@@ -685,6 +717,17 @@
         Start at Park Butte Trailhead, camp around Sandy Camp, and climb to Grant Peak via the Easton Glacier. These are planning numbers, not exact measurements: campsites vary, tracks shift, and this is a busy route.
       </p>
       <div class="notice">Primary objective: get the full team back safely, even if that means turning around below the summit.</div>
+
+      <div class="resource-list" aria-label="Route planning links">
+        <a class="resource-link" href="https://www.fs.usda.gov/r06/mbs/recreation/easton-glacier-climbing-route" target="_blank" rel="noopener">
+          <div class="alt mono">USFS</div>
+          <div><strong>Official Easton Glacier climbing route</strong><span>Use the Forest Service route page for agency route context, access notes, and current management information.</span></div>
+        </a>
+        <a class="resource-link" href="https://www.alltrails.com/trail/us/washington/mount-baker-via-easton-glacier" target="_blank" rel="noopener">
+          <div class="alt mono">Track</div>
+          <div><strong>Mount Baker via Easton Glacier trail page</strong><span>AllTrails can help with approach mileage, recent user notes, and rough track context. Do not treat it as glacier navigation.</span></div>
+        </a>
+      </div>
 
       <div class="grid grid-3" style="margin-top:1.5rem">
         <div class="stat">
@@ -828,6 +871,18 @@
           <div class="alt mono">3285 m</div>
           <div><strong>Mount Baker weather forecast</strong><span>Mountain-Forecast.com summit-level context at 3,285 m.</span></div>
         </a>
+        <a class="weather-link" href="https://forecast.weather.gov/MapClick.php?lat=48.7773&lon=-121.8132&unit=0&lg=english&FcstType=graphical" target="_blank" rel="noopener">
+          <div class="alt mono">NWS</div>
+          <div><strong>NWS hourly forecast for Baker summit</strong><span>Graphical hourly forecast near Grant Peak. Check wind, temperature, precipitation timing, and freezing-level implications.</span></div>
+        </a>
+        <a class="weather-link" href="https://nwcleanairwa.gov/air-quality-center/mt-baker-webcam/" target="_blank" rel="noopener">
+          <div class="alt mono">Webcam</div>
+          <div><strong>Mount Baker webcam and air quality</strong><span>Use the NW Clean Air Agency view for visibility, cloud deck, smoke, and general conditions context before departure.</span></div>
+        </a>
+        <a class="weather-link" href="mw.html?m=baker&amp;r=easton">
+          <div class="alt mono">Tool</div>
+          <div><strong>Get detailed forecast</strong><span>Open the Mountain Weather dashboard prefilled for Mount Baker and the Easton route. The climb window defaults to the next Saturday.</span></div>
+        </a>
       </div>
     </section>
 
@@ -961,9 +1016,12 @@
       <div class="source-list">
         <a href="https://www.mountaineers.org/activities/routes-places/mount-baker-easton-glacier" target="_blank" rel="noopener">Mountaineers - Mount Baker via Easton Route</a>
         <a href="https://www.summitpost.org/easton-glacier/155616" target="_blank" rel="noopener">SummitPost - Mount Baker via Easton Route</a>
-        <a href="https://www.fs.usda.gov/r6/mbs" target="_blank" rel="noopener">Mt. Baker-Snoqualmie National Forest</a>
+        <a href="https://www.fs.usda.gov/r06/mbs/recreation/easton-glacier-climbing-route" target="_blank" rel="noopener">USFS - Easton Glacier Climbing Route</a>
+        <a href="https://www.alltrails.com/trail/us/washington/mount-baker-via-easton-glacier" target="_blank" rel="noopener">AllTrails - Mount Baker via Easton Glacier</a>
         <a href="https://www.windy.com" target="_blank" rel="noopener">Windy forecast comparison</a>
+        <a href="https://forecast.weather.gov/MapClick.php?lat=48.7773&lon=-121.8132&unit=0&lg=english&FcstType=graphical" target="_blank" rel="noopener">NWS - Baker Summit Hourly Forecast</a>
         <a href="https://www.mountain-forecast.com/peaks/Mount-Baker" target="_blank" rel="noopener">Mountain-Forecast - Mount Baker</a>
+        <a href="https://nwcleanairwa.gov/air-quality-center/mt-baker-webcam/" target="_blank" rel="noopener">NW Clean Air Agency - Mount Baker Webcam</a>
         <p class="compact-note">
           Photo credits: Will Najar, Ryan Mcguire, Jennifer Hargiss Murray, No Gluten, No Problem, and Melissa Lopez from Easton Glacier trip posts in May and June 2022.
         </p>
