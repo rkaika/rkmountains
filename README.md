@@ -1,12 +1,17 @@
 # RK Mountains
 
-Small static mountaineering weather tool for comparing climb windows on west-coast and Alaska routes.
+Small static mountaineering planning site with a weather dashboard and route-specific field guides for West Coast, Sierra, and Alaska objectives.
 
 ## Main Page
 
-Open `mw.html` (or `index.html`, which redirects there) to use the mountaineering weather dashboard.
+Open `index.html` for the site home page. Open `mw.html` directly for the mountaineering weather dashboard.
 
-The page helps evaluate a selected mountain, trailhead/route, and climb window. It combines official NWS point forecasts with raw model guidance so you can compare the human-edited baseline against multiple numerical models.
+The weather dashboard helps evaluate a selected mountain, trailhead/route, and climb window. It combines official NWS point forecasts with raw model guidance so you can compare the human-edited baseline against multiple numerical models.
+
+The home page also links to field guides:
+
+- `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
+- `mount-whitney-main-trail.html`: Mount Whitney Main Trail Field Guide.
 
 ## What Is On The Page
 
@@ -54,7 +59,7 @@ Use the hosted GitHub Pages version: [rkaika.github.io/rkmountains](https://rkai
 Then:
 
 1. Select a mountain and route/trailhead.
-2. Set your climb start and expected end time.
+2. Set your climb start and expected end time. The default window is the next Saturday from 10:00 to 22:00 local time. If you change the start time and the end time is now before the start, the dashboard automatically moves the end to `start + 24 hours`.
 3. Click **Get Forecast**.
 4. Read **Climbing Window Guidance** first, then scan the summary cards and route profile weather.
 5. Use the **Route Weather Timeline** selector to compare summit, mid-point, and trailhead conditions before, during, and shortly after the climb. Open **Hourly details** only when you need exact values, then scan the model charts.
@@ -77,7 +82,7 @@ Example:
 https://rkaika.github.io/rkmountains/mw.html?m=hood&r=hogsback&start=2026-05-14T04:00&end=2026-05-14T16:00
 ```
 
-Mountain keys: `baker`, `rainier`, `campMuir`, `glacierPeak`, `stHelens`, `adams`, `hood`, `olympus`, `mailbox`, `shuksan`, `shasta`, `denali`. Route slugs are listed in the **Supported Routes Reference** table below.
+Mountain keys: `baker`, `rainier`, `campMuir`, `glacierPeak`, `stHelens`, `adams`, `hood`, `olympus`, `mailbox`, `colchuck`, `shuksan`, `shasta`, `whitney`, `denali`. Route slugs are listed in the **Supported Routes Reference** table below.
 
 To run it locally instead:
 
@@ -101,8 +106,12 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 
 ## Files
 
-- `index.html`: redirects to `mw.html` (default entry point).
+- `index.html`: site home page with links to the weather dashboard and field guides.
 - `mw.html`: current mountaineering weather dashboard.
+- `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
+- `mount-whitney-main-trail.html`: Mount Whitney Main Trail Field Guide.
+- `assets/baker-easton/`: local images used by the Mount Baker Easton guide.
+- `assets/whitney-main-trail/`: local images used by the Mount Whitney Main Trail guide.
 - `mw3.html`: latest experimental/source copy used before promoting to `mw.html`.
 - `mw2.html`: prior dashboard version kept for comparison.
 - `mw1.html`: earlier dashboard version kept for comparison.
@@ -129,8 +138,10 @@ Thresholds are listed as `W sustained wind go/watch`, `G gust go/watch`, and `P 
 | Mt Hood | 45.3735, -121.6960 | 11,249 ft | PQR | W 20/30, G 30/40, P 20/40 | nwac, volcano, nps, webcam |
 | Mt Olympus | 47.8013, -123.7108 | 7,980 ft | SEW | W 20/30, G 30/40, P 20/35 | nwac, nps |
 | Mailbox Peak | 47.4624, -121.6393 | 4,841 ft | SEW | W 25/35, G 35/45, P 20/40 | nwac, wta |
+| Colchuck Peak | 47.4771, -120.8451 | 8,705 ft | OTX | W 20/30, G 30/40, P 20/35 | nwac, wta |
 | Mt Shuksan | 48.8275, -121.6149 | 9,131 ft | SEW | W 20/30, G 30/40, P 20/35 | nwac, webcam |
 | Mt Shasta | 41.4092, -122.1944 | 14,179 ft | MFR | W 15/25, G 25/35, P 15/30 | avalanche, volcano, nps |
+| Mt Whitney | 36.5786, -118.2923 | 14,505 ft | VEF | W 15/25, G 25/35, P 15/30 | nps, webcam |
 | Mt Denali | 63.0692, -151.0070 | 20,310 ft | AFC | W 15/25, G 25/35, P 15/30 | nps |
 
 ## Supported Routes Reference
@@ -161,10 +172,12 @@ The **Slug** column is the value to pass as the `r` URL parameter (scoped to the
 | `olympus` | Hoh Rain Forest — Blue Glacier | `hoh` | 47.8608, -123.9343 | 575 ft | 270° | 44 | yes |
 | `mailbox` | Mailbox Peak TH — New Trail | `new` | 47.4667, -121.6735 | 900 ft | 315° | 9.4 | yes |
 | `mailbox` | Mailbox Peak TH — Old Trail | `old` | 47.4667, -121.6735 | 900 ft | 315° | 5.4 | yes |
+| `colchuck` | Stuart Lake TH — Colchuck Lake / Glacier | `lakeglacier` | 47.5276, -120.8200 | 3,400 ft | 0° | 12 | yes |
 | `shuksan` | Artist Point — Price / Sulfide Glacier | `sulfide` | 48.8460, -121.6920 | 5,200 ft | 180° | — | search fallback |
 | `shuksan` | Shannon Ridge — NW Couloir | `nwcouloir` | 48.8880, -121.6920 | 3,200 ft | 315° | — | search fallback |
 | `shasta` | Bunny Flat — Avalanche Gulch | `avygulch` | 41.3537, -122.2336 | 6,950 ft | 225° | 11 | yes |
 | `shasta` | Clear Creek TH | `clearcreek` | 41.3700, -122.1540 | 5,760 ft | 180° | — | search fallback |
 | `shasta` | Brewer Creek — Hotlum-Bolam | `hotlum` | 41.4420, -122.0920 | 6,990 ft | 45° | — | search fallback |
+| `whitney` | Whitney Portal — Mount Whitney Trail | `mountwhitneytrail` | 36.5869, -118.2400 | 8,360 ft | 90° | 22 | yes |
 | `denali` | Kahiltna Base Camp — West Buttress | `wb` | 62.9667, -151.1500 | 7,200 ft | 180° | — | search fallback |
 | `denali` | Wonder Lake — Muldrow Glacier | `muldrow` | 63.4775, -150.8728 | 2,000 ft | 0° | — | search fallback |
