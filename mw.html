@@ -761,6 +761,19 @@ const MTNS = {
       { slug:'hotlum', name:'Brewer Creek — Hotlum-Bolam',    lat:41.4420,  lon:-122.0920, elev:6990, aspect:45,  phase:[0.18,0.45,0.08,0.29] },
     ]
   },
+  whitney: {
+    name: 'Mt Whitney', summit: [36.5786, -118.2923, 14505], nws: 'VEF',
+    thr: { wGo:15, wWa:25, gGo:25, gWa:35, pGo:15, pWa:30 },
+    ths: [
+      { slug:'mountwhitneytrail', name:'Whitney Portal — Mount Whitney Trail', lat:36.5869, lon:-118.2400, elev:8360, miles:22, aspect:90, phase:[0.18,0.46,0.08,0.28], alltrails:'https://www.alltrails.com/trail/us/california/mount-whitney-trail',
+        profilePoints:[
+          {name:'Lone Pine Lake', lat:36.5798, lon:-118.2558, elev:9960},
+          {name:'Outpost Camp', lat:36.5675, lon:-118.2667, elev:10360},
+          {name:'Trail Camp', lat:36.5638, lon:-118.2796, elev:12000},
+          {name:'Trail Crest', lat:36.5595, lon:-118.2920, elev:13645},
+        ] },
+    ]
+  },
   denali: {
     name: 'Mt Denali', summit: [63.0692, -151.0070, 20310], nws: 'AFC',
     thr: { wGo:15, wWa:25, gGo:25, gWa:35, pGo:15, pWa:30 },
@@ -829,6 +842,10 @@ const MTN_LINKS = {
     avalanche: 'https://www.shastaavalanche.org/',
     volcano: 'https://www.usgs.gov/volcanoes/mount-shasta',
     nps: 'https://www.fs.usda.gov/r05/shasta-trinity/recreation/mt-shasta-wilderness'
+  },
+  whitney: {
+    nps: 'https://www.recreation.gov/permits/233260',
+    webcam: 'https://www.whitneyzone.com/wz/ubbthreads.php/webcam'
   },
   denali: {
     nps: 'https://www.nps.gov/dena/planyourvisit/mountaineering.htm'
@@ -2701,8 +2718,11 @@ async function loadForecast(){
   const mtn     = MTNS[mtnKey];
   const thIdx   = parseInt(document.getElementById('sel-th').value)||0;
   const th      = mtn.ths[thIdx];
-  const start   = document.getElementById('inp-start').value;
-  const end     = document.getElementById('inp-end').value;
+  const startEl = document.getElementById('inp-start');
+  const endEl   = document.getElementById('inp-end');
+  ensureEndAfterStart(startEl, endEl);
+  const start   = startEl.value;
+  const end     = endEl.value;
 
   const errEl = document.getElementById('err-msg');
   errEl.hidden = true;
@@ -2797,15 +2817,23 @@ function nextSaturdayFrom(date){
 
 function defaultClimbWindow(now = new Date()){
   const start = nextSaturdayFrom(now);
-  start.setHours(22, 0, 0, 0);
+  start.setHours(10, 0, 0, 0);
   const end = new Date(start);
-  end.setHours(start.getHours() + 12);
+  end.setHours(22, 0, 0, 0);
   return {start, end};
+}
+
+function ensureEndAfterStart(inpStart, inpEnd){
+  if(!inpStart?.value || !inpEnd?.value) return;
+  const start = new Date(inpStart.value);
+  const end = new Date(inpEnd.value);
+  if(isNaN(start) || isNaN(end) || end >= start) return;
+  inpEnd.value = dtlStr(addHours(start, 24));
 }
 
 function initForm(){
   const selMtn = document.getElementById('sel-mtn');
-  const WA_KEYS = new Set(['baker','rainier','campMuir','glacierPeak','stHelens','adams','olympus','mailbox','shuksan']);
+  const WA_KEYS = new Set(['baker','rainier','campMuir','glacierPeak','stHelens','adams','olympus','mailbox','colchuck','shuksan']);
   const addOpt = ([k,m])=>{
     const o = document.createElement('option');
     o.value = k; o.textContent = m.name;
@@ -2840,6 +2868,8 @@ function initForm(){
   const inpEnd   = document.getElementById('inp-end');
   inpStart.value = dtlStr(defaultWindow.start);
   inpEnd.value   = dtlStr(defaultWindow.end);
+  inpStart.addEventListener('input', ()=>ensureEndAfterStart(inpStart, inpEnd));
+  inpStart.addEventListener('change', ()=>ensureEndAfterStart(inpStart, inpEnd));
 
   document.getElementById('btn-go').addEventListener('click', loadForecast);
   document.getElementById('btn-go').addEventListener('click', writeUrlFromForm);
