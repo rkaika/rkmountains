@@ -11,6 +11,7 @@ The weather dashboard helps evaluate a selected mountain, trailhead/route, and c
 The home page also links to field guides:
 
 - `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
+- `mount-rainier-dc.html`: Mount Rainier DC / Ingraham Direct Field Guide.
 - `mount-whitney-main-trail.html`: Mount Whitney Main Trail Field Guide.
 
 ## What Is On The Page
@@ -128,6 +129,7 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 - `mw.html`: current mountaineering weather dashboard.
 - `climb.html`: Summit-Day Check — lightweight during-climb conditions page with offline cache.
 - `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
+- `mount-rainier-dc.html`: Mount Rainier DC / Ingraham Direct Field Guide. Uses inline SVG diagrams (elevation profile, season windows, summit-day schedule) instead of photographs, so it has no assets directory.
 - `mount-whitney-main-trail.html`: Mount Whitney Main Trail Field Guide.
 - `assets/baker-easton/`: local images used by the Mount Baker Easton guide.
 - `assets/whitney-main-trail/`: local images used by the Mount Whitney Main Trail guide.
