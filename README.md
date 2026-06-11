@@ -4,7 +4,7 @@ Small static mountaineering planning site with a weather dashboard and route-spe
 
 ## Main Page
 
-Open `index.html` for the site home page. Open `mw.html` directly for the mountaineering weather dashboard.
+Open `index.html` for the site home page. Open `mw.html` directly for the mountaineering weather dashboard. Open `climb.html` for the Summit-Day Check — a lightweight during-climb view (see below).
 
 The weather dashboard helps evaluate a selected mountain, trailhead/route, and climb window. It combines official NWS point forecasts with raw model guidance so you can compare the human-edited baseline against multiple numerical models.
 
@@ -18,6 +18,7 @@ The home page also links to field guides:
 - **Mountain and route controls**: choose a peak, trailhead/route, climb start, and climb end. Washington peaks group at the top of the dropdown; others (OR/CA/AK) sit below a separator.
 - **Crumb header**: name → route, trailhead elevation → summit elevation with computed gain, round-trip miles when known, and the selected climb window.
 - **Selected climbing window group**: a visually grouped block for the core climb-window decision surfaces: verdict, summary metric cards, and route profile weather.
+- **Best window strip**: a row of day chips covering the available forecast days (up to 7). Each day applies the selected start time and duration, scores model-mean wind/gust/precip against the mountain's thresholds, and shows a Go / Watch / Caution color with the limiting metric. Clicking a day reloads the dashboard for that day.
 - **Climbing Window Guidance panel**: a Go / Watch / Caution verdict driven by wind, gust, and precipitation thresholds, followed by the sorted critical-criteria list (red → yellow → green) and a per-hour sparkline showing worst-of-three banding with P/W/G driver letters in cells that hit watch or caution.
 - **Summary cards (met grid)**: summit temperature, trailhead temperature, upper-mountain peak wind, upper-mountain peak gust, freezing level, precipitation probability, snow signal, and model spread — laid out directly below the verdict.
 - **Route profile weather**: NWS point forecasts for trailhead, curated route references, and summit/objective where available. Cards show point elevation, temperature range, precipitation probability, wind, gust when available, and snow signal. Points are planning anchors, not navigation data.
@@ -25,7 +26,7 @@ The home page also links to field guides:
 - **Hourly details**: collapsed by default; expands to hour-by-hour summit and trailhead temperatures alongside wind, gust, direction, freezing level, precipitation probability, sky cover, and notes.
 - **Model charts**: Open-Meteo model comparison charts for wind, gusts, freezing level, precipitation probability, and snowfall. Charts show two days before the climb start through two days after the climb end, with the selected climb window highlighted.
 - **Signal tiles**: Wet snow, Rain on snow, and Wind exposure cards with hover explanations and Avalanche.org reference links on the headline value.
-- **External context**: NWS active alerts, regional avalanche forecast, and SNOTEL/NRCS snowpack pointers.
+- **External context**: NWS active alerts, a live avalanche-center card, a live Snowpack & refreeze card, and a Recent beta card. The snowpack card shows the nearest SNOTEL station's snow depth, SWE, week-over-week change, and temperature, plus a computed overnight-refreeze read (model-mean freezing level vs the route's mid elevation in the 10 hours before the start) and an aspect-based corn-timing hint after a real refreeze; objectives with no station within ~20 miles (Shasta, Whitney, Denali) keep map links only. The avalanche card pulls the current zone product from avalanche.org: in season it shows the danger rating per elevation band (official danger-scale colors), the listed avalanche problems, and the bottom line; off season it shows the center's seasonal statement. Objectives outside any forecast zone (Whitney, Denali) say so explicitly. The Recent beta card links each objective to its avalanche-center field observations page and curated trip-report sources (WTA trip-report listings, the Mount Rainier Climbing Blog, CascadeClimbers searches, MSAC climbing advisory, NPS pages), each labeled with what it is good for.
 - **Recent precipitation**: recent model-mean precipitation totals at the summit. Climb-day civil light, sunrise/sunset, and moon illumination are shown compactly in the Climbing Window Guidance bullets.
 - **Current observations**: nearby station observations, including elevation-aware notes where available.
 - **Model guidance for this window**: lead-time-aware advice on which models to lean on (Nowcast / HRRR lead ≤48 h / NAM bridge ≤84 h / Global pattern beyond), updating based on the selected climb start.
@@ -40,6 +41,8 @@ The home page also links to field guides:
 - **Wind, gusts, temperature, freezing level, precipitation, snowfall, and cloud cover**: Open-Meteo model data.
 - **Route Weather Timeline and recent precipitation**: Open-Meteo model data using `past_days=3`, sampled around the selected climb window.
 - **Forecast discussion**: NWS Area Forecast Discussion products from `api.weather.gov`.
+- **Avalanche forecast**: current zone products (danger ratings, problems, bottom line, seasonal statements) from the avalanche.org v2 public API (`api.avalanche.org`). Zone assignments were verified point-in-polygon against the avalanche.org map-layer polygons.
+- **Snowpack**: nearest-SNOTEL snow depth, SWE, week-over-week change, and station temperature from the NRCS AWDB REST API (`wcc.sc.egov.usda.gov/awdbRestApi`). The overnight-refreeze read uses Open-Meteo model-mean freezing level for the ~10 hours before the climb start, compared to the route's mid elevation.
 
 Open-Meteo model comparisons currently include:
 
@@ -64,6 +67,19 @@ Then:
 4. Read **Climbing Window Guidance** first, then scan the summary cards and route profile weather.
 5. Use the **Route Weather Timeline** selector to compare summit, mid-point, and trailhead conditions before, during, and shortly after the climb. Open **Hourly details** only when you need exact values, then scan the model charts.
 6. Scan signal tiles, external context, recent precipitation, observations, and the NWS Area Forecast Discussion.
+
+## Summit-Day Check (`climb.html`)
+
+A separate, deliberately small page for checking conditions during the climb on a weak cell connection. It accepts the same `m`/`r` (and optional `start`/`end`) URL parameters as the dashboard; the dashboard's quick links include a "Summit-day view" chip that carries the current selection over. With no parameters it shows a simple mountain/route picker.
+
+What it shows:
+
+- 12 hours at the summit point (GFS + HRRR mean): temperature, wind chill, wind, gust, precipitation probability, and freezing level, color-banded with the mountain's Go / Watch / Caution thresholds. If a `start` parameter is present and still ahead, the table anchors at the climb window (starting 2 hours early for the approach) and says so; once the window has begun, when it lies beyond the 2-day fetch horizon, or when there are no parameters, it anchors at the current hour.
+- NWS active alerts for the summit point.
+- A daylight line: hours of sun left, sunset, and civil dusk (next sunrise after dark).
+- Nearby station observations, loaded on tap to save data.
+
+The last successful fetch is cached in `localStorage` per mountain/route. When a refresh fails, the page renders the cached data with a prominent `OFFLINE — showing cached data fetched N min ago` stamp. Route data is a trimmed copy of the dashboard's `MTNS`; keep them in sync when adding objectives.
 
 ## Shareable / Embeddable URLs
 
@@ -102,12 +118,15 @@ To run it locally instead:
 
 The Go / Watch / Caution verdict is only a planning aid. It is not a substitute for judgment, current observations, avalanche forecasts, route condition reports, or turning around.
 
+When an in-season avalanche forecast covers the selected climb day (same day, or the next day via the center's "tomorrow" rating), the danger rating gates the verdict: Considerable or higher caps the verdict at Caution, and Moderate caps it at Watch. Ratings from earlier days do not gate the verdict — they appear in the decision list as context with a reminder to recheck closer to departure.
+
 Use the NWS temperatures as the baseline for expected surface conditions. Use the Open-Meteo model comparison to understand uncertainty, especially for wind, freezing level, and precipitation timing. Wide model spread means the plan deserves more caution and another check closer to departure.
 
 ## Files
 
 - `index.html`: site home page with links to the weather dashboard and field guides.
 - `mw.html`: current mountaineering weather dashboard.
+- `climb.html`: Summit-Day Check — lightweight during-climb conditions page with offline cache.
 - `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
 - `mount-whitney-main-trail.html`: Mount Whitney Main Trail Field Guide.
 - `assets/baker-easton/`: local images used by the Mount Baker Easton guide.

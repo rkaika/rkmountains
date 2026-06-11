@@ -6,6 +6,7 @@ This repository is a small static site for mountaineering planning. Treat it as 
 
 - `index.html` is the home page. It links to the weather dashboard and field guides.
 - `mw.html` is the current production weather dashboard.
+- `climb.html` is the Summit-Day Check, a lightweight during-climb page. Its `PEAKS` data is a trimmed copy of `MTNS` in `mw.html`; keep keys, slugs, coordinates, and thresholds in sync when objectives change.
 - `mw3.html`, `mw2.html`, and `mw1.html` are older or experimental dashboard copies. Do not edit them unless the task explicitly asks for it.
 - `mount-baker-easton.html` and `mount-whitney-main-trail.html` are standalone field guides.
 - `assets/baker-easton/` and `assets/whitney-main-trail/` contain local guide images.

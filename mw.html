@@ -233,6 +233,43 @@ header p { width: 100%; max-width: 720px; font-size: 16px; color: var(--dim); le
 	.context-card.watch .val { color: var(--watch); }
 	.context-card.caution .val { color: var(--caution); }
 		.context-card .sub { color: var(--dim); font-size: 11px; line-height: 1.5; }
+
+	/* avalanche danger card (North American danger-scale colors, fixed in both themes) */
+	.avy-bands { display: flex; gap: 6px; margin: 2px 0 8px; flex-wrap: wrap; }
+	.avy-band { flex: 1 1 88px; min-width: 88px; border-radius: 6px; padding: 5px 8px; font-family: var(--mono); border: 1px solid var(--bdr); }
+	.avy-band .b-elev { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.78; }
+	.avy-band .b-rating { font-size: 11px; font-weight: 700; }
+	.avy-d0 { background: var(--bdr2); color: var(--dim); }
+	.avy-d1 { background: #50b848; color: #0b1c0e; }
+	.avy-d2 { background: #fff200; color: #3a3500; }
+	.avy-d3 { background: #f7941e; color: #3a2102; }
+	.avy-d4 { background: #ed1c24; color: #ffffff; }
+	.avy-d5 { background: #231f20; color: #ffffff; border-color: #ed1c24; }
+	.avy-probs { margin: 0 0 6px; }
+	.avy-probs .p-item { font-size: 11px; color: var(--dim); line-height: 1.5; }
+
+	/* recent beta link list */
+	.beta-item { font-size: 11px; color: var(--dim); line-height: 1.7; }
+	.beta-item .b-note { color: var(--faint); }
+
+	/* best-window finder strip */
+	.window-finder { margin-bottom: 14px; }
+	.wf-title { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 6px; }
+	.wf-strip { display: flex; gap: 6px; flex-wrap: wrap; }
+	.wf-day { flex: 1 1 86px; min-width: 86px; background: var(--card); border: 1px solid var(--bdr); border-top: 3px solid var(--bdr2); border-radius: 8px; padding: 7px 6px 6px; text-align: center; cursor: pointer; font-family: var(--mono); }
+	.wf-day.go { border-top-color: var(--go); }
+	.wf-day.watch { border-top-color: var(--watch); }
+	.wf-day.caution { border-top-color: var(--caution); }
+	.wf-day.selected { outline: 2px solid var(--blue); outline-offset: 1px; }
+	.wf-day:hover { filter: brightness(1.08); }
+	.wf-day .wf-dow { font-size: 11px; font-weight: 700; }
+	.wf-day .wf-date { font-size: 10px; color: var(--faint); }
+	.wf-day .wf-verdict { font-size: 10px; font-weight: 700; margin-top: 3px; }
+	.wf-day.go .wf-verdict { color: var(--go); }
+	.wf-day.watch .wf-verdict { color: var(--watch); }
+	.wf-day.caution .wf-verdict { color: var(--caution); }
+	.wf-day .wf-why { font-size: 9px; color: var(--dim); margin-top: 2px; }
+	.wf-note { font-size: 10px; color: var(--faint); margin-top: 6px; }
 		.context-card a { color: var(--blue); text-decoration: none; }
 		.context-card a:hover { text-decoration: underline; }
 		.route-profile { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px; overflow: hidden; }
@@ -460,6 +497,7 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
   <div class="climb-frame" id="climb-frame"></div>
   <div class="links" id="quick-links"></div>
   <section class="window-group" aria-label="Selected climbing window">
+	  <div class="window-finder" id="window-finder" hidden></div>
 	  <div class="verdict" id="verdict"></div>
 	  <div class="inv-alert" id="inv-alert" hidden></div>
 	  <div class="met-grid" id="met-grid"></div>
@@ -602,7 +640,7 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
   </div>
 </div>
 <footer>
-  Data: api.weather.gov for NWS hourly temperatures, snowfall grid data, and AFD · open-meteo.com for GFS, ECMWF IFS 0.25°, DWD ICON, Canadian GEM, HRRR, and NAM model fields<br>
+  Data: api.weather.gov for NWS hourly temperatures, snowfall grid data, and AFD · open-meteo.com for GFS, ECMWF IFS 0.25°, DWD ICON, Canadian GEM, HRRR, and NAM model fields · api.avalanche.org for avalanche-center danger ratings and statements<br>
   Thresholds per mountain. Go/Watch/Caution is an aid — not a substitute for judgment, real-time observations, and NWAC.
 </footer>
 
@@ -791,19 +829,19 @@ const MTN_LINKS = {
     webcam: 'https://www.mtbaker.us/the-mountain/web-cams/'
   },
   rainier: {
-    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-central',
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-south',
     volcano: 'https://www.usgs.gov/volcanoes/mount-rainier',
     nps: 'https://www.nps.gov/mora/planyourvisit/climbing.htm',
     webcam: 'https://www.nps.gov/mora/learn/photosmultimedia/webcams.htm'
   },
   campMuir: {
-    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-central',
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-south',
     nps: 'https://www.nps.gov/mora/planyourvisit/climbing.htm',
     webcam: 'https://www.nps.gov/mora/learn/photosmultimedia/webcams.htm',
     wta: 'https://www.wta.org/go-hiking/hikes/camp-muir'
   },
   glacierPeak: {
-    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-north',
+    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-central',
     volcano: 'https://www.usgs.gov/volcanoes/glacier-peak'
   },
   stHelens: {
@@ -827,11 +865,11 @@ const MTN_LINKS = {
     nps: 'https://www.nps.gov/olym/planyourvisit/wilderness-trip-planner.htm'
   },
   mailbox: {
-    nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-central',
+    nwac: 'https://nwac.us/avalanche-forecast/#/snoqualmie-pass',
     wta: 'https://www.wta.org/go-hiking/hikes/mailbox-peak'
   },
   colchuck: {
-    nwac: 'https://nwac.us/avalanche-forecast/#/east-central',
+    nwac: 'https://nwac.us/avalanche-forecast/#/east-slopes-central',
     wta: 'https://www.wta.org/go-hiking/hikes/colchuck-lake'
   },
   shuksan: {
@@ -855,6 +893,107 @@ const MTN_LINKS = {
 const LOCAL_GUIDANCE = {
   stHelens: { name: 'MSH Institute · Current Conditions', url: 'https://www.mshinstitute.org/current-conditions' },
 };
+
+// Avalanche-center zone for each objective, verified point-in-polygon against
+// api.avalanche.org v2 map-layer polygons. Whitney and Denali sit outside all
+// forecast zones and are intentionally absent.
+const AVY_ZONES = {
+  baker:       { center:'NWAC', zone:1646, zoneName:'West Slopes North',   url:'https://nwac.us/avalanche-forecast/#/west-slopes-north' },
+  rainier:     { center:'NWAC', zone:1648, zoneName:'West Slopes South',   url:'https://nwac.us/avalanche-forecast/#/west-slopes-south' },
+  campMuir:    { center:'NWAC', zone:1648, zoneName:'West Slopes South',   url:'https://nwac.us/avalanche-forecast/#/west-slopes-south' },
+  glacierPeak: { center:'NWAC', zone:1647, zoneName:'West Slopes Central', url:'https://nwac.us/avalanche-forecast/#/west-slopes-central' },
+  stHelens:    { center:'NWAC', zone:1648, zoneName:'West Slopes South',   url:'https://nwac.us/avalanche-forecast/#/west-slopes-south' },
+  adams:       { center:'NWAC', zone:1648, zoneName:'West Slopes South',   url:'https://nwac.us/avalanche-forecast/#/west-slopes-south' },
+  hood:        { center:'NWAC', zone:1657, zoneName:'Mt Hood',             url:'https://nwac.us/avalanche-forecast/#/mt-hood' },
+  olympus:     { center:'NWAC', zone:1645, zoneName:'Olympics',            url:'https://nwac.us/avalanche-forecast/#/olympics' },
+  mailbox:     { center:'NWAC', zone:1653, zoneName:'Snoqualmie Pass',     url:'https://nwac.us/avalanche-forecast/#/snoqualmie-pass' },
+  colchuck:    { center:'NWAC', zone:1655, zoneName:'East Slopes Central', url:'https://nwac.us/avalanche-forecast/#/east-slopes-central' },
+  shuksan:     { center:'NWAC', zone:1646, zoneName:'West Slopes North',   url:'https://nwac.us/avalanche-forecast/#/west-slopes-north' },
+  shasta:      { center:'MSAC', zone:1833, zoneName:'Mount Shasta',        url:'https://www.shastaavalanche.org/advisories/avalanche-advisory/#/mount-shasta' },
+};
+
+// Recent-beta sources per objective. Every URL verified reachable (Jun 2026).
+// WTA links point at the hike's trip-report listing; label notes say what each
+// source is good for so climbers know which to open first.
+const BETA_LINKS = {
+  baker: [
+    { label:'WTA trip reports — Heliotrope Ridge', url:'https://www.wta.org/go-hiking/hikes/heliotrope-ridge/@@related_tripreport_listing', note:'approach + lower Coleman conditions' },
+    { label:'CascadeClimbers — Mt Baker', url:'https://cascadeclimbers.com/forum/search/?q=Mount+Baker', note:'climber trip reports, all routes' },
+  ],
+  rainier: [
+    { label:'Mount Rainier Climbing Blog', url:'http://mountrainierclimbing.blogspot.com', note:'official ranger route updates' },
+    { label:'CascadeClimbers — Mt Rainier', url:'https://cascadeclimbers.com/forum/search/?q=Mount+Rainier', note:'climber trip reports' },
+  ],
+  campMuir: [
+    { label:'Mount Rainier Climbing Blog', url:'http://mountrainierclimbing.blogspot.com', note:'official ranger route updates' },
+    { label:'WTA trip reports — Camp Muir', url:'https://www.wta.org/go-hiking/hikes/camp-muir/@@related_tripreport_listing', note:'snowfield conditions from hikers' },
+  ],
+  glacierPeak: [
+    { label:'WTA trip reports — Glacier Peak', url:'https://www.wta.org/go-hiking/hikes/glacier-peak/@@related_tripreport_listing', note:'approach + climb reports' },
+    { label:'CascadeClimbers — Glacier Peak', url:'https://cascadeclimbers.com/forum/search/?q=Glacier+Peak', note:'climber trip reports' },
+  ],
+  stHelens: [
+    { label:'WTA trip reports — Monitor Ridge', url:'https://www.wta.org/go-hiking/hikes/mount-st-helens-monitor-ridge/@@related_tripreport_listing', note:'summit route conditions' },
+    { label:'MSH Institute — current conditions', url:'https://www.mshinstitute.org/current-conditions', note:'permit + route status' },
+  ],
+  adams: [
+    { label:'WTA trip reports — South Climb', url:'https://www.wta.org/go-hiking/hikes/mount-adams-south-climb/@@related_tripreport_listing', note:'route + road conditions' },
+    { label:'CascadeClimbers — Mt Adams', url:'https://cascadeclimbers.com/forum/search/?q=Mount+Adams', note:'climber trip reports' },
+  ],
+  hood: [
+    { label:'CascadeClimbers — Mt Hood', url:'https://cascadeclimbers.com/forum/search/?q=Mount+Hood', note:'climber trip reports, all routes' },
+  ],
+  olympus: [
+    { label:'WTA trip reports — Hoh River / Blue Glacier', url:'https://www.wta.org/go-hiking/hikes/hoh-river-blue-glacier/@@related_tripreport_listing', note:'approach + glacier conditions' },
+    { label:'CascadeClimbers — Mt Olympus', url:'https://cascadeclimbers.com/forum/search/?q=Mount+Olympus', note:'climber trip reports' },
+  ],
+  mailbox: [
+    { label:'WTA trip reports — Mailbox Peak', url:'https://www.wta.org/go-hiking/hikes/mailbox-peak/@@related_tripreport_listing', note:'trail + snowline reports' },
+  ],
+  colchuck: [
+    { label:'WTA trip reports — Colchuck Lake', url:'https://www.wta.org/go-hiking/hikes/colchuck-lake/@@related_tripreport_listing', note:'approach + lake basin conditions' },
+    { label:'CascadeClimbers — Colchuck', url:'https://cascadeclimbers.com/forum/search/?q=Colchuck', note:'climber trip reports' },
+  ],
+  shuksan: [
+    { label:'CascadeClimbers — Mt Shuksan', url:'https://cascadeclimbers.com/forum/search/?q=Mount+Shuksan', note:'climber trip reports, all routes' },
+  ],
+  shasta: [
+    { label:'MSAC climbing advisory', url:'https://www.shastaavalanche.org/climbing-advisory', note:'official ranger route conditions' },
+  ],
+  whitney: [
+    { label:'NPS — Mt Whitney trip planning', url:'https://www.nps.gov/seki/planyourvisit/whitney.htm', note:'official trail + permit updates' },
+  ],
+  denali: [
+    { label:'NPS Denali mountaineering blog', url:'https://www.nps.gov/dena/blogs/mountainblog.htm', note:'official ranger updates from the range' },
+  ],
+};
+
+// Nearest representative SNOTEL station per objective (NRCS AWDB, verified by
+// distance Jun 2026). Shasta, Whitney, and Denali have no station within ~20 mi
+// and are intentionally absent — their card keeps links only.
+const SNOTEL_STATIONS = {
+  baker:       { triplet:'999:WA:SNTL',  sitenum:999,  name:'Marten Ridge',      elev:3520, miles:5.4 },
+  rainier:     { triplet:'679:WA:SNTL',  sitenum:679,  name:'Paradise',          elev:5150, miles:4.9 },
+  campMuir:    { triplet:'679:WA:SNTL',  sitenum:679,  name:'Paradise',          elev:5150, miles:3.7 },
+  glacierPeak: { triplet:'606:WA:SNTL',  sitenum:606,  name:'Lyman Lake',        elev:5990, miles:10.8 },
+  stHelens:    { triplet:'1012:WA:SNTL', sitenum:1012, name:'Swift Creek',       elev:4440, miles:2.0 },
+  adams:       { triplet:'702:WA:SNTL',  sitenum:702,  name:'Potato Hill',       elev:4480, miles:10.2 },
+  hood:        { triplet:'651:OR:SNTL',  sitenum:651,  name:'Mt Hood Test Site', elev:5380, miles:3.8 },
+  olympus:     { triplet:'1107:WA:SNTL', sitenum:1107, name:'Buckinghorse',      elev:4850, miles:13.4 },
+  mailbox:     { triplet:'898:WA:SNTL',  sitenum:898,  name:'Mount Gardner',     elev:2930, miles:8.0 },
+  colchuck:    { triplet:'352:WA:SNTL',  sitenum:352,  name:'Blewett Pass',      elev:4240, miles:11.7 },
+  shuksan:     { triplet:'999:WA:SNTL',  sitenum:999,  name:'Marten Ridge',      elev:3520, miles:5.9 },
+};
+
+// Field-observation feeds are CORS-restricted to avalanche-center origins, so
+// link to the center's observations page instead of fetching inline.
+function obsLinkFor(mtnKey){
+  const zone = AVY_ZONES[mtnKey];
+  if(!zone) return null;
+  if(zone.center === 'NWAC') return { label:'NWAC field observations', url:'https://nwac.us/observations/', note:'recent snowpack + avalanche obs' };
+  if(zone.center === 'MSAC') return { label:'MSAC observations', url:'https://www.shastaavalanche.org/observations', note:'recent snowpack + avalanche obs' };
+  return null;
+}
 
 const MODELS = ['gfs_seamless','ecmwf_ifs025','icon_seamless','gem_seamless','ncep_hrrr_conus','ncep_nam_conus'];
 const MODEL_COLORS = {
@@ -1723,7 +1862,7 @@ function compactAstronomyDeal(startStr, endStr, lat, lon){
   return { band:'neutral', text:`Light: ${civil} · ${sun} · moon ${Math.round(moon.illum * 100)}% lit.` };
 }
 
-function buildDecisionData(rows, s, thr, summitFt, nws, startStr, endStr, lat, lon){
+function buildDecisionData(rows, s, thr, summitFt, nws, startStr, endStr, lat, lon, avyDeal){
   const windChill = minWindChill(rows);
   const conf = confidenceLabel(s.avgSpread, startStr);
   const refreeze = refreezeSignal(rows, nws);
@@ -1743,6 +1882,7 @@ function buildDecisionData(rows, s, thr, summitFt, nws, startStr, endStr, lat, l
   deals.push(windChillDeal(windChill));
   deals.push({ band: refreeze.band, text:`${refreeze.label}: ${refreeze.body}` });
   deals.push({ band: conf.band, text:`Forecast confidence: ${conf.label}. ${conf.body}` });
+  if(avyDeal) deals.push(avyDeal);
 
   deals.sort((a, b) => bandRank(b.band) - bandRank(a.band));
   return { deals: [...deals.slice(0, 6), compactAstronomyDeal(startStr, endStr, lat, lon)] };
@@ -1889,64 +2029,286 @@ async function fetchNwsAlerts(lat, lon){
   return r.json();
 }
 
+const AVY_RATINGS = ['No rating', 'Low', 'Moderate', 'Considerable', 'High', 'Extreme'];
+
+async function fetchAvyForecast(mtnKey){
+  const zone = AVY_ZONES[mtnKey];
+  if(!zone) return null;
+  const url = `https://api.avalanche.org/v2/public/product?type=forecast&center_id=${zone.center}&zone_id=${zone.zone}`;
+  const r = await fetch(url, {cache:'no-store'});
+  if(!r.ok) throw new Error(`avalanche.org ${r.status}`);
+  const data = await r.json();
+  return data && data.id ? data : undefined;
+}
+
+function stripHtmlText(html){
+  if(!html) return '';
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
+}
+
+function avyDangerRows(avy){
+  return Array.isArray(avy?.danger)
+    ? avy.danger.filter(d => d && (d.valid_day === 'current' || d.valid_day === 'tomorrow'))
+    : [];
+}
+
+// Days between the forecast's publish date and the climb start date (date-only math).
+function avyDaysOut(avy, startStr){
+  const pub = new Date(avy.published_time);
+  const start = new Date(startStr);
+  const pubDay = new Date(pub.getFullYear(), pub.getMonth(), pub.getDate());
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  return Math.round((startDay - pubDay) / 86400000);
+}
+
+// Pick the danger row matching the climb day and reduce it to the max rating
+// across elevation bands. `applies` is true only when the forecast actually
+// covers the climb day (same day, or next day via the 'tomorrow' rating).
+function avyRelevantDanger(avy, startStr){
+  const rows = avyDangerRows(avy);
+  if(!rows.length) return null;
+  const daysOut = avyDaysOut(avy, startStr);
+  const day = (daysOut >= 1 && rows.find(d => d.valid_day === 'tomorrow'))
+    || rows.find(d => d.valid_day === 'current')
+    || rows[0];
+  const vals = [day.lower, day.middle, day.upper].filter(v => typeof v === 'number' && v > 0);
+  const max = vals.length ? Math.max(...vals) : 0;
+  return { day, max, daysOut, applies: daysOut <= 1 };
+}
+
+// Avalanche danger gate for the Go/Watch/Caution verdict. Caps the verdict only
+// when an in-season danger rating covers the climb day; otherwise contributes an
+// informational line to the decision list.
+function avyVerdictGate(avy, startStr){
+  if(!avy || avy.product_type !== 'forecast') return { cap:null, deal:null };
+  const rel = avyRelevantDanger(avy, startStr);
+  if(!rel || rel.max < 1) return { cap:null, deal:null };
+  const name = AVY_RATINGS[rel.max];
+  if(rel.applies){
+    if(rel.max >= 3) return { cap:'caution', deal:{ band:'caution', text:`Avalanche danger is ${name} for your climb day — verdict capped at Caution. Read the full zone forecast before committing.` } };
+    if(rel.max === 2) return { cap:'watch', deal:{ band:'watch', text:`Avalanche danger is ${name} for your climb day. Check the problem aspects and elevations against your route.` } };
+    return { cap:null, deal:{ band:'go', text:`Avalanche danger is ${name} for your climb day. Watch for isolated instabilities.` } };
+  }
+  return { cap:null, deal:{ band: rel.max >= 3 ? 'watch' : 'go', text:`Avalanche danger is ${name} today (context only — your window is ${rel.daysOut} days out; recheck the zone forecast closer to departure).` } };
+}
+
 function snowpackLinks(lat, lon){
   const nrMap = 'https://www.nrcs.usda.gov/resources/data-and-reports/snow-and-water-interactive-map';
   const snotelInfo = `https://snotel.info/?lat=${lat.toFixed(3)}&lon=${lon.toFixed(3)}&zoom=8`;
   return { nrMap, snotelInfo };
 }
 
-function externalCard(label, value, band, body){
+function externalCard(label, value, band, body, id){
   return `
-    <div class="context-card ${band || 'go'}">
+    <div ${id ? `id="${id}" ` : ''}class="context-card ${band || 'go'}">
       <div class="lbl">${escapeHtml(label)}</div>
       <div class="val">${value}</div>
       <div class="sub">${body}</div>
     </div>`;
 }
 
-function avalancheContextCard(extras){
-  if(extras.nwac){
-    const month = new Date().getMonth();
-    const seasonal = month >= 4 && month <= 9
-      ? 'Daily winter forecasts may be out of season; check NWAC statements and recent observations.'
-      : 'Open the current zone forecast and recent observations before committing.';
-    return externalCard(
-      'Avalanche forecast',
-      `<a href="${extras.nwac}" target="_blank" rel="noopener noreferrer">NWAC zone</a>`,
-      'watch',
-      seasonal
-    );
-  }
-  if(extras.avalanche){
-    return externalCard(
-      'Avalanche forecast',
-      `<a href="${extras.avalanche}" target="_blank" rel="noopener noreferrer">Shasta Avalanche Center</a>`,
-      'watch',
-      'Check the current advisory, observations, and seasonal statements.'
-    );
-  }
-  return externalCard('Avalanche forecast', 'No direct zone link', 'watch', 'Use local avalanche center and recent observations for snowpack decisions.');
+function avyBandChip(label, value){
+  const v = typeof value === 'number' && value > 0 ? Math.min(value, 5) : 0;
+  return `<div class="avy-band avy-d${v}"><span class="b-elev">${label}</span><span class="b-rating">${escapeHtml(AVY_RATINGS[v])}</span></div>`;
 }
 
-function snowpackContextCard(mtn){
-  const [lat, lon] = mtn.summit;
-  const links = snowpackLinks(lat, lon);
+function avalancheContextCard(mtnKey, extras, avy, startStr){
+  const zone = AVY_ZONES[mtnKey];
+  if(!zone){
+    return externalCard(
+      'Avalanche forecast',
+      'No zone coverage',
+      'watch',
+      'This objective sits outside avalanche-center forecast zones. Evaluate the snowpack yourself and lean on ranger reports and recent observations.'
+    );
+  }
+  const link = zone.url || extras.nwac || extras.avalanche;
+  const zoneLabel = `${zone.center} · ${zone.zoneName}`;
+  if(!avy){
+    return externalCard(
+      zoneLabel,
+      `<a href="${link}" target="_blank" rel="noopener noreferrer">Open zone forecast</a>`,
+      'watch',
+      'Live forecast could not be loaded from avalanche.org — open the zone page directly before committing.'
+    );
+  }
+  const published = avy.published_time
+    ? new Date(avy.published_time).toLocaleDateString([], {month:'short', day:'numeric'})
+    : '';
+  if(avy.product_type === 'forecast' && avyDangerRows(avy).length){
+    const rel = avyRelevantDanger(avy, startStr);
+    const d = rel.day;
+    const band = rel.max >= 3 ? 'caution' : rel.max === 2 ? 'watch' : 'go';
+    const bands = `<div class="avy-bands">${avyBandChip('Above treeline', d.upper)}${avyBandChip('Near treeline', d.middle)}${avyBandChip('Below treeline', d.lower)}</div>`;
+    const probs = (avy.forecast_avalanche_problems || []).map(p =>
+      `<div class="p-item">• ${escapeHtml(p.name || 'Avalanche problem')}${p.likelihood ? ` — ${escapeHtml(String(p.likelihood))}` : ''}</div>`
+    ).join('');
+    const bottom = stripHtmlText(avy.bottom_line);
+    const dayLabel = d.valid_day === 'tomorrow' ? 'tomorrow' : 'today';
+    const staleNote = rel.applies ? '' : ' Rating covers ' + dayLabel + ' — your window is later; recheck closer to departure.';
+    return externalCard(
+      zoneLabel,
+      `<a href="${link}" target="_blank" rel="noopener noreferrer">${escapeHtml(AVY_RATINGS[rel.max])}</a>`,
+      band,
+      `${bands}${probs ? `<div class="avy-probs">${probs}</div>` : ''}${bottom ? escapeHtml(bottom.slice(0, 220)) + ' ' : ''}<span class="c-dim">Published ${published}.${staleNote}</span>`
+    );
+  }
+  // Off-season: centers publish a 'summary' product (seasonal statement) with no danger ratings.
+  const text = stripHtmlText(avy.bottom_line) || stripHtmlText(avy.hazard_discussion);
   return externalCard(
-    'Snowpack context',
-    `<a href="${links.nrMap}" target="_blank" rel="noopener noreferrer">NRCS map</a> · <a href="${links.snotelInfo}" target="_blank" rel="noopener noreferrer">SNOTEL dashboard</a>`,
+    zoneLabel,
+    `<a href="${link}" target="_blank" rel="noopener noreferrer">Seasonal statement</a>`,
     'watch',
-    'Use nearby SNOTEL/Snow Course data as regional context only; station elevation and aspect may differ from the climb.'
+    `${escapeHtml(text.slice(0, 240))}… <span class="c-dim">Published ${published}. No daily danger ratings right now; evaluate the snowpack yourself.</span>`
   );
 }
 
-function renderExternalContextBase(mtnKey, mtn){
+async function fetchSnotel(mtnKey){
+  const st = SNOTEL_STATIONS[mtnKey];
+  if(!st) return null;
+  const fmt = d => dtlStr(d).slice(0, 10);
+  const end = new Date();
+  const begin = addHours(end, -24 * 9);
+  const url = `https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/data?stationTriplets=${encodeURIComponent(st.triplet)}&elements=WTEQ,SNWD,TOBS&duration=DAILY&beginDate=${fmt(begin)}&endDate=${fmt(end)}`;
+  const r = await fetch(url);
+  if(!r.ok) throw new Error(`AWDB ${r.status}`);
+  const json = await r.json();
+  const series = {};
+  (json?.[0]?.data || []).forEach(d => { series[d.stationElement.elementCode] = d.values || []; });
+  const latest = vals => {
+    for(let i = (vals || []).length - 1; i >= 0; i--){
+      if(vals[i].value !== null && vals[i].value !== undefined) return vals[i];
+    }
+    return null;
+  };
+  const weekChange = vals => {
+    const l = latest(vals);
+    if(!l || !vals.length) return null;
+    const first = vals.find(v => v.value !== null && v.value !== undefined);
+    return first && first.date !== l.date ? l.value - first.value : null;
+  };
+  return {
+    station: st,
+    depth: latest(series.SNWD),
+    swe: latest(series.WTEQ),
+    tobs: latest(series.TOBS),
+    depthChange: weekChange(series.SNWD),
+    sweChange: weekChange(series.WTEQ),
+  };
+}
+
+// Model-mean freezing level over the ~10 hours before the climb start, compared
+// against the route's mid and summit elevations: a quick overnight-refreeze read.
+function overnightRefreeze(api, mtn, th, startStr){
+  if(!api) return null;
+  const summitFt = mtn.summit[2];
+  const midFt = Math.round((th.elev + summitFt) / 2);
+  const preStart = dtlStr(addHours(new Date(startStr), -10));
+  const rows = parseWindow(api, preStart, startStr, summitFt, {upper:{byTime:{}}, trail:{byTime:{}}});
+  const known = rows.filter(r => r.fl_ft !== null);
+  if(!known.length) return null;
+  return {
+    hours: known.length,
+    belowMid: known.filter(r => r.fl_ft < midFt).length,
+    belowSummit: known.filter(r => r.fl_ft < summitFt).length,
+    midFt,
+  };
+}
+
+// Rough corn-timing heuristic from route aspect; only shown after a real refreeze.
+function cornHint(aspect){
+  if(aspect === undefined || aspect === null) return '';
+  if(aspect >= 45 && aspect < 135) return 'E-facing line — surface likely softens early to mid morning; start early.';
+  if(aspect >= 135 && aspect < 225) return 'S-facing line — surface likely softens late morning; plan to be descending by early afternoon.';
+  if(aspect >= 225 && aspect < 315) return 'W/SW-facing line — surface likely softens early to mid afternoon.';
+  return 'N-facing line — surface may stay firm most of the day.';
+}
+
+function refreezeBlurb(rf, th){
+  if(!rf) return '';
+  const frac = rf.belowMid / rf.hours;
+  let line;
+  if(frac >= 0.8) line = `Solid refreeze signal: freezing level sat below ${rf.midFt.toLocaleString()} ft (route mid) for ${rf.belowMid} of the ${rf.hours} h before your start.`;
+  else if(frac >= 0.4) line = `Partial refreeze: freezing level was below ${rf.midFt.toLocaleString()} ft (route mid) for only ${rf.belowMid} of ${rf.hours} h before your start.`;
+  else line = `Poor refreeze signal: freezing level stayed above ${rf.midFt.toLocaleString()} ft (route mid) for most of the night before your start — expect soft snow and elevated wet-slide risk as the day warms.`;
+  const corn = frac >= 0.4 ? ` ${cornHint(th.aspect)}` : '';
+  return `${line}${corn} `;
+}
+
+function snowpackContextCard(mtnKey, mtn, th, startStr){
+  const [lat, lon] = mtn.summit;
+  const links = snowpackLinks(lat, lon);
+  const st = SNOTEL_STATIONS[mtnKey];
+  const rf = overnightRefreeze(_apiData, mtn, th, startStr);
+  const refreeze = refreezeBlurb(rf, th);
+  const linkPair = `<a href="${links.nrMap}" target="_blank" rel="noopener noreferrer">NRCS map</a> · <a href="${links.snotelInfo}" target="_blank" rel="noopener noreferrer">SNOTEL dashboard</a>`;
+  if(!st){
+    return externalCard(
+      'Snowpack & refreeze',
+      linkPair,
+      'watch',
+      `${refreeze}<span class="c-dim">No representative SNOTEL station within ~20 miles of this objective; use the regional map and local observations.</span>`,
+      'snowpack-card'
+    );
+  }
+  const stUrl = `https://wcc.sc.egov.usda.gov/nwcc/site?sitenum=${st.sitenum}`;
+  return externalCard(
+    'Snowpack & refreeze',
+    `<a href="${stUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(st.name)} SNOTEL</a>`,
+    'watch',
+    `<span id="snotel-live">Loading station data…</span>${refreeze}<span class="c-dim">${escapeHtml(st.name)} sits at ${st.elev.toLocaleString()} ft, ${st.miles} mi from the summit — treat as regional context, not route truth.</span>`,
+    'snowpack-card'
+  );
+}
+
+function renderSnotelLive(res){
+  const el = document.getElementById('snotel-live');
+  if(!el) return;
+  if(!res){ el.textContent = ''; return; }
+  const fmtIn = v => v === null || v === undefined ? '—' : `${Math.round(v)} in`;
+  const fmtD = v => v === null || v === undefined ? '' : ` (${v > 0 ? '+' : ''}${Math.round(v)} in/wk)`;
+  const parts = [];
+  if(res.depth) parts.push(`Snow depth ${fmtIn(res.depth.value)}${fmtD(res.depthChange)}`);
+  if(res.swe) parts.push(`SWE ${fmtIn(res.swe.value)}${fmtD(res.sweChange)}`);
+  if(res.tobs) parts.push(`station temp ${Math.round(res.tobs.value)}°F`);
+  const asOf = res.depth?.date || res.swe?.date || '';
+  el.innerHTML = parts.length ? `${escapeHtml(parts.join(' · '))}${asOf ? ` <span class="c-dim">(as of ${escapeHtml(asOf)})</span>` : ''}. ` : '';
+  // rapid melt or big loading week deserves attention
+  const card = el.closest('.context-card');
+  if(card && res.depthChange !== null && res.depthChange !== undefined && Math.abs(res.depthChange) >= 10){
+    card.classList.remove('go'); card.classList.add('watch');
+  }
+}
+
+function renderSnotelError(){
+  const el = document.getElementById('snotel-live');
+  if(el) el.innerHTML = '<span class="c-dim">Station data could not be loaded from NRCS — open the SNOTEL link directly. </span>';
+}
+
+function betaContextCard(mtnKey){
+  const links = [obsLinkFor(mtnKey), ...(BETA_LINKS[mtnKey] || [])].filter(Boolean);
+  if(!links.length) return '';
+  const items = links.map(l =>
+    `<div class="beta-item">• <a href="${l.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.label)}</a>${l.note ? ` <span class="b-note">— ${escapeHtml(l.note)}</span>` : ''}</div>`
+  ).join('');
+  return externalCard(
+    'Recent beta',
+    'Trip reports & observations',
+    'go',
+    `${items}<span class="c-dim">Read the freshest reports first; conditions change fast after storms and warm spells.</span>`
+  );
+}
+
+function renderExternalContextBase(mtnKey, mtn, th, avy, startStr){
   const el = document.getElementById('external-context');
   if(!el) return;
   const extras = MTN_LINKS[mtnKey] || {};
   el.innerHTML = [
     externalCard('NWS active alerts', 'Checking...', 'watch', 'Fetching official active alerts for the summit point.'),
-    avalancheContextCard(extras),
-    snowpackContextCard(mtn),
+    avalancheContextCard(mtnKey, extras, avy, startStr),
+    snowpackContextCard(mtnKey, mtn, th, startStr),
+    betaContextCard(mtnKey),
   ].join('');
 }
 
@@ -1994,8 +2356,8 @@ function renderNwsAlertsError(){
   cards[0]?.remove();
 }
 
-function renderExternalContext(mtnKey, mtn){
-  renderExternalContextBase(mtnKey, mtn);
+function renderExternalContext(mtnKey, mtn, th, avy, startStr){
+  renderExternalContextBase(mtnKey, mtn, th, avy, startStr);
   const [lat, lon] = mtn.summit;
   fetchNwsAlerts(lat, lon)
     .then(renderNwsAlertsCard)
@@ -2003,6 +2365,87 @@ function renderExternalContext(mtnKey, mtn){
       console.warn('NWS alerts fetch failed:', err);
       renderNwsAlertsError();
     });
+  if(SNOTEL_STATIONS[mtnKey]){
+    fetchSnotel(mtnKey)
+      .then(renderSnotelLive)
+      .catch(err => {
+        console.warn('SNOTEL fetch failed:', err);
+        renderSnotelError();
+      });
+  }
+}
+
+// Evaluate one candidate day-window against the mountain's thresholds using
+// model-mean fields only (no NWS point data needed for ranking).
+function evaluateDayWindow(api, thr, sStr, eStr, summitFt){
+  const stubNws = { upper:{byTime:{}}, trail:{byTime:{}} };
+  const rows = parseWindow(api, sStr, eStr, summitFt, stubNws);
+  if(!rows.length) return null;
+  const peakWind = mx(rows.map(r => r.wind_speed_10m));
+  const peakGust = mx(rows.map(r => r.wind_gusts_10m));
+  const maxPrecip = mx(rows.map(r => r.precipitation_probability));
+  if(peakWind === null && peakGust === null && maxPrecip === null) return null;
+  const avgSpread = mean(rows.map(r => r.spread));
+  const score = (v, go, wa) => v === null ? 'go' : v <= go ? 'go' : v <= wa ? 'watch' : 'caution';
+  const wScore = score(peakWind, thr.wGo, thr.wWa);
+  const gScore = score(peakGust, thr.gGo, thr.gWa);
+  const pScore = score(maxPrecip, thr.pGo, thr.pWa);
+  const verdict = worstBand([wScore, gScore, pScore]);
+  const drivers = verdict === 'go' ? '' :
+    [wScore === verdict ? 'W' : '', gScore === verdict ? 'G' : '', pScore === verdict ? 'P' : ''].filter(Boolean).join('+');
+  return { peakWind, peakGust, maxPrecip, avgSpread, verdict, drivers };
+}
+
+// Best-window finder: applies the selected start clock + duration to each
+// forecast day and ranks them with the same thresholds as the main verdict.
+function renderWindowFinder(api, mtn, startStr, endStr){
+  const el = document.getElementById('window-finder');
+  if(!el) return;
+  const thr = mtn.thr;
+  const startClock = startStr.slice(11, 16);
+  const durMs = new Date(endStr) - new Date(startStr);
+  const now = new Date();
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const lastTime = api.hourly.time[api.hourly.time.length - 1] || '';
+  const verdictLabel = { go:'Go', watch:'Watch', caution:'Caution' };
+  const days = [];
+  for(let d = 0; d < 10; d++){
+    const day = new Date(today); day.setDate(today.getDate() + d);
+    const sStr = `${dtlStr(day).slice(0, 10)}T${startClock}`;
+    const e = new Date(new Date(sStr).getTime() + durMs);
+    if(e <= now) continue;
+    if(sStr > lastTime) break;
+    const ev = evaluateDayWindow(api, thr, sStr, dtlStr(e), mtn.summit[2]);
+    if(!ev) continue;
+    days.push({ sStr, eStr: dtlStr(e), day, ...ev });
+  }
+  if(days.length < 2){ el.hidden = true; el.innerHTML = ''; return; }
+  const chips = days.map(d => {
+    const selected = d.sStr.slice(0, 10) === startStr.slice(0, 10);
+    const why = d.verdict === 'go'
+      ? `G ${rnd(d.peakGust, 0)} · P ${rnd(d.maxPrecip, 0)}%`
+      : `${d.drivers} · W ${rnd(d.peakWind, 0)} · G ${rnd(d.peakGust, 0)} · P ${rnd(d.maxPrecip, 0)}%`;
+    const dow = d.day.toLocaleDateString([], { weekday:'short' });
+    const date = d.day.toLocaleDateString([], { month:'numeric', day:'numeric' });
+    return `<div class="wf-day ${d.verdict}${selected ? ' selected' : ''}" data-start="${d.sStr}" data-end="${d.eStr}" title="W ${rnd(d.peakWind,0)} mph · G ${rnd(d.peakGust,0)} mph · P ${rnd(d.maxPrecip,0)}% · spread ${rnd(d.avgSpread,0)} mph">`+
+      `<div class="wf-dow">${dow}</div>`+
+      `<div class="wf-date">${date}</div>`+
+      `<div class="wf-verdict">${verdictLabel[d.verdict]}</div>`+
+      `<div class="wf-why">${why}</div>`+
+      `</div>`;
+  }).join('');
+  el.innerHTML =
+    `<div class="wf-title">Best window · next ${days.length} days · ${startClock} start, same duration</div>`+
+    `<div class="wf-strip">${chips}</div>`+
+    `<div class="wf-note">Model-mean wind/gust/precip vs this mountain's thresholds. Click a day to load it. Days further out carry more uncertainty.</div>`;
+  el.hidden = false;
+  el.onclick = ev => {
+    const chip = ev.target.closest('.wf-day');
+    if(!chip || chip.classList.contains('selected')) return;
+    document.getElementById('inp-start').value = chip.dataset.start;
+    document.getElementById('inp-end').value = chip.dataset.end;
+    loadForecast();
+  };
 }
 
 function renderClimbFrame(startStr, endStr, lat, lon){
@@ -2070,7 +2513,7 @@ function buildHourSpark(rows, thr){
     `</div>`;
 }
 
-function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws){
+function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws, avy, avyDeal){
   const verdictLabel = { go:'Go', watch:'Watch', caution:'Caution' };
   const summitFt = mtn.summit[2];
 
@@ -2087,7 +2530,7 @@ function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws){
   vEl.className = `verdict v-${s.verdict}`;
 
   const thr = mtn.thr;
-  const decision = buildDecisionData(rows, s, thr, summitFt, nws, startStr, endStr, mtn.summit[0], mtn.summit[1]);
+  const decision = buildDecisionData(rows, s, thr, summitFt, nws, startStr, endStr, mtn.summit[0], mtn.summit[1], avyDeal);
   const dealsHtml = decision.deals.map(d => `<div class="deal-item ${d.band}"><span class="deal-dot"></span><span>${d.text}</span></div>`).join('');
   const sparkHtml = buildHourSpark(rows, thr);
   vEl.innerHTML =
@@ -2104,7 +2547,7 @@ function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws){
 	  } else { inv.hidden = true; }
 
 	  renderSignalGrid(rows, thr, summitFt, nws, startStr, endStr, mtn, th);
-	  renderExternalContext(mtnKey, mtn);
+	  renderExternalContext(mtnKey, mtn, th, avy, startStr);
 
 	  document.getElementById('met-grid').innerHTML = `
     <div class="met">
@@ -2330,6 +2773,12 @@ function renderQuickLinks(mtnKey, mtn, th){
   lbl.className = 'links-lbl';
   lbl.textContent = 'Verify on';
   chips.push(lbl);
+
+  const climbStart = document.getElementById('inp-start')?.value || '';
+  const climbEnd = document.getElementById('inp-end')?.value || '';
+  const climbQs = `m=${encodeURIComponent(mtnKey)}&r=${encodeURIComponent(th.slug)}`+
+    (climbStart && climbEnd ? `&start=${encodeURIComponent(climbStart)}&end=${encodeURIComponent(climbEnd)}` : '');
+  chips.push(buildLinkChip('Summit-day view', `climb.html?${climbQs}`, 'save for the climb'));
 
   chips.push(buildLinkChip('NWS forecast',
     `https://forecast.weather.gov/MapClick.php?lat=${lat}&lon=${lon}`));
@@ -2743,10 +3192,14 @@ async function loadForecast(){
     const [lat,lon] = mtn.summit;
     const summitPoint = {name:`${mtn.name} summit`, lat, lon, elevFt:mtn.summit[2]};
     const trailPoint = {name:th.name, lat:th.lat, lon:th.lon, elevFt:th.elev};
-    const [api, upperBundle, trailBundle] = await Promise.all([
+    const [api, upperBundle, trailBundle, avy] = await Promise.all([
       fetchWeather(lat, lon),
       fetchNwsPointForecast(summitPoint),
       fetchNwsPointForecast(trailPoint),
+      fetchAvyForecast(mtnKey).catch(err => {
+        console.warn('Avalanche forecast fetch failed:', err);
+        return undefined;
+      }),
     ]);
     _apiData = api;
     const nws = {
@@ -2762,7 +3215,10 @@ async function loadForecast(){
     }
 
     const s = computeSummary(rows, mtn.thr, mtn.summit[2], nws);
-    renderAll(mtnKey, mtn, th, start, end, rows, s, nws);
+    const avyGate = avyVerdictGate(avy, start);
+    if(avyGate.cap) s.verdict = worstBand([s.verdict, avyGate.cap]);
+    renderAll(mtnKey, mtn, th, start, end, rows, s, nws, avy, avyGate.deal);
+    renderWindowFinder(api, mtn, start, end);
     setupPreTrendSelector(mtn, th, start, end, api);
     fetchAndRenderRouteProfile(mtn, th, start, end, mtn.thr, {trail:nws.trail, summit:nws.upper})
       .catch(error => {

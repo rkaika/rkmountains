@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summit-Day Check</title>
+<meta name="description" content="Lightweight during-climb weather check: next hours at the summit, live observations, alerts, and daylight countdown. Built for weak cell signal.">
+<style>
+:root {
+  --bg: #0d1117; --card: #161b22; --bdr: #30363d; --bdr2: #21262d;
+  --txt: #e6edf3; --dim: #9da7b3; --faint: #6e7681;
+  --go: #3fb950; --watch: #d29922; --caution: #f85149; --blue: #58a6ff;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--txt); font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 14px 12px 40px; max-width: 560px; margin-inline: auto; }
+h1 { font-size: 17px; margin: 0 0 2px; }
+.sub { color: var(--dim); font-size: 13px; margin-bottom: 12px; }
+.stamp { font-family: var(--mono); font-size: 12px; color: var(--faint); margin: 6px 0 12px; }
+.stamp.stale { color: var(--watch); font-weight: 700; }
+.btn { display: block; width: 100%; padding: 16px; font-size: 17px; font-weight: 800; color: #fff; background: var(--blue); border: none; border-radius: 12px; cursor: pointer; margin: 10px 0 16px; }
+.btn:active { filter: brightness(1.2); }
+.btn.secondary { background: var(--card); border: 1px solid var(--bdr); color: var(--txt); font-weight: 600; font-size: 15px; padding: 13px; }
+.card { background: var(--card); border: 1px solid var(--bdr); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
+.card .lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
+.daylight { font-size: 15px; }
+.daylight strong { font-size: 18px; }
+table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; }
+th { text-align: right; color: var(--faint); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 6px; }
+th:first-child, td:first-child { text-align: left; padding-left: 0; }
+td { text-align: right; padding: 5px 6px; border-top: 1px solid var(--bdr2); }
+td.go { color: var(--go); } td.watch { color: var(--watch); } td.caution { color: var(--caution); font-weight: 700; }
+.alert-line { font-size: 14px; padding: 4px 0; }
+.alert-line.caution { color: var(--caution); font-weight: 700; }
+.alert-line.watch { color: var(--watch); }
+.alert-line.go { color: var(--go); }
+.obs { font-family: var(--mono); font-size: 13px; padding: 6px 0; border-top: 1px solid var(--bdr2); }
+.obs:first-of-type { border-top: none; }
+.obs .nm { color: var(--dim); font-size: 11px; }
+a { color: var(--blue); }
+.note { color: var(--faint); font-size: 12px; line-height: 1.5; margin-top: 14px; }
+.err { color: var(--caution); font-size: 14px; margin: 8px 0; }
+select, input { width: 100%; padding: 12px; font-size: 16px; background: var(--card); color: var(--txt); border: 1px solid var(--bdr); border-radius: 10px; margin-bottom: 10px; }
+label { font-size: 13px; color: var(--dim); display: block; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<h1 id="title">Summit-Day Check</h1>
+<div class="sub" id="subtitle">Lightweight conditions check for the climb itself.</div>
+
+<div id="picker" hidden>
+  <label for="p-mtn">Mountain</label>
+  <select id="p-mtn"></select>
+  <label for="p-route">Route / trailhead</label>
+  <select id="p-route"></select>
+  <button class="btn" id="p-go">Load conditions</button>
+</div>
+
+<div id="main" hidden>
+  <button class="btn" id="btn-refresh">↻ Refresh now</button>
+  <div class="stamp" id="stamp"></div>
+  <div class="err" id="err" hidden></div>
+
+  <div class="card">
+    <div class="lbl">Daylight</div>
+    <div class="daylight" id="daylight">—</div>
+  </div>
+
+  <div class="card">
+    <div class="lbl">NWS active alerts · summit point</div>
+    <div id="alerts">Checking…</div>
+  </div>
+
+  <div class="card">
+    <div class="lbl" id="fc-lbl">Next hours · summit point · model mean</div>
+    <table>
+      <thead><tr><th>Time</th><th>Temp</th><th>Chill</th><th>Wind</th><th>Gust</th><th>Precip</th><th>Frz lvl</th></tr></thead>
+      <tbody id="fc-body"><tr><td colspan="7">Loading…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="lbl">Nearby station observations</div>
+    <div id="obs-wrap">
+      <button class="btn secondary" id="btn-obs">Load latest observations</button>
+    </div>
+  </div>
+
+  <div class="note" id="full-link"></div>
+  <div class="note">Colors use this mountain's Go / Watch / Caution thresholds. This page caches the last successful fetch, so with no signal you still see the most recent data — check the timestamp before trusting it. Not a substitute for judgment or turning around.</div>
+</div>
+
+<script>
+// Trimmed copy of the dashboard's MTNS data (mw.html). Keep keys, slugs,
+// coordinates, and thresholds in sync when objectives change there.
+const PEAKS = {
+  baker:       { name:'Mt Baker',      summit:[48.7767,-121.8144,10781], thr:{wGo:20,wWa:30,gGo:30,gWa:40,pGo:20,pWa:40}, routes:[
+    {slug:'coleman', name:'Heliotrope Ridge — Coleman Glacier', lat:48.80218056, lon:-121.894725, elev:3700},
+    {slug:'easton',  name:'Shannon Creek — Easton Glacier',     lat:48.7067849,  lon:-121.8129229, elev:3350},
+    {slug:'boulder', name:'Boulder Ridge',                      lat:48.7870,     lon:-121.7470, elev:4200}] },
+  rainier:     { name:'Mt Rainier',    summit:[46.8529,-121.7604,14411], thr:{wGo:15,wWa:25,gGo:25,gWa:35,pGo:15,pWa:30}, routes:[
+    {slug:'dc',      name:'Paradise — Muir Snowfield / DC route', lat:46.7860, lon:-121.7350, elev:5400},
+    {slug:'emmons',  name:'White River — Emmons Glacier',         lat:46.9020, lon:-121.6427, elev:4250},
+    {slug:'tahoma',  name:'Mowich Lake — Tahoma Cleaver',         lat:46.9335, lon:-121.8638, elev:4929},
+    {slug:'liberty', name:'Carbon River — Willis Wall / Liberty', lat:46.9940, lon:-121.9160, elev:1800}] },
+  campMuir:    { name:'Camp Muir',     summit:[46.8356,-121.7328,10188], thr:{wGo:20,wWa:30,gGo:30,gWa:40,pGo:20,pWa:40}, routes:[
+    {slug:'paradise', name:'Paradise — Muir Snowfield', lat:46.7860, lon:-121.7350, elev:5400}] },
+  glacierPeak: { name:'Glacier Peak',  summit:[48.1127,-121.1137,10541], thr:{wGo:20,wWa:30,gGo:30,gWa:40,pGo:20,pWa:35}, routes:[
+    {slug:'sitkum',     name:'Suiattle River — Sitkum Glacier',   lat:48.2520, lon:-121.1810, elev:1850},
+    {slug:'whitechuck', name:'N Fork Sauk — White Chuck Glacier', lat:48.1680, lon:-121.1438, elev:2200}] },
+  stHelens:    { name:'Mt St Helens',  summit:[46.1912,-122.1944,8366],  thr:{wGo:25,wWa:35,gGo:35,gWa:45,pGo:20,pWa:40}, routes:[
+    {slug:'wormflows', name:'Marble Mountain Sno-Park — Worm Flows', lat:46.12982241, lon:-122.1711745, elev:2700},
+    {slug:'monitor',   name:'Climbers Bivouac — Monitor Ridge',      lat:46.1471,     lon:-122.1838, elev:3800}] },
+  adams:       { name:'Mt Adams',      summit:[46.2024,-121.4909,12281], thr:{wGo:20,wWa:30,gGo:30,gWa:40,pGo:20,pWa:40}, routes:[
+    {slug:'southclimb', name:'Cold Springs — South Climb',   lat:46.1359, lon:-121.4977, elev:5575},
+    {slug:'swchutes',   name:'Morrison Creek — SW Chutes',   lat:46.1760, lon:-121.4540, elev:4600},
+    {slug:'northridge', name:'Killen Creek — North Ridge',   lat:46.2890, lon:-121.5460, elev:4315}] },
+  hood:        { name:'Mt Hood',       summit:[45.3735,-121.6960,11249], thr:{wGo:20,wWa:30,gGo:30,gWa:40,pGo:20,pWa:40}, routes:[
+    {slug:'hogsback',   name:'Timberline — South Side / Hogsback',   lat:45.3309, lon:-121.7113, elev:5960},
+    {slug:'cooperspur', name:'Cloud Cap — Cooper Spur / Sunshine',   lat:45.4019, lon:-121.6537, elev:5750}] },
+  olympus:     { name:'Mt Olympus',    summit:[47.8013,-123.7108,7980],  thr:{wGo:20,wWa:30,gGo:30,gWa:40,pGo:20,pWa:35}, routes:[
+    {slug:'hoh', name:'Hoh Rain Forest — Blue Glacier', lat:47.8608, lon:-123.9343, elev:575}] },
+  mailbox:     { name:'Mailbox Peak',  summit:[47.462405,-121.63926,4841], thr:{wGo:25,wWa:35,gGo:35,gWa:45,pGo:20,pWa:40}, routes:[
+    {slug:'new', name:'Mailbox Peak TH — New Trail', lat:47.466707, lon:-121.673491, elev:900},
+    {slug:'old', name:'Mailbox Peak TH — Old Trail', lat:47.466707, lon:-121.673491, elev:900}] },
+  colchuck:    { name:'Colchuck Peak', summit:[47.4770632,-120.8450878,8705], thr:{wGo:20,wWa:30,gGo:30,gWa:40,pGo:20,pWa:35}, routes:[
+    {slug:'lakeglacier', name:'Stuart Lake TH — Colchuck Lake / Glacier', lat:47.5276, lon:-120.8200, elev:3400}] },
+  shuksan:     { name:'Mt Shuksan',    summit:[48.8275,-121.6149,9131],  thr:{wGo:20,wWa:30,gGo:30,gWa:40,pGo:20,pWa:35}, routes:[
+    {slug:'sulfide',   name:'Artist Point — Price / Sulfide Glacier', lat:48.8460, lon:-121.6920, elev:5200},
+    {slug:'nwcouloir', name:'Shannon Ridge — NW Couloir',             lat:48.8880, lon:-121.6920, elev:3200}] },
+  shasta:      { name:'Mt Shasta',     summit:[41.4092,-122.1944,14179], thr:{wGo:15,wWa:25,gGo:25,gWa:35,pGo:15,pWa:30}, routes:[
+    {slug:'avygulch',   name:'Bunny Flat — Avalanche Gulch', lat:41.35373, lon:-122.23359, elev:6950},
+    {slug:'clearcreek', name:'Clear Creek TH',               lat:41.3700,  lon:-122.1540, elev:5760},
+    {slug:'hotlum',     name:'Brewer Creek — Hotlum-Bolam',  lat:41.4420,  lon:-122.0920, elev:6990}] },
+  whitney:     { name:'Mt Whitney',    summit:[36.5786,-118.2923,14505], thr:{wGo:15,wWa:25,gGo:25,gWa:35,pGo:15,pWa:30}, routes:[
+    {slug:'mountwhitneytrail', name:'Whitney Portal — Mount Whitney Trail', lat:36.5869, lon:-118.2400, elev:8360}] },
+  denali:      { name:'Mt Denali',     summit:[63.0692,-151.0070,20310], thr:{wGo:15,wWa:25,gGo:25,gWa:35,pGo:15,pWa:30}, routes:[
+    {slug:'wb',      name:'Kahiltna Base Camp — West Buttress', lat:62.9667, lon:-151.1500, elev:7200},
+    {slug:'muldrow', name:'Wonder Lake — Muldrow Glacier',      lat:63.4775, lon:-150.8728, elev:2000}] },
+};
+
+const HOURS_AHEAD = 12;
+const MODELS = ['gfs_seamless', 'ncep_hrrr_conus'];
+const VARS = ['temperature_2m','wind_speed_10m','wind_gusts_10m','precipitation_probability','freezing_level_height','cloud_cover'];
+
+function pad2(n){ return String(n).padStart(2, '0'); }
+function esc(t){ return String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function mean(a){ const v = a.filter(x => x !== null && x !== undefined && !isNaN(x)); return v.length ? v.reduce((s,x)=>s+x)/v.length : null; }
+function band(v, go, wa){ return v === null ? '' : v <= go ? 'go' : v <= wa ? 'watch' : 'caution'; }
+function windChillF(t, w){
+  if(t === null || w === null) return null;
+  if(t > 50 || w < 3) return t;
+  return 35.74 + 0.6215*t - 35.75*Math.pow(w,0.16) + 0.4275*t*Math.pow(w,0.16);
+}
+function haversineMi(a,b,c,d){
+  const R = 3958.8, p1 = a*Math.PI/180, p2 = c*Math.PI/180;
+  const h = Math.sin((c-a)*Math.PI/360)**2 + Math.cos(p1)*Math.cos(p2)*Math.sin((d-b)*Math.PI/360)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+
+// Sunrise/sunset (same math as mw.html solarEvents, trimmed).
+function solarEvents(date, lat, lon){
+  const dayNoon = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+  const J = dayNoon.getTime()/86400000 + 2440587.5;
+  const n = Math.floor(J - 2451545 + 0.0008);
+  const Jstar = n - lon/360;
+  const Mdeg = ((357.5291 + 0.98560028*Jstar) % 360 + 360) % 360;
+  const M = Mdeg*Math.PI/180;
+  const Cdeg = 1.9148*Math.sin(M) + 0.02*Math.sin(2*M) + 0.0003*Math.sin(3*M);
+  const lambda = (((Mdeg + Cdeg + 180 + 102.9372) % 360 + 360) % 360) * Math.PI/180;
+  const Jtransit = 2451545 + Jstar + 0.0053*Math.sin(M) - 0.0069*Math.sin(2*lambda);
+  const delta = Math.asin(Math.sin(lambda)*Math.sin(23.44*Math.PI/180));
+  const latRad = lat*Math.PI/180;
+  function eventAt(altDeg){
+    const cosO = (Math.sin(altDeg*Math.PI/180) - Math.sin(latRad)*Math.sin(delta)) / (Math.cos(latRad)*Math.cos(delta));
+    if(cosO > 1 || cosO < -1) return { rise:null, set:null };
+    const o = Math.acos(cosO)*180/Math.PI;
+    const toDate = jd => new Date((jd - 2440587.5)*86400000);
+    return { rise: toDate(Jtransit - o/360), set: toDate(Jtransit + o/360) };
+  }
+  const std = eventAt(-0.833), civil = eventAt(-6);
+  return { sunrise: std.rise, sunset: std.set, civilDusk: civil.set };
+}
+
+const params = new URLSearchParams(location.search);
+let mtnKey = params.get('m'), routeSlug = params.get('r');
+let mtn = PEAKS[mtnKey];
+let route = mtn ? (mtn.routes.find(r => r.slug === routeSlug) || mtn.routes[0]) : null;
+const cacheKey = () => `climb-cache-${mtnKey}-${route ? route.slug : ''}`;
+
+function initPicker(){
+  const mSel = document.getElementById('p-mtn');
+  mSel.innerHTML = Object.entries(PEAKS).map(([k,p]) => `<option value="${k}">${esc(p.name)}</option>`).join('');
+  const rSel = document.getElementById('p-route');
+  const fillRoutes = () => {
+    rSel.innerHTML = PEAKS[mSel.value].routes.map(r => `<option value="${r.slug}">${esc(r.name)}</option>`).join('');
+  };
+  mSel.onchange = fillRoutes;
+  fillRoutes();
+  document.getElementById('p-go').onclick = () => {
+    location.search = `?m=${mSel.value}&r=${rSel.value}`;
+  };
+  document.getElementById('picker').hidden = false;
+}
+
+function fmtClock(d){ return d ? `${pad2(d.getHours())}:${pad2(d.getMinutes())}` : '—'; }
+
+function renderDaylight(){
+  const [lat, lon] = mtn.summit;
+  const now = new Date();
+  const ev = solarEvents(now, lat, lon);
+  let line;
+  if(ev.sunset && now < ev.sunset){
+    const mins = Math.round((ev.sunset - now)/60000);
+    const h = Math.floor(mins/60), m = mins % 60;
+    line = `<strong>${h}h ${pad2(m)}m of sun left</strong> · sunset ${fmtClock(ev.sunset)} · civil dusk ${fmtClock(ev.civilDusk)}`;
+  } else {
+    const tomorrow = solarEvents(new Date(now.getTime() + 86400000), lat, lon);
+    line = `<strong>After sunset.</strong> Next sunrise ${fmtClock(tomorrow.sunrise)}`;
+  }
+  document.getElementById('daylight').innerHTML = line;
+}
+
+function hourKey(d){
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:00`;
+}
+
+// Anchor the table at the climb window when one was passed and is still ahead
+// (starting 2 h early for the approach); otherwise at the current hour.
+function forecastAnchor(){
+  const now = new Date(); now.setMinutes(0, 0, 0);
+  const sp = params.get('start');
+  if(sp){
+    const start = new Date(sp);
+    if(!isNaN(start) && start > new Date()){
+      const early = new Date(start.getTime() - 2 * 3600000);
+      const anchor = early > now ? early : now;
+      anchor.setMinutes(0, 0, 0);
+      return { key: hourKey(anchor), mode: 'window', startClock: sp.slice(11, 16) };
+    }
+  }
+  return { key: hourKey(now), mode: 'now' };
+}
+
+function renderForecast(data, thr){
+  const tb = document.getElementById('fc-body');
+  const lbl = document.getElementById('fc-lbl');
+  const times = data.hourly.time;
+  const nowKey = hourKey(new Date(new Date().setMinutes(0, 0, 0)));
+  let anchor = forecastAnchor();
+  // window beyond the fetched horizon — fall back to the hours ahead of now
+  if(anchor.mode === 'window' && !times.some(t => t >= anchor.key)){
+    anchor = { key: nowKey, mode: 'now' };
+  }
+  lbl.textContent = anchor.mode === 'window'
+    ? `Climb window · from ${anchor.startClock} (−2 h) · summit point · model mean`
+    : 'Next hours · summit point · model mean';
+  const rows = [];
+  times.forEach((t, i) => {
+    if(t < anchor.key || rows.length >= HOURS_AHEAD) return;
+    const v = name => mean(MODELS.map(m => data.hourly[`${name}_${m}`]?.[i]));
+    const temp = v('temperature_2m'), wind = v('wind_speed_10m'), gust = v('wind_gusts_10m');
+    const pp = v('precipitation_probability'), fl = v('freezing_level_height');
+    const chill = windChillF(temp, wind);
+    rows.push(`<tr><td>${t.slice(11,16)}</td>`+
+      `<td>${temp !== null ? Math.round(temp)+'°' : '—'}</td>`+
+      `<td>${chill !== null ? Math.round(chill)+'°' : '—'}</td>`+
+      `<td class="${band(wind, thr.wGo, thr.wWa)}">${wind !== null ? Math.round(wind) : '—'}</td>`+
+      `<td class="${band(gust, thr.gGo, thr.gWa)}">${gust !== null ? Math.round(gust) : '—'}</td>`+
+      `<td class="${band(pp, thr.pGo, thr.pWa)}">${pp !== null ? Math.round(pp)+'%' : '—'}</td>`+
+      `<td>${fl !== null ? Math.round(fl).toLocaleString() : '—'}</td></tr>`);
+  });
+  tb.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="7">No hours available — refresh when you have signal.</td></tr>';
+}
+
+function alertBand(a){
+  const ev = (a?.properties?.event || '').toLowerCase();
+  const sev = (a?.properties?.severity || '').toLowerCase();
+  if(sev === 'extreme' || sev === 'severe' || /warning|emergency/.test(ev)) return 'caution';
+  if(sev === 'moderate' || /watch|advisory|statement/.test(ev)) return 'watch';
+  return 'go';
+}
+
+function renderAlerts(alerts){
+  const el = document.getElementById('alerts');
+  const features = alerts?.features || [];
+  if(!features.length){ el.innerHTML = '<div class="alert-line go">None active</div>'; return; }
+  el.innerHTML = features.slice(0, 4).map(a => {
+    const p = a.properties || {};
+    return `<div class="alert-line ${alertBand(a)}">${esc(p.event || 'Alert')} — ${esc((p.headline || '').slice(0, 110))}</div>`;
+  }).join('');
+}
+
+function renderStamp(fetchedAt, fromCache){
+  const el = document.getElementById('stamp');
+  const ageMin = Math.round((Date.now() - fetchedAt) / 60000);
+  const age = ageMin < 60 ? `${ageMin} min ago` : `${(ageMin/60).toFixed(1)} h ago`;
+  el.textContent = (fromCache ? 'OFFLINE — showing cached data fetched ' : 'Data fetched ') + age;
+  el.className = 'stamp' + (fromCache || ageMin > 90 ? ' stale' : '');
+}
+
+async function fetchAll(){
+  const [lat, lon] = mtn.summit;
+  const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`+
+    `&hourly=${VARS.join(',')}&models=${MODELS.join(',')}&timezone=America%2FLos_Angeles`+
+    `&forecast_days=2&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`;
+  const [om, alerts] = await Promise.all([
+    fetch(omUrl).then(r => { if(!r.ok) throw new Error(`Open-Meteo ${r.status}`); return r.json(); }),
+    fetch(`https://api.weather.gov/alerts/active?point=${lat.toFixed(4)},${lon.toFixed(4)}`,
+      { headers:{'Accept':'application/geo+json'} }).then(r => r.ok ? r.json() : null).catch(() => null),
+  ]);
+  return { om, alerts, fetchedAt: Date.now() };
+}
+
+async function refresh(){
+  const err = document.getElementById('err');
+  err.hidden = true;
+  renderDaylight();
+  try {
+    const bundle = await fetchAll();
+    try { localStorage.setItem(cacheKey(), JSON.stringify(bundle)); } catch(e) {}
+    renderForecast(bundle.om, mtn.thr);
+    renderAlerts(bundle.alerts);
+    renderStamp(bundle.fetchedAt, false);
+  } catch(e) {
+    console.warn('Fetch failed:', e);
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(cacheKey()) || 'null'); } catch(_) {}
+    if(cached){
+      renderForecast(cached.om, mtn.thr);
+      renderAlerts(cached.alerts);
+      renderStamp(cached.fetchedAt, true);
+      err.textContent = 'No connection — showing the last cached fetch.';
+    } else {
+      err.textContent = 'Fetch failed and no cached data yet: ' + e.message;
+    }
+    err.hidden = false;
+  }
+}
+
+async function loadObs(){
+  const wrap = document.getElementById('obs-wrap');
+  wrap.innerHTML = '<div class="obs">Loading…</div>';
+  const [lat, lon, summitFt] = mtn.summit;
+  try {
+    const r = await fetch(`https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}/stations`, {headers:{'Accept':'application/geo+json'}});
+    if(!r.ok) throw new Error(`stations ${r.status}`);
+    const data = await r.json();
+    const cands = (data.features || []).map(f => {
+      const p = f.properties || {}, c = f.geometry?.coordinates;
+      const elevFt = p.elevation?.value != null ? p.elevation.value * 3.28084 : null;
+      return { id: p.stationIdentifier, name: p.name || p.stationIdentifier, elevFt,
+        elevDiff: elevFt !== null ? Math.abs(elevFt - summitFt) : Infinity,
+        distMi: Array.isArray(c) ? haversineMi(lat, lon, c[1], c[0]) : null };
+    }).filter(s => s.id && s.distMi !== null && s.distMi <= 40)
+      .sort((a,b) => a.elevDiff - b.elevDiff).slice(0, 4);
+    const results = await Promise.allSettled(cands.map(s =>
+      fetch(`https://api.weather.gov/stations/${s.id}/observations/latest`, {headers:{'Accept':'application/geo+json'}})
+        .then(r => r.ok ? r.json() : null)));
+    const lines = cands.map((s, i) => {
+      const p = results[i].status === 'fulfilled' ? results[i].value?.properties : null;
+      if(!p || !p.timestamp) return null;
+      const ageMin = Math.round((Date.now() - new Date(p.timestamp)) / 60000);
+      if(ageMin > 360) return null;
+      const t = p.temperature?.value != null ? Math.round(p.temperature.value * 9/5 + 32) + '°F' : '—';
+      const w = p.windSpeed?.value != null ? Math.round(p.windSpeed.value * 0.621371) + ' mph' : '—';
+      const g = p.windGust?.value != null ? ' g' + Math.round(p.windGust.value * 0.621371) : '';
+      return `<div class="obs">${t} · ${w}${g} <span class="nm">· ${esc(s.name).slice(0,34)} · ${s.elevFt !== null ? Math.round(s.elevFt).toLocaleString()+' ft' : ''} · ${ageMin}m ago</span></div>`;
+    }).filter(Boolean);
+    wrap.innerHTML = lines.length ? lines.join('') : '<div class="obs">No fresh observations within 40 miles.</div>';
+  } catch(e) {
+    wrap.innerHTML = `<div class="obs">Observations unavailable (${esc(e.message)}). <a href="#" id="obs-retry">Retry</a></div>`;
+    document.getElementById('obs-retry').onclick = ev => { ev.preventDefault(); loadObs(); };
+  }
+}
+
+function init(){
+  if(!mtn || !route){ initPicker(); return; }
+  document.getElementById('main').hidden = false;
+  document.getElementById('title').textContent = `${mtn.name} · Summit-Day Check`;
+  document.getElementById('subtitle').textContent = `${route.name} · summit ${mtn.summit[2].toLocaleString()} ft`;
+  const q = `m=${encodeURIComponent(mtnKey)}&r=${encodeURIComponent(route.slug)}`;
+  const startEnd = params.get('start') && params.get('end')
+    ? `&start=${encodeURIComponent(params.get('start'))}&end=${encodeURIComponent(params.get('end'))}` : '';
+  document.getElementById('full-link').innerHTML =
+    `<a href="mw.html?${q}${startEnd}">Open the full weather dashboard →</a>`;
+  document.getElementById('btn-refresh').onclick = refresh;
+  document.getElementById('btn-obs').onclick = loadObs;
+  refresh();
+  setInterval(renderDaylight, 60000);
+}
+init();
+</script>
+</body>
+</html>
