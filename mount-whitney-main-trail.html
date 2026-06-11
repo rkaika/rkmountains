@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mount Whitney Main Trail Field Guide</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #111617;
+    --text: #263130;
+    --muted: #66716e;
+    --faint: #8d9692;
+    --line: #d9dfdc;
+    --line-strong: #b8c4bf;
+    --paper: #f7f8f4;
+    --panel: #ffffff;
+    --alpine: #2d6b73;
+    --pine: #315d46;
+    --granite: #576162;
+    --gold: #b1762c;
+    --rust: #9c4f31;
+    --night: #10191b;
+    --shadow: 0 14px 40px rgba(16, 24, 32, 0.10);
+    --radius: 8px;
+    --content: 1120px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+  }
+
+  img { max-width: 100%; display: block; }
+  a { color: var(--alpine); text-underline-offset: 0.18em; }
+
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    letter-spacing: 0.02em;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(247, 248, 244, 0.94);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topbar-inner {
+    max-width: var(--content);
+    margin: 0 auto;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .brand {
+    color: var(--ink);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .brand span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .back-link {
+    color: var(--alpine);
+    font-size: 0.72rem;
+    font-weight: 850;
+    letter-spacing: 0.14em;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .back-link:hover { text-decoration: underline; }
+
+  .jump-nav {
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+    padding-bottom: 0.1rem;
+  }
+
+  .jump-nav a {
+    white-space: nowrap;
+    color: var(--text);
+    text-decoration: none;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 999px;
+    padding: 0.38rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .hero {
+    min-height: min(760px, 92vh);
+    display: grid;
+    align-items: end;
+    position: relative;
+    color: #fff;
+    background:
+      linear-gradient(180deg, rgba(16, 25, 27, 0.18) 0%, rgba(16, 25, 27, 0.58) 55%, rgba(16, 25, 27, 0.94) 100%),
+      url("assets/whitney-main-trail/hero.webp") center 44% / cover no-repeat;
+  }
+
+  .hero-content {
+    width: min(var(--content), calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 7rem 0 2.5rem;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: #b9e0df;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 2rem;
+    height: 2px;
+    background: currentColor;
+  }
+
+  h1 {
+    margin: 1rem 0 1rem;
+    max-width: 960px;
+    color: #fff;
+    font-size: clamp(3rem, 10vw, 7rem);
+    line-height: 0.9;
+    letter-spacing: -0.07em;
+  }
+
+  .hero-copy {
+    max-width: 780px;
+    color: #ebf4f2;
+    font-size: clamp(1.05rem, 2.4vw, 1.4rem);
+    line-height: 1.55;
+  }
+
+  .hero-note {
+    margin-top: 1.25rem;
+    max-width: 780px;
+    color: #d8e6e4;
+    font-size: 0.95rem;
+  }
+
+  .quick-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    margin-top: 2rem;
+  }
+
+  .quick-stat { padding: 1rem 1rem 0 0; }
+
+  .quick-stat b {
+    display: block;
+    color: #fff;
+    font-size: clamp(1.35rem, 3.4vw, 2.1rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .quick-stat span {
+    display: block;
+    margin-top: 0.35rem;
+    color: #cadbd7;
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  main { padding: 0 1rem 4rem; }
+
+  section {
+    max-width: var(--content);
+    margin: 0 auto;
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  section:last-child { border-bottom: 0; }
+
+  .section-kicker {
+    color: var(--rust);
+    text-transform: uppercase;
+    font-weight: 850;
+    letter-spacing: 0.16em;
+    font-size: 0.76rem;
+  }
+
+  h2 {
+    margin: 0.45rem 0 1rem;
+    color: var(--ink);
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 1.02;
+    letter-spacing: -0.055em;
+  }
+
+  h3 {
+    margin: 0;
+    color: var(--ink);
+    font-size: 1.16rem;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .lead {
+    max-width: 800px;
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  }
+
+  .notice {
+    margin-top: 1.4rem;
+    padding: 1rem;
+    border-left: 5px solid var(--pine);
+    background: #edf5ef;
+    border-radius: var(--radius);
+    color: #1f4633;
+    font-weight: 650;
+  }
+
+  .grid { display: grid; gap: 1rem; }
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+  .card,
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1rem;
+    box-shadow: 0 1px 0 rgba(16, 24, 32, 0.02);
+  }
+
+  .card strong,
+  .stat strong { color: var(--ink); }
+
+  .stat .label {
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 0.74rem;
+    font-weight: 850;
+    letter-spacing: 0.1em;
+  }
+
+  .stat .value {
+    margin-top: 0.4rem;
+    color: var(--ink);
+    font-size: 1.7rem;
+    font-weight: 850;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  .stat p,
+  .card p {
+    margin: 0.55rem 0 0;
+    color: var(--muted);
+    font-size: 0.94rem;
+    line-height: 1.45;
+  }
+
+  .route-map {
+    margin-top: 2rem;
+    overflow: hidden;
+    border-radius: var(--radius);
+    border: 1px solid var(--line-strong);
+    background: var(--night);
+    box-shadow: var(--shadow);
+  }
+
+  .route-map img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .caption {
+    padding: 0.75rem 0.9rem;
+    color: #dce9e7;
+    background: var(--night);
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+
+  .timeline {
+    margin-top: 2rem;
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .step-num {
+    width: 3rem;
+    height: 3rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #e7f1ef;
+    color: var(--alpine);
+    font-weight: 900;
+  }
+
+  .step-body {
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .step-body p {
+    margin: 0.35rem 0 0;
+    color: var(--muted);
+  }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .photo {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+  }
+
+  .photo img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .photo figcaption {
+    padding: 0.8rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .weather-list,
+  .resource-list {
+    margin-top: 1.5rem;
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .weather-link,
+  .resource-link {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.85rem;
+    align-items: start;
+    padding: 1rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .weather-link .alt,
+  .resource-link .alt {
+    min-width: 5.2rem;
+    color: var(--alpine);
+    font-weight: 900;
+  }
+
+  .weather-link span,
+  .resource-link span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.75fr);
+    gap: 1.5rem;
+    align-items: start;
+    margin-top: 1.5rem;
+  }
+
+  .callout {
+    background: var(--night);
+    color: #e7f2f1;
+    border-radius: var(--radius);
+    padding: 1.15rem;
+  }
+
+  .callout h3 { color: #fff; }
+  .callout a { color: #a6d8d6; }
+  .callout p,
+  .callout li { color: #cfdfdc; }
+
+  ul.clean,
+  ol.clean {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .clean li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .clean li:last-child { border-bottom: 0; }
+  .callout .clean li { border-bottom-color: rgba(255, 255, 255, 0.13); }
+
+  .plan { display: grid; gap: 0.75rem; }
+
+  .day {
+    display: grid;
+    grid-template-columns: 4.3rem 1fr;
+    gap: 0.8rem;
+    align-items: baseline;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .day b {
+    color: var(--alpine);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .checklist {
+    counter-reset: item;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .checklist li {
+    counter-increment: item;
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1rem 1rem 1rem 3.25rem;
+  }
+
+  .checklist li::before {
+    content: counter(item, decimal-leading-zero);
+    position: absolute;
+    left: 1rem;
+    top: 1.1rem;
+    color: var(--rust);
+    font-weight: 900;
+    font-size: 0.78rem;
+  }
+
+  .compact-note {
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .footer {
+    background: var(--night);
+    color: #cfdfdc;
+    padding: 3rem 1rem;
+  }
+
+  .footer-inner {
+    max-width: var(--content);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 2rem;
+  }
+
+  .footer h2 {
+    color: #fff;
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .footer a { color: #a6d8d6; }
+
+  .source-list { display: grid; gap: 0.5rem; }
+  .source-list a { display: block; padding: 0.5rem 0; }
+
+  @media (max-width: 840px) {
+    body { font-size: 16px; }
+    .topbar { position: static; }
+    .topbar-inner {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .jump-nav { width: 100%; padding-bottom: 0.2rem; }
+    .hero { min-height: auto; background-position: center top; }
+    .hero-content { padding: 3.25rem 0 1.25rem; }
+    h1 {
+      font-size: clamp(3.1rem, 18vw, 5rem);
+      line-height: 0.95;
+    }
+    .quick-stats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+    }
+    .quick-stat { padding-top: 0.9rem; }
+    section { padding: 3rem 0; }
+    .grid-2,
+    .grid-3,
+    .grid-4,
+    .split,
+    .footer-inner { grid-template-columns: 1fr; }
+    .photo-grid { grid-template-columns: 1fr; }
+    .checklist { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 430px) {
+    main { padding-left: 0.85rem; padding-right: 0.85rem; }
+    .brand-row {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .hero-content { width: calc(100% - 1.7rem); }
+    .eyebrow { font-size: 0.7rem; letter-spacing: 0.12em; }
+    .quick-stat b { font-size: 1.22rem; }
+    .weather-link,
+    .resource-link {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+    .step {
+      grid-template-columns: 2.4rem 1fr;
+      gap: 0.75rem;
+    }
+    .step-num {
+      width: 2.4rem;
+      height: 2.4rem;
+    }
+    .day {
+      grid-template-columns: 1fr;
+      gap: 0.1rem;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .hero-content { padding-top: 2.4rem; }
+    .quick-stats { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-row">
+        <a class="back-link" href="index.html">Back to index</a>
+        <div class="brand">Mount Whitney <span>Main Trail Field Guide</span></div>
+      </div>
+      <nav class="jump-nav" aria-label="Page sections">
+        <a href="#route">Route</a>
+        <a href="#sequence">Sequence</a>
+        <a href="#weather">Weather</a>
+        <a href="#permits">Permits</a>
+        <a href="#plans">Plans</a>
+        <a href="#prep">Prep</a>
+        <a href="#return">Return</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="hero-content">
+      <div class="eyebrow mono">What to expect on the classic Mount Whitney route</div>
+      <h1>Main Trail</h1>
+      <p class="hero-copy">
+        A strenuous non-technical ascent from Whitney Portal to the highest summit in the lower 48 when the trail is dry. This guide is for the Mount Whitney Main Trail only, not the Mountaineers Route, East Face, East Buttress, or North Fork approaches.
+      </p>
+      <p class="hero-note">
+        Permits, weather, snow, altitude, water, and team pace decide the day. Re-verify everything before departure and build a firm turnaround time.
+      </p>
+      <div class="quick-stats" aria-label="Route summary">
+        <div class="quick-stat"><b>8,360 ft</b><span>Whitney Portal trailhead</span></div>
+        <div class="quick-stat"><b>14,505 ft</b><span>Summit elevation</span></div>
+        <div class="quick-stat"><b>22 mi RT</b><span>Classic day-hike distance</span></div>
+        <div class="quick-stat"><b>12-14 hr</b><span>Common summit-and-back estimate</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="route">
+      <div class="section-kicker mono">01 / Goal</div>
+      <h2>Plan the Main Trail as an altitude day, not a casual hike.</h2>
+      <p class="lead">
+        The Mount Whitney Trail starts at Whitney Portal, climbs more than 6,200 ft, reaches the summit in Sequoia National Park, and returns the same way for most day hikers. The trail is straightforward when dry, but the elevation, exposure, darkness, weather, and descent make it a serious mountain objective.
+      </p>
+      <div class="notice">Primary objective: return the full team safely to Whitney Portal. The summit is optional; the descent is mandatory.</div>
+
+      <div class="resource-list" aria-label="Route planning links">
+        <a class="resource-link" href="https://www.recreation.gov/permits/445860" target="_blank" rel="noopener">
+          <div class="alt mono">Permit</div>
+          <div><strong>Official Mt. Whitney permit page</strong><span>Use Recreation.gov for permit type, lottery timing, fees, print deadlines, bear rules, waste rules, and route-specific permit boundaries.</span></div>
+        </a>
+        <a class="resource-link" href="https://www.nps.gov/seki/planyourvisit/whitney.htm" target="_blank" rel="noopener">
+          <div class="alt mono">NPS</div>
+          <div><strong>Seeing and Climbing Mt. Whitney</strong><span>NPS route overview for the Whitney Portal approach, summit elevation, season notes, and permit context.</span></div>
+        </a>
+        <a class="resource-link" href="https://www.fs.usda.gov/sites/nfs/files/legacy-media/inyo/Mount%20Whitney%20Zone%20MAP%20-%20June%202023.pdf" target="_blank" rel="noopener">
+          <div class="alt mono">Zone</div>
+          <div><strong>Mount Whitney Zone map</strong><span>Official map linked from the permit page. Use it to understand permit boundaries and entry/exit context, not as your only navigation tool.</span></div>
+        </a>
+      </div>
+
+      <div class="grid grid-4" style="margin-top:1.5rem">
+        <div class="stat">
+          <div class="label mono">Start</div>
+          <div class="value">Whitney Portal</div>
+          <p>8,360 ft, about 13 miles west of Lone Pine. Expect night starts, bear activity, full parking, and cold pre-dawn sorting.</p>
+        </div>
+        <div class="stat">
+          <div class="label mono">Midpoint</div>
+          <div class="value">Trail Camp</div>
+          <p>About 12,000 ft. A common overnight camp and a useful place to reassess wind, energy, water, and altitude symptoms.</p>
+        </div>
+        <div class="stat">
+          <div class="label mono">High pass</div>
+          <div class="value">Trail Crest</div>
+          <p>Roughly 13,600 ft. From here the route traverses west-side terrain before the final summit push.</p>
+        </div>
+        <div class="stat">
+          <div class="label mono">Summit</div>
+          <div class="value">14,505 ft</div>
+          <p>Highest point in the lower 48. Take the moment, then start managing the long descent immediately.</p>
+        </div>
+      </div>
+
+      <figure class="route-map">
+        <img src="assets/whitney-main-trail/switchbacks.webp" alt="Switchbacks on the Mount Whitney Main Trail above Trail Camp with Consultation Lake below.">
+        <figcaption class="caption">Main Trail terrain above Trail Camp. The route can be a dry trail in summer, but snow or ice changes the problem into mountaineering terrain.</figcaption>
+      </figure>
+    </section>
+
+    <section id="scope">
+      <div class="section-kicker mono">02 / Scope</div>
+      <h2>Do not mix this plan with the Mountaineers Route.</h2>
+      <div class="grid grid-3">
+        <div class="card">
+          <h3>Main Trail</h3>
+          <p>The classic Whitney Portal trail used by most day hikers. Dry-season travel is usually non-technical, but still long, high, and committing.</p>
+        </div>
+        <div class="card">
+          <h3>Mountaineers Route</h3>
+          <p>Different approach via the North Fork of Lone Pine Creek. It has different terrain, permit context, hazards, and routefinding demands.</p>
+        </div>
+        <div class="card">
+          <h3>Snow season</h3>
+          <p>If snow or ice is present, bring the skills and equipment for winter mountain travel or choose another date.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="sequence">
+      <div class="section-kicker mono">03 / Route Sequence</div>
+      <h2>Break the climb into decision points.</h2>
+      <p class="lead">
+        Treat these as planning anchors, not navigation instructions. Carry a real map, downloaded offline maps, headlamp margin, and enough judgment to turn around before the mountain decides for you.
+      </p>
+
+      <div class="timeline">
+        <div class="step">
+          <div class="step-num mono">1</div>
+          <div class="step-body">
+            <h3>Whitney Portal, 8,360 ft</h3>
+            <p>Start organized. Bear-proof food storage, permit, pack-out kit, water plan, headlamp, layers, and turnaround time should all be settled before leaving the lot.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">2</div>
+          <div class="step-body">
+            <h3>Stay on the Main Trail</h3>
+            <p>Early junctions can matter in the dark. Confirm you are not drifting toward the North Fork / Mountaineers Route approach.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">3</div>
+          <div class="step-body">
+            <h3>Lone Pine Lake and Outpost Camp</h3>
+            <p>Use the lower basin to check pace, temperature, and altitude response. Overnight hikers need the proper Whitney Trail overnight permit for camping.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">4</div>
+          <div class="step-body">
+            <h3>Mirror Lake, Trailside Meadow, Trail Camp</h3>
+            <p>Approach the high basin deliberately. Filter or treat water, watch for fragile areas, and avoid camping on vegetation.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">5</div>
+          <div class="step-body">
+            <h3>Switchbacks and cables</h3>
+            <p>The switchbacks above Trail Camp are exposed to wind, ice, solar heating, and fatigue. If snow or ice blocks the trail, reassess equipment and ability honestly.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">6</div>
+          <div class="step-body">
+            <h3>Trail Crest and west-side traverse</h3>
+            <p>The climb is not over at Trail Crest. Watch weather, wind, clouds, snow patches, group spacing, and whether everyone can still descend safely.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">7</div>
+          <div class="step-body">
+            <h3>Summit hut and summit plateau</h3>
+            <p>Protect energy and temperature. Take photos, eat, drink, check the clock, and leave before the descent margin gets thin.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num mono">8</div>
+          <div class="step-body">
+            <h3>Descend the same way</h3>
+            <p>Most incidents happen when people are tired, late, dehydrated, or altitude-sick. Keep the team together all the way back to Whitney Portal.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="photo-grid">
+        <figure class="photo">
+          <img src="assets/whitney-main-trail/stream-crossing.webp" alt="Hikers crossing a stream on the Mount Whitney Trail.">
+          <figcaption>Lower trail: stream crossings and early movement should stay calm, dry, and efficient.</figcaption>
+        </figure>
+        <figure class="photo">
+          <img src="assets/whitney-main-trail/trail-hikers.webp" alt="Hikers on the Mount Whitney Main Trail near the summit.">
+          <figcaption>Upper trail: the summit can feel close while the descent still carries most of the risk.</figcaption>
+        </figure>
+        <figure class="photo">
+          <img src="assets/whitney-main-trail/switchbacks.webp" alt="Mount Whitney Trail switchbacks above Trail Camp.">
+          <figcaption>Switchbacks: dry trail is one problem; snow, ice, or wind make it a different day.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="weather">
+      <div class="section-kicker mono">04 / Weather</div>
+      <h2>Check the summit, the trailhead, and the trend.</h2>
+      <p class="lead">
+        Whitney weather can change the plan quickly: wind on the crest, thunderstorm timing, smoke, heat near Lone Pine, cold pre-dawn starts, and snow or ice on the switchbacks all matter.
+      </p>
+      <div class="weather-list">
+        <a class="weather-link" href="https://forecast.weather.gov/MapClick.php?lat=36.5786&amp;lon=-118.2923&amp;unit=0&amp;lg=english&amp;FcstType=graphical" target="_blank" rel="noopener">
+          <div class="alt mono">NWS</div>
+          <div><strong>NWS forecast near Mount Whitney summit</strong><span>Official point forecast near 14,505 ft. Compare wind, gusts, temperature, precipitation, and lightning timing.</span></div>
+        </a>
+        <a class="weather-link" href="https://forecast.weather.gov/MapClick.php?lat=36.5869&amp;lon=-118.2400&amp;unit=0&amp;lg=english&amp;FcstType=graphical" target="_blank" rel="noopener">
+          <div class="alt mono">Portal</div>
+          <div><strong>NWS forecast near Whitney Portal</strong><span>Use this for trailhead heat/cold, overnight sorting, and the first/last miles.</span></div>
+        </a>
+        <a class="weather-link" href="https://www.mountain-forecast.com/peaks/Mount-Whitney" target="_blank" rel="noopener">
+          <div class="alt mono">14505</div>
+          <div><strong>Mountain-Forecast: Mount Whitney</strong><span>Summit-level context. Treat as comparison, then prioritize official NWS and actual observed conditions.</span></div>
+        </a>
+        <a class="weather-link" href="https://www.windy.com/36.579/-118.292?36.579,-118.292,10" target="_blank" rel="noopener">
+          <div class="alt mono">Windy</div>
+          <div><strong>Windy model comparison near the summit</strong><span>Useful for scanning wind, gust, smoke, cloud, and model disagreement across the Sierra crest.</span></div>
+        </a>
+        <a class="weather-link" href="mw.html?m=whitney&amp;r=mountwhitneytrail">
+          <div class="alt mono">Tool</div>
+          <div><strong>Get detailed forecast</strong><span>Open the Mountain Weather dashboard prefilled for Mount Whitney and the Main Trail.</span></div>
+        </a>
+      </div>
+    </section>
+
+    <section id="permits">
+      <div class="section-kicker mono">05 / Permits And Logistics</div>
+      <h2>Whitney is permit planning plus mountain planning.</h2>
+      <div class="split">
+        <div>
+          <p class="lead">
+            A wilderness permit is required year-round to visit Mount Whitney. Day use covers one day only, midnight to midnight. Overnight permits for the Mount Whitney Trail cover multi-day trips starting on the classic Main Trail.
+          </p>
+          <ul class="clean" style="margin-top:1rem">
+            <li><strong>Lottery:</strong> Recreation.gov lists lottery results on March 15 and a claim deadline of April 21 for awarded reservations.</li>
+            <li><strong>After lottery:</strong> unclaimed dates open for reservations on April 22, according to Recreation.gov.</li>
+            <li><strong>Print deadline:</strong> day-use permits can be canceled as no-show unless printed before noon one day before entry.</li>
+            <li><strong>Bears:</strong> remove food and scented items from vehicles at Whitney Portal and use the bear-proof lockers.</li>
+            <li><strong>Waste:</strong> there are no restrooms along the trail. Pack out solid human waste and paper.</li>
+            <li><strong>Cell service:</strong> do not rely on a phone for communication or navigation.</li>
+          </ul>
+        </div>
+        <aside class="callout">
+          <h3>Before you leave Lone Pine</h3>
+          <ul class="clean">
+            <li><strong>Permit:</strong> printed or issued, signed, and carried by the leader.</li>
+            <li><strong>Food storage:</strong> car food and scented items ready for lockers.</li>
+            <li><strong>Waste kit:</strong> pack-out kit in a known location.</li>
+            <li><strong>Navigation:</strong> maps downloaded and paper backup packed.</li>
+            <li><strong>Turnaround:</strong> hard time agreed before anyone is tired.</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section id="plans">
+      <div class="section-kicker mono">06 / Trip Plans</div>
+      <h2>Choose a schedule that respects altitude.</h2>
+      <div class="grid grid-3" style="margin-top:1.5rem">
+        <div class="card plan">
+          <h3>Single-day climb</h3>
+          <div class="day"><b>Before</b><span>Sleep nearby, stage food and layers, and start before sunrise.</span></div>
+          <div class="day"><b>Climb</b><span>Whitney Portal to summit and back, with a firm turnaround time.</span></div>
+          <div class="day"><b>After</b><span>Do not underestimate the drive or the need for food, water, and dry clothes.</span></div>
+        </div>
+        <div class="card plan">
+          <h3>Two-day backpack</h3>
+          <div class="day"><b>Day 1</b><span>Hike to Outpost Camp, Consultation Lake, or Trail Camp.</span></div>
+          <div class="day"><b>Day 2</b><span>Summit early, return to camp, pack up, and descend to the portal.</span></div>
+        </div>
+        <div class="card plan">
+          <h3>Three-day backpack</h3>
+          <div class="day"><b>Day 1</b><span>Approach and camp without rushing.</span></div>
+          <div class="day"><b>Day 2</b><span>Summit with lighter packs and return to camp.</span></div>
+          <div class="day"><b>Day 3</b><span>Pack out with more sleep and more descent margin.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="prep">
+      <div class="section-kicker mono">07 / Prep</div>
+      <h2>Train the day before you need the day.</h2>
+      <p class="lead">
+        Whitney rewards boring competence: altitude pacing, early starts, steady eating, water discipline, warm layers, foot care, and the willingness to turn around while descent still looks easy.
+      </p>
+      <ol class="checklist">
+        <li>Acclimate before the climb when possible. Do not discover your altitude response above Trail Camp.</li>
+        <li>Carry headlamp plus backup light or batteries. Many parties move in the dark both directions.</li>
+        <li>Set a turnaround time before leaving the trailhead.</li>
+        <li>Know altitude illness symptoms and make conservative decisions if they appear.</li>
+        <li>Bring enough water capacity and treatment; confirm current water availability locally.</li>
+        <li>Pack layers for both desert heat and crest-level wind/cold.</li>
+        <li>Carry traction, ice axe, and the skill to use them when snow or ice remains.</li>
+        <li>Use footwear and socks already proven on long descents.</li>
+        <li>Keep the group together. Split parties create rescue and decision problems.</li>
+        <li>Pack out all trash, food waste, and human waste.</li>
+      </ol>
+    </section>
+
+    <section id="mental">
+      <div class="section-kicker mono">08 / Mental Game</div>
+      <h2>Expect the climb to feel long twice.</h2>
+      <div class="split">
+        <div>
+          <p class="lead">
+            The ascent is long, and the descent can feel longer. Break the route into known sections: Portal, lower lakes, Trail Camp, switchbacks, Trail Crest, traverse, summit, and every one of those in reverse.
+          </p>
+          <ul class="clean" style="margin-top:1rem">
+            <li>Use small goals: the next switchback, next snack, next layer check, next water check.</li>
+            <li>Do not confuse seeing the summit area with being nearly done.</li>
+            <li>If someone is slowing sharply, solve that early rather than above Trail Crest.</li>
+            <li>Keep enough focus for the final miles below Lone Pine Lake.</li>
+          </ul>
+        </div>
+        <aside class="callout">
+          <h3>The good decision is often early</h3>
+          <p>Most teams know they are behind plan before they admit it. Make the conservative call while turning around is still simple.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="return">
+      <div class="section-kicker mono">09 / Return</div>
+      <h2>Make the descent part of the summit plan.</h2>
+      <div class="grid grid-3" style="margin-top:1.5rem">
+        <div class="stat">
+          <div class="label mono">Descent</div>
+          <div class="value">6,000+ ft</div>
+          <p>Plan for knees, feet, altitude fatigue, darkness, and slower party members on the way down.</p>
+        </div>
+        <div class="stat">
+          <div class="label mono">Hazards</div>
+          <div class="value">Late day</div>
+          <p>Afternoon storms, smoke, wind, soft snow, dehydration, and navigation mistakes all get sharper when the team is tired.</p>
+        </div>
+        <div class="stat">
+          <div class="label mono">After</div>
+          <div class="value">Recover</div>
+          <p>Have food, electrolytes, dry layers, and a realistic plan for sleep or driving after the climb.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="section-kicker mono">References</div>
+        <h2>Use this as a planning brief, then verify current conditions.</h2>
+        <p>
+          Use this page for route framing and trip planning, then verify permits, weather, snow, trail conditions, bear rules, waste rules, water, and team readiness before any real climb.
+        </p>
+      </div>
+      <div class="source-list">
+        <a href="https://www.recreation.gov/permits/445860" target="_blank" rel="noopener">Recreation.gov - Mt. Whitney permit page</a>
+        <a href="https://www.nps.gov/seki/planyourvisit/whitney.htm" target="_blank" rel="noopener">NPS - Seeing and Climbing Mt. Whitney</a>
+        <a href="https://www.nps.gov/seki/planyourvisit/trailcond.htm" target="_blank" rel="noopener">NPS - Sequoia &amp; Kings Canyon trail conditions</a>
+        <a href="https://forecast.weather.gov/MapClick.php?lat=36.5786&amp;lon=-118.2923&amp;unit=0&amp;lg=english&amp;FcstType=graphical" target="_blank" rel="noopener">NWS - Mount Whitney summit point forecast</a>
+        <a href="https://www.mountain-forecast.com/peaks/Mount-Whitney" target="_blank" rel="noopener">Mountain-Forecast - Mount Whitney</a>
+        <a href="mw.html?m=whitney&amp;r=mountwhitneytrail">RK Mountains - Whitney Main Trail weather dashboard</a>
+        <p class="compact-note">
+          Photo credits: Recreation.gov / Inyo National Forest Mt. Whitney gallery.
+        </p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
