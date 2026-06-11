@@ -127,11 +127,31 @@
   }
 
   .card.field {
-    background:
+    --field-image: url("assets/baker-easton/hero.jpg");
+    --field-position: center 40%;
+    background-image:
       linear-gradient(180deg, rgba(16, 24, 32, 0.08), rgba(16, 24, 32, 0.68)),
-      url("assets/baker-easton/hero.jpg") center 40% / cover no-repeat;
+      var(--field-image);
+    background-position: center, var(--field-position);
+    background-size: cover, cover;
+    background-repeat: no-repeat;
     color: #fff;
     border-color: rgba(16, 24, 32, 0.2);
+  }
+
+  .card.field-baker {
+    --field-image: url("assets/baker-easton/hero.jpg");
+    --field-position: center 40%;
+  }
+
+  .card.field-rainier {
+    --field-image: url("assets/rainier-dc/hero.jpg");
+    --field-position: center 45%;
+  }
+
+  .card.field-whitney {
+    --field-image: url("assets/whitney-main-trail/hero.webp");
+    --field-position: center 42%;
   }
 
   .tag {
@@ -280,7 +300,7 @@
           <p class="section-note">Route-specific notes and practical planning references.</p>
         </div>
         <div class="card-grid">
-          <a class="card field" href="mount-baker-easton.html">
+          <a class="card field field-baker" href="mount-baker-easton.html">
             <span class="tag">Mount Baker</span>
             <h3>Easton Route Field Guide</h3>
             <p>Park Butte Trailhead, Sandy Camp, Easton Glacier, weather checks, logistics, trip plans, prep, and descent notes.</p>
@@ -290,7 +310,7 @@
               <span>Glacier route</span>
             </div>
           </a>
-          <a class="card field" href="mount-rainier-dc.html">
+          <a class="card field field-rainier" href="mount-rainier-dc.html">
             <span class="tag">Mount Rainier</span>
             <h3>DC / Ingraham Direct Field Guide</h3>
             <p>Paradise, Camp Muir, Ingraham Flats, the Cleaver vs the Direct, summit-day timing, permits, weather checks, and descent margin.</p>
@@ -300,7 +320,7 @@
               <span>Glacier route</span>
             </div>
           </a>
-          <a class="card field" href="mount-whitney-main-trail.html">
+          <a class="card field field-whitney" href="mount-whitney-main-trail.html">
             <span class="tag">Mount Whitney</span>
             <h3>Main Trail Field Guide</h3>
             <p>Whitney Portal, permits, the Main Trail sequence, weather checks, altitude prep, trip plans, and descent margin.</p>

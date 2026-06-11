@@ -129,9 +129,10 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 - `mw.html`: current mountaineering weather dashboard.
 - `climb.html`: Summit-Day Check — lightweight during-climb conditions page with offline cache.
 - `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
-- `mount-rainier-dc.html`: Mount Rainier DC / Ingraham Direct Field Guide. Uses inline SVG diagrams (elevation profile, season windows, summit-day schedule) instead of photographs, so it has no assets directory.
+- `mount-rainier-dc.html`: Mount Rainier DC / Ingraham Direct Field Guide. Uses inline SVG diagrams for route planning and a local Rainier image for the home page field-guide card.
 - `mount-whitney-main-trail.html`: Mount Whitney Main Trail Field Guide.
 - `assets/baker-easton/`: local images used by the Mount Baker Easton guide.
+- `assets/rainier-dc/`: local image used by the Mount Rainier field-guide card on the home page.
 - `assets/whitney-main-trail/`: local images used by the Mount Whitney Main Trail guide.
 - `mw3.html`: latest experimental/source copy used before promoting to `mw.html`.
 - `mw2.html`: prior dashboard version kept for comparison.
