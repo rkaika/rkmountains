@@ -495,6 +495,7 @@ footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; 
 <div id="results" hidden>
   <div class="crumb" id="crumb"></div>
   <div class="climb-frame" id="climb-frame"></div>
+  <div class="inv-alert" id="fallback-note" hidden></div>
   <div class="links" id="quick-links"></div>
   <section class="window-group" aria-label="Selected climbing window">
 	  <div class="window-finder" id="window-finder" hidden></div>
@@ -1171,8 +1172,18 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
   });
 }
 
+const CHART_SOURCE_TEXT = 'Sources: wind, gust, freezing level, precipitation, snowfall, and cloud data from Open-Meteo models. Charts show two days before the climb start through two days after the climb end; HRRR and NAM appear only where their shorter forecast horizons have data.';
+
 function renderCharts(startStr, endStr, summitFt, thr){
   _lastChartArgs = [startStr, endStr, summitFt, thr];
+  const srcEl = document.getElementById('chart-source');
+  document.querySelectorAll('.chart-card').forEach(c => { c.style.display = _apiData ? '' : 'none'; });
+  if(!_apiData){
+    Object.keys(_charts).forEach(id => { _charts[id].destroy(); delete _charts[id]; });
+    if(srcEl) srcEl.textContent = 'Model comparison charts unavailable — the Open-Meteo model service could not be reached.';
+    return;
+  }
+  if(srcEl) srcEl.textContent = CHART_SOURCE_TEXT;
   const cStart = new Date(startStr); const cEnd = new Date(endStr);
   renderChart('chart-wind',     'wind_speed_10m',         cStart, cEnd, summitFt, {unit:' mph', refLine:{value:thr.wGo, label:`Go (${thr.wGo} mph)`, color:'rgba(210,153,34,0.55)'}});
   renderChart('chart-gust',     'wind_gusts_10m',         cStart, cEnd, summitFt, {unit:' mph', refLine:{value:thr.gGo, label:`Go (${thr.gGo} mph)`, color:'rgba(210,153,34,0.55)'}});
@@ -1270,26 +1281,32 @@ function metClass(val, go, watch){
   return 'caution';
 }
 
+// Abort a fetch that hangs (e.g. a service accepting connections but never
+// responding) so degraded rendering can kick in instead of stalling the page.
+function fetchTimeoutSignal(ms){
+  return (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(ms) : undefined;
+}
+
 async function fetchWeather(lat, lon){
   const vars = VARS.join(',');
   const models = MODELS.join(',');
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=${vars}&models=${models}&timezone=America%2FLos_Angeles&past_days=3&forecast_days=7&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&_=${Date.now()}`;
-  const r = await fetch(url);
+  const r = await fetch(url, {signal: fetchTimeoutSignal(15000)});
   if(!r.ok) throw new Error(`Open-Meteo ${r.status}`);
   return r.json();
 }
 
 async function fetchNwsPointForecast(point){
   const pointUrl = `https://api.weather.gov/points/${point.lat.toFixed(4)},${point.lon.toFixed(4)}`;
-  const pointResponse = await fetch(pointUrl, {headers:{'Accept':'application/geo+json'}});
+  const pointResponse = await fetch(pointUrl, {headers:{'Accept':'application/geo+json'}, signal: fetchTimeoutSignal(15000)});
   if(!pointResponse.ok) throw new Error(`NWS point lookup failed for ${point.name}`);
   const pointData = await pointResponse.json();
   const hourlyUrl = pointData.properties.forecastHourly;
   const gridUrl = pointData.properties.forecastGridData;
 
   const [hourlyResponse, gridResponse] = await Promise.all([
-    fetch(hourlyUrl, {headers:{'Accept':'application/geo+json'}}),
-    fetch(gridUrl, {headers:{'Accept':'application/geo+json'}}),
+    fetch(hourlyUrl, {headers:{'Accept':'application/geo+json'}, signal: fetchTimeoutSignal(15000)}),
+    fetch(gridUrl, {headers:{'Accept':'application/geo+json'}, signal: fetchTimeoutSignal(15000)}),
   ]);
   if(!hourlyResponse.ok) throw new Error(`NWS hourly forecast failed for ${point.name}`);
 
@@ -1337,6 +1354,9 @@ function snowInchesFromGrid(grid, start, end){
 }
 
 function summarizeNwsForecast(bundle, startStr, endStr){
+  if(!bundle){
+    return {periods:[], byTime:{}, minTemp:null, maxTemp:null, maxPop:null, snowInches:0, generatedAt:null, unavailable:true};
+  }
   const start = new Date(startStr);
   const end = new Date(endStr);
   const periods = (bundle.hourly.properties.periods||[]).filter(p => periodOverlaps(p, start, end));
@@ -1521,6 +1541,30 @@ function parseWindow(api, startStr, endStr, summitFt, nws){
   return rows;
 }
 
+// Fallback when Open-Meteo is unreachable: build the hourly window rows from
+// the NWS summit point forecast alone. Model-only fields (freezing level,
+// cloud cover, precipitation amount, spread) stay null and render as '—'.
+const NWS_DIR_DEG = {N:0, NNE:22.5, NE:45, ENE:67.5, E:90, ESE:112.5, SE:135, SSE:157.5, S:180, SSW:202.5, SW:225, WSW:247.5, W:270, WNW:292.5, NW:315, NNW:337.5};
+function nwsFallbackRows(nws){
+  return (nws.upper.periods || []).map(p => {
+    const t = dtlStr(new Date(p.startTime));
+    const row = { time: t, byModel: {} };
+    VARS.forEach(v => { row[v] = null; });
+    row.wind_speed_10m = maxWindFromText(p.windSpeed);
+    row.wind_gusts_10m = maxWindFromText(p.windGust);
+    row.wind_direction_10m = NWS_DIR_DEG[String(p.windDirection || '').toUpperCase()] ?? null;
+    row.precipitation_probability = p.probabilityOfPrecipitation?.value ?? null;
+    row.temperature_2m = p.temperature ?? null;
+    row.fl_ft = null;
+    row.summit_f = p.temperature ?? null;
+    row.trail_f = nws.trail.byTime[t]?.temperature ?? null;
+    row.snow_signal = /snow|sleet|wintry/i.test(p.shortForecast || '');
+    row.inversion = false;
+    row.spread = null;
+    return row;
+  }).sort((a, b) => a.time < b.time ? -1 : 1);
+}
+
 function addHours(date, hours){
   const d = new Date(date);
   d.setHours(d.getHours() + hours);
@@ -1658,6 +1702,12 @@ function renderPreClimbTrend(api, startStr, endStr, mtn, thr, point = {label:'Su
   const source = document.getElementById('pretrend-source');
   const el = document.getElementById('pretrend');
   if(!source || !el) return;
+
+  if(!api){
+    source.innerHTML = '<strong>Sources:</strong> Open-Meteo model data (currently unreachable).';
+    el.innerHTML = '<div class="pretrend-empty">Route weather timeline unavailable — the Open-Meteo model service could not be reached.</div>';
+    return;
+  }
 
   const rows = parsePreClimbTrend(api, startStr, endStr);
   const pointText = `${point.label.toLowerCase()}${point.elev ? ` · ${Math.round(point.elev).toLocaleString()} ft` : ''}`;
@@ -1831,6 +1881,9 @@ function refreezeSignal(rows, nws){
   const summitMin = nws.upper.minTemp;
   const trailMin = nws.trail.minTemp;
   const cloudAvg = mean(rows.map(r => r.cloud_cover));
+  if(summitMin === null){
+    return { band:'watch', label:'Refreeze unknown', body:'NWS summit temperatures are unavailable, so overnight refreeze could not be judged.' };
+  }
   if(summitMin !== null && summitMin <= 28 && (trailMin === null || trailMin <= 36) && (cloudAvg === null || cloudAvg < 70)){
     return { band:'go', label:'Good refreeze', body:'Cold upper mountain and limited cloud signal support firmer early travel.' };
   }
@@ -2401,6 +2454,7 @@ function evaluateDayWindow(api, thr, sStr, eStr, summitFt){
 function renderWindowFinder(api, mtn, startStr, endStr){
   const el = document.getElementById('window-finder');
   if(!el) return;
+  if(!api){ el.hidden = true; el.innerHTML = ''; return; }
   const thr = mtn.thr;
   const startClock = startStr.slice(11, 16);
   const durMs = new Date(endStr) - new Date(startStr);
@@ -2578,7 +2632,7 @@ function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws, avy, avyDeal
     <div class="met ${metClass(s.maxPrecip,thr.pGo,thr.pWa)}">
       <div class="lbl">Max precip prob</div>
       <div class="val">${s.maxPrecip!==null?Math.round(s.maxPrecip)+'%':'—'}</div>
-      <div class="sub">Open-Meteo mean · go &lt;${thr.pGo}%${atSuffix(s.maxPrecipAt)}</div>
+      <div class="sub">${_apiData?'Open-Meteo mean':'NWS hourly'} · go &lt;${thr.pGo}%${atSuffix(s.maxPrecipAt)}</div>
     </div>
     <div class="met">
       <div class="lbl">Snow signal</div>
@@ -2603,10 +2657,13 @@ function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws, avy, avyDeal
     spreadEl.textContent = `Model peaks (wind) → ${modelVals} · spread ${Math.round(s.avgSpread)} mph · ${tight?'tight — high confidence':wide?'wide — low confidence — check back closer':'moderate uncertainty'}`;
   } else { spreadEl.textContent = ''; }
 
-  document.getElementById('table-source').innerHTML =
-    `<strong>Sources:</strong> summit/trailhead temperatures = NWS hourly point forecasts `+
-    `(summit generated ${formatGenerated(nws.upper.generatedAt)}; trailhead generated ${formatGenerated(nws.trail.generatedAt)}) · `+
-    `wind/gust/freezing level/precip/cloud = Open-Meteo available-model mean · snow flag = NWS upper forecast text`;
+  document.getElementById('table-source').innerHTML = _apiData
+    ? `<strong>Sources:</strong> summit/trailhead temperatures = NWS hourly point forecasts `+
+      `(summit generated ${formatGenerated(nws.upper.generatedAt)}; trailhead generated ${formatGenerated(nws.trail.generatedAt)}) · `+
+      `wind/gust/freezing level/precip/cloud = Open-Meteo available-model mean · snow flag = NWS upper forecast text`
+    : `<strong>Sources:</strong> Open-Meteo is unreachable — all columns come from NWS hourly point forecasts `+
+      `(summit generated ${formatGenerated(nws.upper.generatedAt)}; trailhead generated ${formatGenerated(nws.trail.generatedAt)}). `+
+      `Freezing level, cloud cover, and model spread are unavailable in this mode.`;
 
   const tbody = document.getElementById('tbl-body');
   tbody.innerHTML = '';
@@ -2641,8 +2698,8 @@ function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws, avy, avyDeal
       `<td class="r ${gC}">${rnd(r.wind_gusts_10m,0)}</td>`+
       `<td>${windDir(r.wind_direction_10m)}</td>`+
       `<td class="r">${flStr}</td>`+
-      `<td class="r ${pC}">${rnd(r.precipitation_probability,0)}%</td>`+
-      `<td class="r c-dim">${rnd(r.cloud_cover,0)}%</td>`+
+      `<td class="r ${pC}">${r.precipitation_probability!==null?rnd(r.precipitation_probability,0)+'%':'—'}</td>`+
+      `<td class="r c-dim">${r.cloud_cover!==null?rnd(r.cloud_cover,0)+'%':'—'}</td>`+
       `<td>${flags.join(' ')}</td>`;
 
     tbody.appendChild(tr);
@@ -2986,6 +3043,10 @@ function computePrecipHistory(api){
 function renderPrecipHistory(api, point = {label:'Summit', elev:null}, startStr = null){
   const el = document.getElementById('precip-history');
   if(!el) return;
+  if(!api){
+    el.innerHTML = '<div class="station-empty">Recent precipitation history unavailable — the Open-Meteo model service could not be reached.</div>';
+    return;
+  }
   const h = computePrecipHistory(api);
   if(!h){ el.replaceChildren(); return; }
 
@@ -3193,25 +3254,59 @@ async function loadForecast(){
     const summitPoint = {name:`${mtn.name} summit`, lat, lon, elevFt:mtn.summit[2]};
     const trailPoint = {name:th.name, lat:th.lat, lon:th.lon, elevFt:th.elev};
     const [api, upperBundle, trailBundle, avy] = await Promise.all([
-      fetchWeather(lat, lon),
-      fetchNwsPointForecast(summitPoint),
-      fetchNwsPointForecast(trailPoint),
+      fetchWeather(lat, lon).catch(err => {
+        console.warn('Open-Meteo fetch failed:', err);
+        return null;
+      }),
+      fetchNwsPointForecast(summitPoint).catch(err => {
+        console.warn('NWS summit forecast failed:', err);
+        return null;
+      }),
+      fetchNwsPointForecast(trailPoint).catch(err => {
+        console.warn('NWS trailhead forecast failed:', err);
+        return null;
+      }),
       fetchAvyForecast(mtnKey).catch(err => {
         console.warn('Avalanche forecast fetch failed:', err);
         return undefined;
       }),
     ]);
+
+    if(!api && !upperBundle){
+      errEl.textContent = 'Neither Open-Meteo nor the NWS forecast API could be reached — this is a weather-service outage, not a problem with your connection. Try again in a few minutes.';
+      errEl.hidden = false;
+      return;
+    }
+
     _apiData = api;
     const nws = {
       upper: summarizeRoutePointForecast(upperBundle, start, end),
       trail: summarizeRoutePointForecast(trailBundle, start, end),
     };
-    const rows = parseWindow(api, start, end, mtn.summit[2], nws);
+    const rows = api ? parseWindow(api, start, end, mtn.summit[2], nws) : nwsFallbackRows(nws);
 
     if(!rows.length){
-      errEl.textContent = 'No data for that window. Open-Meteo covers the next 7 days — try dates closer to now.';
+      errEl.textContent = api
+        ? 'No data for that window. Open-Meteo covers the next 7 days — try dates closer to now.'
+        : 'Open-Meteo is unreachable and the NWS hourly forecast has no data for that window — try dates closer to now.';
       errEl.hidden = false;
       return;
+    }
+
+    const missingSources = [
+      !api && 'Open-Meteo model data',
+      !upperBundle && 'the NWS summit forecast',
+      !trailBundle && 'the NWS trailhead forecast',
+    ].filter(Boolean);
+    const fallbackNote = document.getElementById('fallback-note');
+    if(fallbackNote){
+      if(missingSources.length){
+        fallbackNote.hidden = false;
+        fallbackNote.innerHTML = `<strong>⚠ Degraded data:</strong> ${missingSources.join(' and ')} could not be reached — showing what is available.`+
+          (api ? '' : ' The verdict below is based on NWS hourly point data only: no model mean, freezing level, cloud cover, or model spread. Reload later for the full view.');
+      } else {
+        fallbackNote.hidden = true;
+      }
     }
 
     const s = computeSummary(rows, mtn.thr, mtn.summit[2], nws);
@@ -3220,7 +3315,10 @@ async function loadForecast(){
     renderAll(mtnKey, mtn, th, start, end, rows, s, nws, avy, avyGate.deal);
     renderWindowFinder(api, mtn, start, end);
     setupPreTrendSelector(mtn, th, start, end, api);
-    fetchAndRenderRouteProfile(mtn, th, start, end, mtn.thr, {trail:nws.trail, summit:nws.upper})
+    fetchAndRenderRouteProfile(mtn, th, start, end, mtn.thr, {
+      ...(trailBundle ? {trail:nws.trail} : {}),
+      ...(upperBundle ? {summit:nws.upper} : {}),
+    })
       .catch(error => {
         console.warn('Route profile fetch failed:', error);
         renderRouteProfileError('Route profile weather unavailable.');
@@ -3237,7 +3335,7 @@ async function loadForecast(){
     document.getElementById('afd-card').innerHTML = '<div class="afd-hdr">Loading discussion…</div>';
     fetchNwsAfd(mtn.nws).then(afd => renderAfd(afd, mtn.nws));
   } catch(e) {
-    errEl.textContent = 'Fetch failed: '+e.message+'. Check your connection.';
+    errEl.textContent = 'Fetch failed: '+e.message+'. A weather service may be down, or your connection dropped — try again shortly.';
     errEl.hidden = false;
     console.error(e);
   } finally {
