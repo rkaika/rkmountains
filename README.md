@@ -8,7 +8,7 @@ Open `index.html` for the site home page. It shares the current dashboard's visu
 
 The weather dashboard helps evaluate a selected mountain, trailhead/route, and climb window. It combines official NWS point forecasts with raw model guidance so you can compare the human-edited baseline against multiple numerical models.
 
-Field guides are standalone pages with a sequence, timing, weather checks, permits and access, hazards, and descent notes for one route each:
+Field guides are standalone pages with a sequence, timing, weather checks, permits and access, hazards, and descent notes for one route each. All four share the dashboard's fonts, palette, top bar, and dark-mode toggle:
 
 - `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
 - `mount-rainier-dc.html`: Mount Rainier DC / Ingraham Direct Field Guide.
@@ -151,7 +151,7 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 - `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
 - `mount-rainier-dc.html`: Mount Rainier DC / Ingraham Direct Field Guide. Uses inline SVG diagrams for route planning and a local Rainier image for the home page field-guide card.
 - `mount-whitney-main-trail.html`: Mount Whitney Main Trail Field Guide.
-- `enchantments-thru-hike.html`: Enchantments Thru-Hike Field Guide. Styled like the current dashboard (shared fonts, palette, and dark-mode toggle), with inline SVG diagrams (elevation profile, sample schedule with decision gates) and a drawn SVG hero for the home page card; no photographs.
+- `enchantments-thru-hike.html`: Enchantments Thru-Hike Field Guide, with inline SVG diagrams (elevation profile, sample schedule with decision gates) and a drawn SVG hero for the home page card; no photographs.
 - `assets/baker-easton/`: local images used by the Mount Baker Easton guide.
 - `assets/rainier-dc/`: local image used by the Mount Rainier field-guide card on the home page.
 - `assets/whitney-main-trail/`: local images used by the Mount Whitney Main Trail guide.

@@ -42,7 +42,7 @@ When adding or changing objectives/routes:
 
 ## Field Guide Changes
 
-Field guides are standalone HTML pages. The older guides (`mount-baker-easton.html`, `mount-rainier-dc.html`, `mount-whitney-main-trail.html`) share one light-only style; `enchantments-thru-hike.html` uses the dashboard's design tokens, fonts, top bar, and `summit-weather-theme` dark-mode key. Model new guides on the Enchantments page:
+Field guides are standalone HTML pages that share the dashboard's design tokens, fonts, top bar (brand, title pill, Forecast chip, theme toggle, section jump links), and `summit-weather-theme` dark-mode key; their `<style>` blocks are identical apart from the hero background. Model new guides on `enchantments-thru-hike.html`:
 
 - Keep the first screen as an actual route guide, not a marketing landing page.
 - Use local assets under `assets/<route-name>/`; avoid relying on hotlinked images for normal page rendering.

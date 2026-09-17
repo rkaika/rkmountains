@@ -114,7 +114,7 @@
   h1 { margin: 14px 0 14px; max-width: 900px; color: #fff; font-size: clamp(2.6rem, 8vw, 5.4rem); font-weight: 700; line-height: 0.94; letter-spacing: -0.05em; }
   .hero-copy { max-width: 760px; color: #eef2f0; font-size: clamp(1.02rem, 2.2vw, 1.3rem); line-height: 1.5; }
   .hero-note { margin-top: 16px; max-width: 760px; color: #d7dfde; font-family: var(--mono); font-size: 12px; line-height: 1.6; }
-  .quick-stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px 14px; border-top: 1px solid rgba(255, 255, 255, 0.22); margin-top: 26px; padding-top: 16px; }
+  .quick-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px 14px; border-top: 1px solid rgba(255, 255, 255, 0.22); margin-top: 26px; padding-top: 16px; }
   .quick-stat { min-width: 0; }
   .quick-stat b { display: block; color: #fff; font-family: var(--mono); font-weight: 600; font-size: clamp(1.1rem, 2.3vw, 1.55rem); line-height: 1.05; letter-spacing: -0.02em; white-space: nowrap; }
   .quick-stat.gain b { color: #9fd8b3; }
@@ -212,6 +212,7 @@
     .weather-link, .resource-link { grid-template-columns: 1fr; gap: 4px; }
     .step { grid-template-columns: 36px 1fr; gap: 12px; }
     .step-num { width: 36px; height: 36px; font-size: 0.9rem; }
+    .topbar-title { white-space: normal; flex-wrap: wrap; font-size: 15px; line-height: 1.2; }
   }
 </style>
 </head>
