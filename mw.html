@@ -230,7 +230,7 @@ a { color: var(--accent); }
 .phase-seg { flex: 1; min-width: 70px; border-radius: 8px; padding: 6px 6px; background: var(--go-bg); border-top: 3px solid var(--go); display: flex; flex-direction: column; gap: 1px; overflow: hidden; }
 .phase-seg.watch { background: var(--watch-bg); border-top-color: var(--watch); }
 .phase-seg.caution { background: var(--caution-bg); border-top-color: var(--caution); }
-.ps-name { font-weight: 700; font-size: 11px; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ps-name { font-weight: 700; font-size: 11px; letter-spacing: -0.01em; line-height: 1.15; overflow-wrap: anywhere; }
 .ps-time { font-family: var(--mono); font-size: 11px; color: var(--dim); white-space: nowrap; }
 .ps-why { font-family: var(--mono); font-size: 10px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .phase-seg.watch .ps-why { color: var(--watch); }
@@ -861,11 +861,13 @@ const MTNS = {
   },
   // Summit point is Aasgard Pass, the thru-hike high point; the route keeps going
   // down to Snow Lakes TH, so the descent side is listed in descentPoints.
+  // Phase shares for a thru-hike day: TH to Colchuck Lake, the Aasgard climb,
+  // the core traverse to Lake Viviane, then the long Snow Lakes descent.
   enchantments: {
     name: 'Enchantments Thru-Hike', summit: [47.48028, -120.82056, 7841], nws: 'OTX',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
     ths: [
-      { slug:'stuarttosnow', name:'Stuart Lake TH — Aasgard Pass to Snow Lakes TH (thru)', lat:47.5276, lon:-120.8200, elev:3400, miles:19, oneWay:true, aspect:290, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/the-enchantments-trail',
+      { slug:'stuarttosnow', name:'Stuart Lake TH — Aasgard Pass to Snow Lakes TH (thru)', lat:47.5276, lon:-120.8200, elev:3400, miles:19, oneWay:true, aspect:290, phase:[0.18,0.16,0.22,0.44], phaseLabels:['Approach','Aasgard climb','Core traverse','Snow Lakes descent'], alltrails:'https://www.alltrails.com/trail/us/washington/the-enchantments-trail',
         profilePoints:[
           {name:'Colchuck Lake', lat:47.4931, lon:-120.8333, elev:5570},
         ],
@@ -3614,6 +3616,9 @@ const V2_PHASE_KEY = 'mw-v2-summit-override';
 const V2_LAST_KEY = 'mw-v2-lastcheck';
 const V2_MIN_RECHECK_MS = 20 * 60000;
 const PHASE_DEFAULT = [0.25, 0.40, 0.10, 0.25];
+const PHASE_LABELS_DEFAULT = ['Approach', 'Climb', 'Summit', 'Descent'];
+// Route-specific phase names read as proper nouns; the defaults read as plain words.
+function phaseLabelText(label){ return PHASE_LABELS_DEFAULT.includes(label) ? label.toLowerCase() : label; }
 const THR_FIELDS = ['wGo', 'wWa', 'gGo', 'gWa', 'pGo', 'pWa'];
 let _v2ctx = null;
 let _chartsDirty = false;
@@ -3747,11 +3752,13 @@ function computePhases(th, startStr, endStr, summitFrac){
   }
   const at = fr => new Date(start.getTime() + dur * fr);
   const t1 = at(a), t2 = at(a + c), t3 = at(a + c + s);
+  const labels = Array.isArray(th.phaseLabels) && th.phaseLabels.length === 4 && th.phaseLabels.every(x => typeof x === 'string' && x)
+    ? th.phaseLabels : PHASE_LABELS_DEFAULT;
   return [
-    { key:'approach', label:'Approach', start, end:t1, frac:a },
-    { key:'climb',    label:'Climb',    start:t1, end:t2, frac:c },
-    { key:'summit',   label:'Summit',   start:t2, end:t3, frac:s },
-    { key:'descent',  label:'Descent',  start:t3, end,    frac:d },
+    { key:'approach', label:labels[0], start, end:t1, frac:a },
+    { key:'climb',    label:labels[1], start:t1, end:t2, frac:c },
+    { key:'summit',   label:labels[2], start:t2, end:t3, frac:s },
+    { key:'descent',  label:labels[3], start:t3, end,    frac:d },
   ];
 }
 function phaseOfTime(phases, timeStr){
@@ -3895,7 +3902,7 @@ function v2Gates(ctx){
   const t = thunderAssessment(rows, nws, phases);
   if(t.band !== 'go'){
     const capeTxt = t.cape !== null
-      ? `model CAPE peaks near ${Math.round(t.cape).toLocaleString()} J/kg at ${fmtHHMM(t.at)}${t.phase ? ` (${t.phase.toLowerCase()})` : ''}`
+      ? `model CAPE peaks near ${Math.round(t.cape).toLocaleString()} J/kg at ${fmtHHMM(t.at)}${t.phase ? ` (${phaseLabelText(t.phase)})` : ''}`
       : 'no CAPE guidance';
     const nwsTxt = t.nwsHours
       ? `NWS mentions thunderstorms for ${t.nwsHours} h${t.nwsLikely ? ', likely' : ''}`
@@ -3929,7 +3936,7 @@ function v2Reasons(ctx){
   const [lat, lon] = mtn.summit;
   const deals = [];
   const phaseAt = t => t ? phaseOfTime(phases, t) : null;
-  const during = p => p ? ` during the ${p.label.toLowerCase()} (${fmtClock(p.start)}–${fmtClock(p.end)})` : '';
+  const during = p => p ? ` during the ${phaseLabelText(p.label)} (${fmtClock(p.start)}–${fmtClock(p.end)})` : '';
 
   const gBand = metClass(s.peakGust, thr.gGo, thr.gWa);
   if(gBand && gBand !== 'go'){
@@ -4025,7 +4032,7 @@ function buildBrief(ctx){
   L.push(`${start.replace('T', ' ')} to ${end.replace('T', ' ')} (Pacific)`);
   L.push(`Verdict: ${cap(s.verdict)}${s.baseVerdict && s.baseVerdict !== s.verdict ? ` (wind/gust/precip alone: ${cap(s.baseVerdict)})` : ''}`);
   (reasons || []).filter(r => r.band === 'caution' || r.band === 'watch').slice(0, 3).forEach(r => L.push(`- ${r.text}`));
-  L.push(`Summit ~${fmtClock(phases[1].end)} · turnaround ${fmtClock(phases[2].end)} · civil dusk ${fmtClock(ev.civilDusk)}`);
+  L.push(`${th.oneWay ? 'High point' : 'Summit'} ~${fmtClock(phases[1].end)} · ${th.oneWay ? 'descent starts' : 'turnaround'} ${fmtClock(phases[2].end)} · civil dusk ${fmtClock(ev.civilDusk)}`);
   L.push(`Peak wind ${rnd(s.peakWind)} / gust ${rnd(s.peakGust)} mph · precip ${rnd(s.maxPrecip)}% · max freezing level ${s.maxFL !== null ? Math.round(s.maxFL).toLocaleString() : '—'} ft`);
   L.push(location.href);
   return L.join('\n');
@@ -4080,7 +4087,7 @@ function renderHero(ctx, reasons, why){
     `<div class="hero-top">` +
       `<div class="v-kicker">Climbing window guidance · ${escapeHtml(mtn.name)} · ${escapeHtml(th.name)}</div>` +
       `<div class="v-word">${cap(s.verdict)}</div>` +
-      `<div class="v-why">${escapeHtml(why)}<small>Summit ≈ ${fmtClock(phases[1].end)} · turnaround ${fmtClock(phases[2].end)} · the worst hour in the window sets the verdict; the timing strip shows when it lands.</small></div>` +
+      `<div class="v-why">${escapeHtml(why)}<small>${th.oneWay ? 'High point' : 'Summit'} ≈ ${fmtClock(phases[1].end)} · ${th.oneWay ? 'descent starts' : 'turnaround'} ${fmtClock(phases[2].end)} · the worst hour in the window sets the verdict; the timing strip shows when it lands.</small></div>` +
     `</div>` +
     `<div class="hero-meta">${chips.join('')}</div>` +
     `<div class="deal-list">${dealsHtml}</div>` +
@@ -4113,9 +4120,9 @@ function renderPhaseCard(ctx){
   const summitP = phaseSummary[2];
   const gustPhase = s.peakGustAt ? phaseOfTime(phases, s.peakGustAt) : null;
   const facts = [
-    factHtml('Summit', fmtClock(phases[1].end), `turnaround ${fmtClock(phases[2].end)} · ${fmtSpan(Math.round((phases[1].end - startD) / 60000))} in`, ''),
-    factHtml('At the summit', `${summitP.peakWind !== null ? Math.round(summitP.peakWind) : '—'} / ${summitP.peakGust !== null ? Math.round(summitP.peakGust) : '—'} mph`, `wind / gust · precip ${rnd(summitP.maxPop, 0)}%${summitP.temp !== null ? ` · ${Math.round(summitP.temp)}°F` : ''}`, summitP.band),
-    factHtml('Peak gust', s.peakGustAt ? fmtHHMM(s.peakGustAt) : '—', gustPhase && s.peakGust !== null ? `${Math.round(s.peakGust)} mph in the ${gustPhase.label.toLowerCase()}` : 'no gust guidance', metClass(s.peakGust, thr.gGo, thr.gWa)),
+    factHtml(th.oneWay ? 'High point' : 'Summit', fmtClock(phases[1].end), `${th.oneWay ? 'descent starts' : 'turnaround'} ${fmtClock(phases[2].end)} · ${fmtSpan(Math.round((phases[1].end - startD) / 60000))} in`, ''),
+    factHtml(th.oneWay ? 'At the high point' : 'At the summit', `${summitP.peakWind !== null ? Math.round(summitP.peakWind) : '—'} / ${summitP.peakGust !== null ? Math.round(summitP.peakGust) : '—'} mph`, `wind / gust · precip ${rnd(summitP.maxPop, 0)}%${summitP.temp !== null ? ` · ${Math.round(summitP.temp)}°F` : ''}`, summitP.band),
+    factHtml('Peak gust', s.peakGustAt ? fmtHHMM(s.peakGustAt) : '—', gustPhase && s.peakGust !== null ? `${Math.round(s.peakGust)} mph in the ${phaseLabelText(gustPhase.label)}` : 'no gust guidance', metClass(s.peakGust, thr.gGo, thr.gWa)),
     factHtml('Light', dl.duskLabel, dl.text, dl.band),
   ];
   const summitMin = Math.round((phases[1].end - startD) / 60000);
@@ -4125,7 +4132,7 @@ function renderPhaseCard(ctx){
     `<div class="phase-bar">${segs}</div>` +
     `<div class="phase-facts">${facts.join('')}</div>` +
     `<details class="phase-adjust" id="phase-adjust"${summitFrac !== null ? ' open' : ''}>` +
-      `<summary>${summitFrac !== null ? 'Summit time adjusted · edit' : 'Adjust summit time'}</summary>` +
+      `<summary>${summitFrac !== null ? (th.oneWay ? 'High-point time adjusted · edit' : 'Summit time adjusted · edit') : (th.oneWay ? 'Adjust high-point time' : 'Adjust summit time')}</summary>` +
       `<div class="phase-adjust-row">` +
         `<input type="range" id="summit-range" min="60" max="${maxMin}" step="15" value="${Math.min(Math.max(summitMin, 60), maxMin)}" aria-label="Minutes from start to summit">` +
         `<output id="summit-out">${fmtClock(phases[1].end)}</output>` +

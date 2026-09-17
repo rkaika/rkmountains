@@ -26,7 +26,7 @@ This repository is a small static site for mountaineering planning. Treat it as 
 
 Most dashboard data lives in `mw.html`:
 
-- `const MTNS` defines objectives, summit coordinates, NWS office, thresholds, routes, route slugs, trailhead coordinates, route aspects, mileage, AllTrails links, and optional `profilePoints`.
+- `const MTNS` defines objectives, summit coordinates, NWS office, thresholds, routes, route slugs, trailhead coordinates, route aspects, mileage, AllTrails links, `phase` (approach/climb/summit/descent shares of the climb window, used by the timing strip) with optional `phaseLabels`, `oneWay` for thru routes, and optional `profilePoints` and `descentPoints`.
 - `const MTN_LINKS` defines companion quick links for each objective.
 - `initForm()` controls dropdown grouping. Washington objectives should be included in `WA_KEYS` so they appear above the separator.
 - URL sharing uses `m` for the `MTNS` key and `r` for a route slug. Keep slugs stable once published.

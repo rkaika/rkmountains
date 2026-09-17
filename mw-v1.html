@@ -796,11 +796,13 @@ const MTNS = {
   },
   // Summit point is Aasgard Pass, the thru-hike high point; the route keeps going
   // down to Snow Lakes TH, so the descent side is listed in descentPoints.
+  // Phase shares for a thru-hike day: TH to Colchuck Lake, the Aasgard climb,
+  // the core traverse to Lake Viviane, then the long Snow Lakes descent.
   enchantments: {
     name: 'Enchantments Thru-Hike', summit: [47.48028, -120.82056, 7841], nws: 'OTX',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
     ths: [
-      { slug:'stuarttosnow', name:'Stuart Lake TH — Aasgard Pass to Snow Lakes TH (thru)', lat:47.5276, lon:-120.8200, elev:3400, miles:19, oneWay:true, aspect:290, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/the-enchantments-trail',
+      { slug:'stuarttosnow', name:'Stuart Lake TH — Aasgard Pass to Snow Lakes TH (thru)', lat:47.5276, lon:-120.8200, elev:3400, miles:19, oneWay:true, aspect:290, phase:[0.18,0.16,0.22,0.44], phaseLabels:['Approach','Aasgard climb','Core traverse','Snow Lakes descent'], alltrails:'https://www.alltrails.com/trail/us/washington/the-enchantments-trail',
         profilePoints:[
           {name:'Colchuck Lake', lat:47.4931, lon:-120.8333, elev:5570},
         ],
