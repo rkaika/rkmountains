@@ -783,6 +783,23 @@ const MTNS = {
         ] },
     ]
   },
+  // Summit point is Aasgard Pass, the thru-hike high point; the route keeps going
+  // down to Snow Lakes TH, so the descent side is listed in descentPoints.
+  enchantments: {
+    name: 'Enchantments Thru-Hike', summit: [47.48028, -120.82056, 7841], nws: 'OTX',
+    thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
+    ths: [
+      { slug:'stuarttosnow', name:'Stuart Lake TH — Aasgard Pass to Snow Lakes TH (thru)', lat:47.5276, lon:-120.8200, elev:3400, miles:19, oneWay:true, aspect:290, phase:[0.20,0.45,0.10,0.25], alltrails:'https://www.alltrails.com/trail/us/washington/the-enchantments-trail',
+        profilePoints:[
+          {name:'Colchuck Lake', lat:47.4931, lon:-120.8333, elev:5570},
+        ],
+        descentPoints:[
+          {name:'Perfection Lake (core)', lat:47.4802, lon:-120.7971, elev:7100},
+          {name:'Snow Lakes', lat:47.4831, lon:-120.7587, elev:5415},
+          {name:'Snow Lakes TH (exit)', lat:47.5441, lon:-120.7097, elev:1350},
+        ] },
+    ]
+  },
   shuksan: {
     name: 'Mt Shuksan', summit: [48.8275, -121.6149, 9131], nws: 'SEW',
     thr: { wGo:20, wWa:30, gGo:30, gWa:40, pGo:20, pWa:35 },
@@ -873,6 +890,11 @@ const MTN_LINKS = {
     nwac: 'https://nwac.us/avalanche-forecast/#/east-slopes-central',
     wta: 'https://www.wta.org/go-hiking/hikes/colchuck-lake'
   },
+  enchantments: {
+    nwac: 'https://nwac.us/avalanche-forecast/#/east-slopes-central',
+    nps: 'https://www.fs.usda.gov/r06/okanogan-wenatchee/recreation/enchantments',
+    wta: 'https://www.wta.org/go-hiking/hikes/enchantment-lakes'
+  },
   shuksan: {
     nwac: 'https://nwac.us/avalanche-forecast/#/west-slopes-north',
     webcam: 'https://www.mtbaker.us/the-mountain/web-cams/'
@@ -909,6 +931,7 @@ const AVY_ZONES = {
   olympus:     { center:'NWAC', zone:1645, zoneName:'Olympics',            url:'https://nwac.us/avalanche-forecast/#/olympics' },
   mailbox:     { center:'NWAC', zone:1653, zoneName:'Snoqualmie Pass',     url:'https://nwac.us/avalanche-forecast/#/snoqualmie-pass' },
   colchuck:    { center:'NWAC', zone:1655, zoneName:'East Slopes Central', url:'https://nwac.us/avalanche-forecast/#/east-slopes-central' },
+  enchantments:{ center:'NWAC', zone:1655, zoneName:'East Slopes Central', url:'https://nwac.us/avalanche-forecast/#/east-slopes-central' },
   shuksan:     { center:'NWAC', zone:1646, zoneName:'West Slopes North',   url:'https://nwac.us/avalanche-forecast/#/west-slopes-north' },
   shasta:      { center:'MSAC', zone:1833, zoneName:'Mount Shasta',        url:'https://www.shastaavalanche.org/advisories/avalanche-advisory/#/mount-shasta' },
 };
@@ -956,6 +979,10 @@ const BETA_LINKS = {
     { label:'WTA trip reports — Colchuck Lake', url:'https://www.wta.org/go-hiking/hikes/colchuck-lake/@@related_tripreport_listing', note:'approach + lake basin conditions' },
     { label:'CascadeClimbers — Colchuck', url:'https://cascadeclimbers.com/forum/search/?q=Colchuck', note:'climber trip reports' },
   ],
+  enchantments: [
+    { label:'WTA trip reports — Enchantments', url:'https://www.wta.org/go-hiking/hikes/enchantment-lakes#trip-report-listing-header', note:'Aasgard Pass + core basin conditions' },
+    { label:'WTA trip reports — Snow Lakes', url:'https://www.wta.org/go-hiking/hikes/snow-lakes/@@related_tripreport_listing', note:'descent side + Snow Lakes trail conditions' },
+  ],
   shuksan: [
     { label:'CascadeClimbers — Mt Shuksan', url:'https://cascadeclimbers.com/forum/search/?q=Mount+Shuksan', note:'climber trip reports, all routes' },
   ],
@@ -984,6 +1011,8 @@ const SNOTEL_STATIONS = {
   olympus:     { triplet:'1107:WA:SNTL', sitenum:1107, name:'Buckinghorse',      elev:4850, miles:13.4 },
   mailbox:     { triplet:'898:WA:SNTL',  sitenum:898,  name:'Mount Gardner',     elev:2930, miles:8.0 },
   colchuck:    { triplet:'352:WA:SNTL',  sitenum:352,  name:'Blewett Pass',      elev:4240, miles:11.7 },
+  // Icicle Creek is a new station (reporting since Aug 2026); distance is from Aasgard Pass.
+  enchantments:{ triplet:'1338:WA:SNTL', sitenum:1338, name:'Icicle Creek',      elev:4550, miles:8.4 },
   shuksan:     { triplet:'999:WA:SNTL',  sitenum:999,  name:'Marten Ridge',      elev:3520, miles:5.9 },
 };
 
@@ -1408,7 +1437,9 @@ function routeProfilePoints(mtn, th){
   const trailhead = {name:'Trailhead', lat:th.lat, lon:th.lon, elev:th.elev, role:'trail'};
   const objective = {name:mtn.name, lat:mtn.summit[0], lon:mtn.summit[1], elev:mtn.summit[2], role:'summit'};
   const known = Array.isArray(th.profilePoints) ? th.profilePoints : [];
-  if(known.length) return [trailhead, ...known, objective];
+  // Thru routes keep going past the objective; descentPoints render after it.
+  const descent = Array.isArray(th.descentPoints) ? th.descentPoints : [];
+  if(known.length || descent.length) return [trailhead, ...known, objective, ...descent];
   return [
     trailhead,
     interpolateRoutePoint(trailhead, objective, 0.45, 'Mid route estimate'),
@@ -2573,7 +2604,7 @@ function renderAll(mtnKey, mtn, th, startStr, endStr, rows, s, nws, avy, avyDeal
   const summitFt = mtn.summit[2];
 
   const elevGain = summitFt - th.elev;
-  const milesStr = (typeof th.miles === 'number' && th.miles > 0) ? ` · ${th.miles} mi RT` : '';
+  const milesStr = (typeof th.miles === 'number' && th.miles > 0) ? ` · ${th.miles} mi ${th.oneWay ? 'one-way' : 'RT'}` : '';
   document.getElementById('crumb').innerHTML =
     `<strong>${mtn.name}</strong><span class="sep">›</span>${th.name}`+
     `<span class="sep">·</span>${th.elev.toLocaleString()} ft → ${summitFt.toLocaleString()} ft (${elevGain.toLocaleString()} ft gain${milesStr})`+
@@ -3388,7 +3419,7 @@ function ensureEndAfterStart(inpStart, inpEnd){
 
 function initForm(){
   const selMtn = document.getElementById('sel-mtn');
-  const WA_KEYS = new Set(['baker','rainier','campMuir','glacierPeak','stHelens','adams','olympus','mailbox','colchuck','shuksan']);
+  const WA_KEYS = new Set(['baker','rainier','campMuir','glacierPeak','stHelens','adams','olympus','mailbox','colchuck','enchantments','shuksan']);
   const addOpt = ([k,m])=>{
     const o = document.createElement('option');
     o.value = k; o.textContent = m.name;

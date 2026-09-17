@@ -17,12 +17,12 @@ The home page also links to field guides:
 ## What Is On The Page
 
 - **Mountain and route controls**: choose a peak, trailhead/route, climb start, and climb end. Washington peaks group at the top of the dropdown; others (OR/CA/AK) sit below a separator.
-- **Crumb header**: name → route, trailhead elevation → summit elevation with computed gain, round-trip miles when known, and the selected climb window.
+- **Crumb header**: name → route, trailhead elevation → summit elevation with computed gain, round-trip miles when known (one-way miles for thru routes), and the selected climb window.
 - **Selected climbing window group**: a visually grouped block for the core climb-window decision surfaces: verdict, summary metric cards, and route profile weather.
 - **Best window strip**: a row of day chips covering the available forecast days (up to 7). Each day applies the selected start time and duration, scores model-mean wind/gust/precip against the mountain's thresholds, and shows a Go / Watch / Caution color with the limiting metric. Clicking a day reloads the dashboard for that day.
 - **Climbing Window Guidance panel**: a Go / Watch / Caution verdict driven by wind, gust, and precipitation thresholds, followed by the sorted critical-criteria list (red → yellow → green) and a per-hour sparkline showing worst-of-three banding with P/W/G driver letters in cells that hit watch or caution.
 - **Summary cards (met grid)**: summit temperature, trailhead temperature, upper-mountain peak wind, upper-mountain peak gust, freezing level, precipitation probability, snow signal, and model spread — laid out directly below the verdict.
-- **Route profile weather**: NWS point forecasts for trailhead, curated route references, and summit/objective where available. Cards show point elevation, temperature range, precipitation probability, wind, gust when available, and snow signal. Points are planning anchors, not navigation data.
+- **Route profile weather**: NWS point forecasts for trailhead, curated route references, and summit/objective where available. Thru routes continue past the objective with descent-side references and the exit trailhead. Cards show point elevation, temperature range, precipitation probability, wind, gust when available, and snow signal. Points are planning anchors, not navigation data.
 - **Route Weather Timeline**: a Mountain-Forecast-style timeline from 48 hours before the selected start through 12 hours after the selected end, sampled every 3 hours. It includes sky/precip signal, wind/gust/direction, precipitation probability and amount, model-grid temperature, wind chill, freezing level, and cloud cover. A selector switches the timeline between summit, route mid-point, and trailhead.
 - **Hourly details**: collapsed by default; expands to hour-by-hour summit and trailhead temperatures alongside wind, gust, direction, freezing level, precipitation probability, sky cover, and notes.
 - **Model charts**: Open-Meteo model comparison charts for wind, gusts, freezing level, precipitation probability, and snowfall. Charts show two days before the climb start through two days after the climb end, with the selected climb window highlighted.
@@ -99,7 +99,7 @@ Example:
 https://rkaika.github.io/rkmountains/mw.html?m=hood&r=hogsback&start=2026-05-14T04:00&end=2026-05-14T16:00
 ```
 
-Mountain keys: `baker`, `rainier`, `campMuir`, `glacierPeak`, `stHelens`, `adams`, `hood`, `olympus`, `mailbox`, `colchuck`, `shuksan`, `shasta`, `whitney`, `denali`. Route slugs are listed in the **Supported Routes Reference** table below.
+Mountain keys: `baker`, `rainier`, `campMuir`, `glacierPeak`, `stHelens`, `adams`, `hood`, `olympus`, `mailbox`, `colchuck`, `enchantments`, `shuksan`, `shasta`, `whitney`, `denali`. Route slugs are listed in the **Supported Routes Reference** table below.
 
 To run it locally instead:
 
@@ -161,6 +161,7 @@ Thresholds are listed as `W sustained wind go/watch`, `G gust go/watch`, and `P 
 | Mt Olympus | 47.8013, -123.7108 | 7,980 ft | SEW | W 20/30, G 30/40, P 20/35 | nwac, nps |
 | Mailbox Peak | 47.4624, -121.6393 | 4,841 ft | SEW | W 25/35, G 35/45, P 20/40 | nwac, wta |
 | Colchuck Peak | 47.4771, -120.8451 | 8,705 ft | OTX | W 20/30, G 30/40, P 20/35 | nwac, wta |
+| Enchantments Thru-Hike | 47.4803, -120.8206 (Aasgard Pass) | 7,841 ft | OTX | W 20/30, G 30/40, P 20/35 | nwac, nps, wta |
 | Mt Shuksan | 48.8275, -121.6149 | 9,131 ft | SEW | W 20/30, G 30/40, P 20/35 | nwac, webcam |
 | Mt Shasta | 41.4092, -122.1944 | 14,179 ft | MFR | W 15/25, G 25/35, P 15/30 | avalanche, volcano, nps |
 | Mt Whitney | 36.5786, -118.2923 | 14,505 ft | VEF | W 15/25, G 25/35, P 15/30 | nps, webcam |
@@ -168,7 +169,7 @@ Thresholds are listed as `W sustained wind go/watch`, `G gust go/watch`, and `P 
 
 ## Supported Routes Reference
 
-Route aspect is approximate and is used for wind-exposure hints. Round-trip miles are shown where well-documented; routes without RT data show `—` and the dashboard's crumb header gracefully omits the miles segment.
+Route aspect is approximate and is used for wind-exposure hints. Round-trip miles are shown where well-documented; routes without RT data show `—` and the dashboard's crumb header gracefully omits the miles segment. Thru routes list one-way miles and the crumb header labels them as such.
 
 The **Slug** column is the value to pass as the `r` URL parameter (scoped to the mountain `m`).
 
@@ -195,6 +196,7 @@ The **Slug** column is the value to pass as the `r` URL parameter (scoped to the
 | `mailbox` | Mailbox Peak TH — New Trail | `new` | 47.4667, -121.6735 | 900 ft | 315° | 9.4 | yes |
 | `mailbox` | Mailbox Peak TH — Old Trail | `old` | 47.4667, -121.6735 | 900 ft | 315° | 5.4 | yes |
 | `colchuck` | Stuart Lake TH — Colchuck Lake / Glacier | `lakeglacier` | 47.5276, -120.8200 | 3,400 ft | 0° | 12 | yes |
+| `enchantments` | Stuart Lake TH — Aasgard Pass to Snow Lakes TH (thru) | `stuarttosnow` | 47.5276, -120.8200 | 3,400 ft | 290° | 19 (one-way) | yes |
 | `shuksan` | Artist Point — Price / Sulfide Glacier | `sulfide` | 48.8460, -121.6920 | 5,200 ft | 180° | — | search fallback |
 | `shuksan` | Shannon Ridge — NW Couloir | `nwcouloir` | 48.8880, -121.6920 | 3,200 ft | 315° | — | search fallback |
 | `shasta` | Bunny Flat — Avalanche Gulch | `avygulch` | 41.3537, -122.2336 | 6,950 ft | 225° | 11 | yes |
