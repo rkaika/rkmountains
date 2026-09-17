@@ -5,9 +5,9 @@ This repository is a small static site for mountaineering planning. Treat it as 
 ## Repository Map
 
 - `index.html` is the home page. It links to the weather dashboard and field guides.
-- `mw.html` is the current production weather dashboard.
+- `mw.html` is the current production weather dashboard (V2 layout). Its script starts with the shared engine (objective data through the station cards) followed by a V2 layer that overrides `loadForecast`, `renderCharts`, `renderSignalGrid`, `renderExternalContextBase`, and the alerts card renderers.
 - `climb.html` is the Summit-Day Check, a lightweight during-climb page. Its `PEAKS` data is a trimmed copy of `MTNS` in `mw.html`; keep keys, slugs, coordinates, and thresholds in sync when objectives change.
-- `mw-v2.html` is the V2 preview of the dashboard, kept for A/B comparison against `mw.html`. Its script starts with a verbatim copy of the `mw.html` engine (objective data through the station cards) followed by a V2 layer that overrides `loadForecast`, `renderCharts`, and `renderSignalGrid`. Keep its objective data in sync with `mw.html` when objectives change.
+- `mw-v1.html` is the previous dashboard layout, kept for A/B comparison against `mw.html`. It shares the same engine and objective data; keep its data in sync with `mw.html` when objectives change.
 - `mw3.html`, `mw2.html`, and `mw1.html` are older or experimental dashboard copies. Do not edit them unless the task explicitly asks for it.
 - `mount-baker-easton.html` and `mount-whitney-main-trail.html` are standalone field guides.
 - `assets/baker-easton/` and `assets/whitney-main-trail/` contain local guide images.
@@ -34,7 +34,7 @@ Most dashboard data lives in `mw.html`:
 When adding or changing objectives/routes:
 
 - Update `MTNS` and, when applicable, `MTN_LINKS`.
-- Mirror the same `MTNS`, `MTN_LINKS`, `AVY_ZONES`, `BETA_LINKS`, and `SNOTEL_STATIONS` edits in `mw-v2.html`.
+- Mirror the same `MTNS`, `MTN_LINKS`, `AVY_ZONES`, `BETA_LINKS`, and `SNOTEL_STATIONS` edits in `mw-v1.html`.
 - Add route `profilePoints` when useful for route profile weather.
 - Verify NWS office IDs from `api.weather.gov/points/{lat},{lon}` when adding new summit points.
 - Update `README.md` supported objective and route tables.
@@ -64,7 +64,7 @@ For `mw.html` JavaScript edits, parse inline scripts before finishing:
 node -e 'const fs=require("fs"); const html=fs.readFileSync("mw.html","utf8"); const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).join("\n"); new Function(scripts); console.log("script parse ok");'
 ```
 
-Run the same parse check with `mw-v2.html` in place of `mw.html` after editing the V2 page.
+Run the same parse check with `mw-v1.html` in place of `mw.html` after editing the previous layout.
 
 For pages with changed UI or images:
 

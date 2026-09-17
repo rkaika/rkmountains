@@ -4,7 +4,7 @@ Small static mountaineering planning site with a weather dashboard and route-spe
 
 ## Main Page
 
-Open `index.html` for the site home page. Open `mw.html` directly for the mountaineering weather dashboard. Open `mw-v2.html` for the V2 preview of the dashboard (A/B comparison, see below). Open `climb.html` for the Summit-Day Check — a lightweight during-climb view (see below).
+Open `index.html` for the site home page. Open `mw.html` directly for the mountaineering weather dashboard (the V2 layout, see below). Open `mw-v1.html` for the previous layout, kept for comparison. Open `climb.html` for the Summit-Day Check — a lightweight during-climb view (see below).
 
 The weather dashboard helps evaluate a selected mountain, trailhead/route, and climb window. It combines official NWS point forecasts with raw model guidance so you can compare the human-edited baseline against multiple numerical models.
 
@@ -16,12 +16,14 @@ The home page also links to field guides:
 
 ## What Is On The Page
 
+The current dashboard (`mw.html`) uses the V2 layout described in the next section: verdict and reasons first, then timing, key numbers, a context sidebar, route profile, and timeline, with secondary sections collapsed. The components below are shared by both layouts; items marked V1 describe how the previous layout (`mw-v1.html`) presents them.
+
 - **Mountain and route controls**: choose a peak, trailhead/route, climb start, and climb end. Washington peaks group at the top of the dropdown; others (OR/CA/AK) sit below a separator.
-- **Crumb header**: name → route, trailhead elevation → summit elevation with computed gain, round-trip miles when known (one-way miles for thru routes), and the selected climb window.
-- **Selected climbing window group**: a visually grouped block for the core climb-window decision surfaces: verdict, summary metric cards, and route profile weather.
+- **Crumb header** (V1): name → route, trailhead elevation → summit elevation with computed gain, round-trip miles when known (one-way miles for thru routes), and the selected climb window.
+- **Selected climbing window group** (V1): a visually grouped block for the core climb-window decision surfaces: verdict, summary metric cards, and route profile weather.
 - **Best window strip**: a row of day chips covering the available forecast days (up to 7). Each day applies the selected start time and duration, scores model-mean wind/gust/precip against the mountain's thresholds, and shows a Go / Watch / Caution color with the limiting metric. Clicking a day reloads the dashboard for that day.
 - **Climbing Window Guidance panel**: a Go / Watch / Caution verdict driven by wind, gust, and precipitation thresholds, followed by the sorted critical-criteria list (red → yellow → green) and a per-hour sparkline showing worst-of-three banding with P/W/G driver letters in cells that hit watch or caution.
-- **Summary cards (met grid)**: summit temperature, trailhead temperature, upper-mountain peak wind, upper-mountain peak gust, freezing level, precipitation probability, snow signal, and model spread — laid out directly below the verdict.
+- **Summary cards (met grid)** (V1; the V2 tiles add thunder, snow level, visibility, and confidence): summit temperature, trailhead temperature, upper-mountain peak wind, upper-mountain peak gust, freezing level, precipitation probability, snow signal, and model spread — laid out directly below the verdict.
 - **Route profile weather**: NWS point forecasts for trailhead, curated route references, and summit/objective where available. Thru routes continue past the objective with descent-side references and the exit trailhead. Cards show point elevation, temperature range, precipitation probability, wind, gust when available, and snow signal. Points are planning anchors, not navigation data.
 - **Route Weather Timeline**: a Mountain-Forecast-style timeline from 48 hours before the selected start through 12 hours after the selected end, sampled every 3 hours. It includes sky/precip signal, wind/gust/direction, precipitation probability and amount, model-grid temperature, wind chill, freezing level, and cloud cover. A selector switches the timeline between summit, route mid-point, and trailhead.
 - **Hourly details**: collapsed by default; expands to hour-by-hour summit and trailhead temperatures alongside wind, gust, direction, freezing level, precipitation probability, sky cover, and notes.
@@ -82,9 +84,9 @@ What it shows:
 
 The last successful fetch is cached in `localStorage` per mountain/route. When a refresh fails, the page renders the cached data with a prominent `OFFLINE — showing cached data fetched N min ago` stamp. Route data is a trimmed copy of the dashboard's `MTNS`; keep them in sync when adding objectives.
 
-## Mountain Weather V2 (`mw-v2.html`, A/B preview)
+## The V2 layout (`mw.html`) and the previous layout (`mw-v1.html`)
 
-A second dashboard kept alongside `mw.html` so the two can be compared on the same plan. Both pages accept the same URL parameters, and each has a header link that opens the other with the current selection ("Try V2" on V1, "V1 view" on V2). V2 uses the same data sources and the same fetch and parsing code; the differences are in what is surfaced, how it is ordered, and a few extra judgment signals.
+`mw.html` is the V2 layout and the default dashboard. The previous layout is kept at `mw-v1.html` so the two can be compared on the same plan. Both pages accept the same URL parameters, and each has a header link that opens the other with the current selection ("Current dashboard" on V1, "Previous layout (V1)" on V2). Both use the same data sources and the same fetch and parsing code; the differences are in what is surfaced, how it is ordered, and a few extra judgment signals.
 
 What V2 changes:
 
@@ -96,11 +98,11 @@ What V2 changes:
 - **Share brief.** Copies a short text summary (verdict, top reasons, summit and turnaround times, peak numbers, link) for partners; uses the system share sheet on phones.
 - **Adjustable thresholds.** A Thresholds dialog edits the wind, gust, and precipitation go/watch values per objective and saves them in the browser (`localStorage` key `mw-v2-thresholds`). Shared links still use the built-in defaults for other people.
 
-Implementation notes: the V2 script begins with a copy of the `mw.html` engine (objective data through the station cards) and ends with a V2 layer that overrides `loadForecast`, `renderCharts`, and `renderSignalGrid`. Objective-data edits in `mw.html` must be mirrored in `mw-v2.html` (the same rule as `climb.html`). V2 requests four extra Open-Meteo hourly fields: `cape`, `cloud_cover_low`, `cloud_cover_mid`, and `visibility` (plus `snow_depth`, kept for future use).
+Implementation notes: the `mw.html` script begins with the shared engine (objective data through the station cards, identical in `mw-v1.html`) and ends with a V2 layer that overrides `loadForecast`, `renderCharts`, `renderSignalGrid`, `renderExternalContextBase`, and the alerts card renderers. Objective-data edits in `mw.html` must be mirrored in `mw-v1.html` and `climb.html`. V2 requests four extra Open-Meteo hourly fields: `cape`, `cloud_cover_low`, `cloud_cover_mid`, and `visibility` (plus `snow_depth`, kept for future use).
 
 ## Shareable / Embeddable URLs
 
-The dashboard accepts four query parameters; `mw-v2.html` accepts the same four. When all four are present and valid, the forecast loads automatically — no need to click **Get Forecast**. Clicking **Get Forecast** also writes the current selections back to the URL so the page can be shared or bookmarked.
+The dashboard accepts four query parameters; `mw-v1.html` accepts the same four. When all four are present and valid, the forecast loads automatically — no need to click **Get Forecast**. Clicking **Get Forecast** also writes the current selections back to the URL so the page can be shared or bookmarked.
 
 | Param  | Value                                  | Example              |
 |--------|----------------------------------------|----------------------|
@@ -142,9 +144,9 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 ## Files
 
 - `index.html`: site home page with links to the weather dashboard and field guides.
-- `mw.html`: current mountaineering weather dashboard.
+- `mw.html`: current mountaineering weather dashboard (V2 layout).
 - `climb.html`: Summit-Day Check — lightweight during-climb conditions page with offline cache.
-- `mw-v2.html`: Mountain Weather V2, the A/B preview of the dashboard (see above).
+- `mw-v1.html`: the previous dashboard layout, kept for comparison (see above).
 - `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
 - `mount-rainier-dc.html`: Mount Rainier DC / Ingraham Direct Field Guide. Uses inline SVG diagrams for route planning and a local Rainier image for the home page field-guide card.
 - `mount-whitney-main-trail.html`: Mount Whitney Main Trail Field Guide.
@@ -158,8 +160,8 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 
 ## Planned Improvements
 
-- Customizable Go / Watch / Caution criteria in a settings panel (available in the V2 preview, not yet in `mw.html`).
-- Per-user threshold persistence with `localStorage` (available in the V2 preview).
+- Customizable Go / Watch / Caution criteria in a settings panel (done: the Thresholds dialog in `mw.html`).
+- Per-user threshold persistence with `localStorage` (done in `mw.html`).
 - Cleaner handling for model availability by forecast horizon.
 
 ## Supported Objectives Reference

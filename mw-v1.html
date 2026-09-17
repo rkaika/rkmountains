@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Mountain Weather V2</title>
-<meta name="description" content="Mobile-first climb-window dashboard: verdict and reasons first, phase timing, thunderstorm and visibility gates, adjustable thresholds. A/B preview of the RK Mountains weather dashboard.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mountain Weather (V1)</title>
 <meta name="color-scheme" content="dark light">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script>
 (function(){
   try {
     const saved = localStorage.getItem('summit-weather-theme');
-    document.documentElement.dataset.theme = saved || 'light';
+    const theme = saved || 'light';
+    document.documentElement.dataset.theme = theme;
   } catch(e) {
     document.documentElement.dataset.theme = 'light';
   }
@@ -24,396 +24,341 @@
 <style>
 :root {
   color-scheme: light;
-  --bg:        #f3f1ea;
-  --surf:      #e9e6dc;
-  --card:      #fffdf8;
-  --bdr:       #dcd6c8;
-  --bdr2:      #b9b1a0;
-  --txt:       #1a1f24;
-  --dim:       #5a626b;
-  --faint:     #858d96;
-  --go:        #25774f;
-  --watch:     #c4711a;
-  --caution:   #b0362b;
-  --accent:    #1f6f8f;
-  --blue:      #1f6f8f;
-  --go-bg:     #e4f2ea;
-  --watch-bg:  #fbeedd;
-  --caution-bg:#f9e3df;
-  --accent-bg: #e2eff5;
-  --btn-txt:   #ffffff;
-  --shadow:    0 10px 30px rgba(26, 31, 36, 0.08);
-  --radius:    14px;
-  --content:   1180px;
-  --sans:      'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --mono:      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --chart-grid:#e4e0d5;
-  --window-fill:   rgba(31, 111, 143, 0.10);
-  --window-stroke: rgba(31, 111, 143, 0.45);
-  --tooltip-bg:  #1a1f24;
-  --tooltip-txt: #f3f1ea;
-  --inv-bg:  #fbeedd;
-  --inv-bdr: #e0b47a;
-  --inv-txt: #6e3f0e;
+  --bg:      #f7f9f8;
+  --surf:    #eef7f8;
+  --card:    #ffffff;
+  --bdr:     #dbe4e8;
+  --bdr2:    #b9c7d0;
+  --txt:     #101820;
+  --dim:     #66747f;
+  --faint:   #87949e;
+  --go:      #2f5f45;
+  --watch:   #a86425;
+  --caution: #9a4631;
+  --blue:    #2f6f86;
+  --btn-txt: #ffffff;
+  --hover-row: rgba(47,111,134,0.045);
+  --chart-grid: #e6eef2;
+  --window-fill: rgba(47,111,134,0.08);
+  --window-stroke: rgba(47,111,134,0.42);
+  --tooltip-bg: #101820;
+  --tooltip-txt: #f7f9f8;
+  --inv-bg: #fff5e8;
+  --inv-bdr: #dfb26f;
+  --inv-txt: #744014;
   --tight-bdr: #b7d7bf;
-  --hover-row: rgba(31, 111, 143, 0.05);
+  --shadow: 0 18px 48px rgba(16, 24, 32, 0.10);
+  --radius: 10px;
+  --content: 1120px;
+  --serif:   Georgia, serif;
+  --mono:    'JetBrains Mono', ui-monospace, monospace;
+  --sans:    -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }
 html[data-theme="dark"] {
   color-scheme: dark;
-  --bg:        #0e1316;
-  --surf:      #151c21;
-  --card:      #1a2229;
-  --bdr:       #28323a;
-  --bdr2:      #3b4854;
-  --txt:       #edf0ec;
-  --dim:       #a4adb5;
-  --faint:     #7b858e;
-  --go:        #6dcb9b;
-  --watch:     #f2a94f;
-  --caution:   #f2775f;
-  --accent:    #72bde0;
-  --blue:      #72bde0;
-  --go-bg:     rgba(109, 203, 155, 0.12);
-  --watch-bg:  rgba(242, 169, 79, 0.13);
-  --caution-bg:rgba(242, 119, 95, 0.13);
-  --accent-bg: rgba(114, 189, 224, 0.12);
-  --btn-txt:   #0e1316;
-  --shadow:    0 10px 30px rgba(0, 0, 0, 0.35);
-  --chart-grid:#243039;
-  --window-fill:   rgba(114, 189, 224, 0.10);
-  --window-stroke: rgba(114, 189, 224, 0.45);
-  --tooltip-bg:  #0a0e11;
-  --tooltip-txt: #edf0ec;
-  --inv-bg:  #33240f;
+  --bg:      #101820;
+  --surf:    #17242d;
+  --card:    #1c2a34;
+  --bdr:     #31434e;
+  --bdr2:    #485d69;
+  --txt:     #eef6f8;
+  --dim:     #a8b5bd;
+  --faint:   #7f909a;
+  --go:      #68b684;
+  --watch:   #d1944a;
+  --caution: #e06f5c;
+  --blue:    #7dc4dc;
+  --btn-txt: #101820;
+  --hover-row: rgba(255,255,255,0.035);
+  --chart-grid: #273843;
+  --window-fill: rgba(125,196,220,0.08);
+  --window-stroke: rgba(125,196,220,0.42);
+  --tooltip-bg: #0b1218;
+  --tooltip-txt: #eef6f8;
+  --inv-bg: #38270f;
   --inv-bdr: #7a5421;
-  --inv-txt: #f0c98a;
-  --tight-bdr: #2f5a3f;
-  --hover-row: rgba(255, 255, 255, 0.04);
+  --inv-txt: #edc17d;
+  --tight-bdr: #31533c;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
 body {
-  background: var(--bg);
-  background-image: radial-gradient(circle at 18% -6%, rgba(31, 111, 143, 0.14), transparent 38%);
+  background:
+    linear-gradient(180deg, rgba(247, 249, 248, 0.74), rgba(247, 249, 248, 0.98)),
+    radial-gradient(circle at 20% 0%, rgba(47, 111, 134, 0.16), transparent 34%),
+    var(--bg);
   color: var(--txt);
   font-family: var(--sans);
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.55;
   min-height: 100vh;
-  padding-bottom: env(safe-area-inset-bottom);
 }
-html[data-theme="dark"] body { background-image: radial-gradient(circle at 18% -6%, rgba(114, 189, 224, 0.10), transparent 38%); }
-body.has-results { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
-a { color: var(--accent); }
-.wrap { width: min(var(--content), calc(100% - 32px)); margin-left: auto; margin-right: auto; }
-[hidden] { display: none !important; }
-
-/* ── TOP BAR ── */
-.topbar { position: sticky; top: 0; z-index: 50; background: var(--bg); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--bdr); }
-.topbar-in { width: min(var(--content), calc(100% - 32px)); margin: 0 auto; min-height: 54px; display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; padding: 8px 0; }
-.brand { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); text-decoration: none; white-space: nowrap; }
-.brand:hover { color: var(--txt); }
-.topbar-title { font-weight: 700; letter-spacing: -0.02em; font-size: 17px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-.ver-pill { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; padding: 2px 7px; border-radius: 999px; background: var(--accent); color: var(--btn-txt); }
-.topbar-actions { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
-.chip-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--bdr); background: var(--card); color: var(--txt); font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-decoration: none; cursor: pointer; white-space: nowrap; }
-.chip-btn:hover { border-color: var(--bdr2); }
-.chip-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.chip-btn.primary { background: var(--accent); color: var(--btn-txt); border-color: var(--accent); font-weight: 600; }
-
-/* ── PLAN ── */
-.plan { margin-top: 14px; background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 14px; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03); }
-.plan-form { display: grid; gap: 10px; grid-template-columns: 1fr; }
-.plan-form label { display: flex; flex-direction: column; gap: 5px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); min-width: 0; }
-.plan-form select, .plan-form input { font: 16px/1.2 var(--sans); padding: 11px 12px; border: 1px solid var(--bdr); border-radius: 10px; background: var(--bg); color: var(--txt); min-width: 0; width: 100%; }
-.plan-form select:focus, .plan-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
-.btn { min-height: 46px; padding: 10px 18px; border: none; border-radius: 10px; background: var(--accent); color: var(--btn-txt); font: 700 15px var(--sans); cursor: pointer; align-self: end; white-space: nowrap; }
-.btn:hover:not(:disabled) { filter: brightness(1.08); }
-.btn:disabled { opacity: 0.55; cursor: not-allowed; }
-.btn.ghost { background: transparent; color: var(--txt); border: 1px solid var(--bdr); }
-.err { grid-column: 1 / -1; color: var(--caution); font-family: var(--mono); font-size: 12px; line-height: 1.5; }
-.plan-summary { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; color: var(--dim); }
-.plan-summary strong { color: var(--txt); font-family: var(--sans); font-size: 16px; letter-spacing: -0.01em; }
-.plan-summary .chip-btn { margin-left: auto; }
-.plan.collapsed .plan-form { display: none; }
-@media (min-width: 640px) {
-  .plan-form { grid-template-columns: 1fr 1fr; }
-  .plan-form .btn { grid-column: 1 / -1; }
-}
-@media (min-width: 1000px) {
-  .plan-form { grid-template-columns: 1.1fr 1.7fr 1fr 1fr auto; align-items: end; }
-  .plan-form .btn { grid-column: auto; }
-  .plan.collapsed .plan-form { display: grid; }
-  .plan-summary { display: none !important; }
+html[data-theme="dark"] body {
+  background:
+    linear-gradient(180deg, rgba(16, 24, 32, 0.86), rgba(16, 24, 32, 0.98)),
+    radial-gradient(circle at 20% 0%, rgba(125, 196, 220, 0.12), transparent 34%),
+    var(--bg);
 }
 
-/* ── RESULTS LAYOUT ── */
-#results { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; margin-bottom: 14px; scroll-margin-top: 62px; }
-#results > * { min-width: 0; }
-.rail { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-#notices { display: flex; flex-direction: column; gap: 10px; }
-#notices:not(:has(> :not([hidden]))) { display: none; }
-@media (min-width: 1000px) {
-  #results { display: grid; grid-template-columns: minmax(0, 1fr) 360px; column-gap: 16px; row-gap: 14px; align-items: start;
-    grid-template-areas:
-      "notices notices"
-      "hero    rail"
-      "phase   rail"
-      "tiles   rail"
-      "profile rail"
-      "timeline rail"
-      "links   rail"; }
-  #notices { grid-area: notices; }
-  #verdict { grid-area: hero; }
-  #phase-card { grid-area: phase; }
-  #met-grid { grid-area: tiles; }
-  .rail { grid-area: rail; position: sticky; top: 66px; }
-  #route-profile { grid-area: profile; }
-  #timeline-section { grid-area: timeline; }
-  #quick-links { grid-area: links; }
+/* ── HEADER ── */
+header {
+  width: min(var(--content), calc(100% - 2rem));
+  margin: 0 auto;
+  border-bottom: 1px solid var(--bdr);
+  padding: 36px 0 28px;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
 }
+header h1 {
+  color: var(--txt);
+  font-family: var(--sans);
+  font-size: clamp(2.4rem, 7vw, 5rem);
+  font-weight: 850;
+  line-height: 0.94;
+  letter-spacing: -0.07em;
+}
+header p { width: 100%; max-width: 720px; font-size: 16px; color: var(--dim); letter-spacing: 0; }
+.back-link {
+  width: 100%;
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.back-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.theme-toggle {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 8px;
+  min-height: 34px; padding: 7px 11px; border-radius: 999px;
+  border: 1px solid var(--bdr); background: var(--card); color: var(--txt);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em;
+  text-transform: uppercase; cursor: pointer;
+}
+.theme-toggle:hover { border-color: var(--bdr2); }
+.ver-link {
+  margin-left: auto; display: inline-flex; align-items: center;
+  min-height: 34px; padding: 7px 11px; border-radius: 999px;
+  border: 1px solid var(--blue); color: var(--blue); background: var(--card);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em;
+  text-transform: uppercase; text-decoration: none;
+}
+.ver-link:hover { background: var(--surf); }
+.ver-link + .theme-toggle { margin-left: 0; }
+.theme-toggle .theme-icon { font-size: 14px; line-height: 1; }
 
-/* ── NOTICES ── */
-.notice { border: 1px solid var(--inv-bdr); background: var(--inv-bg); color: var(--inv-txt); border-radius: 12px; padding: 10px 14px; font-family: var(--mono); font-size: 12px; line-height: 1.6; }
-.notice strong { font-weight: 600; }
-.notice.info { border-color: var(--bdr2); background: var(--accent-bg); color: var(--txt); }
+/* ── CONFIG PANEL ── */
+.config {
+  width: min(var(--content), calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 20px 0 24px;
+  border-bottom: 1px solid var(--bdr);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.config label { display: flex; flex-direction: column; gap: 5px; font-size: 11px; color: var(--dim); letter-spacing: 0.06em; text-transform: uppercase; }
+.config select, .config input[type="datetime-local"] {
+  background: var(--card); border: 1px solid var(--bdr); color: var(--txt);
+  font-family: var(--mono); font-size: 13px; padding: 9px 11px;
+  border-radius: 8px; outline: none; min-width: 0; }
+.config select { min-width: 240px; }
+.config select:focus, .config input:focus { border-color: var(--blue); }
+.config input[type="datetime-local"] { min-width: 190px; }
+.btn { padding: 10px 20px; background: var(--blue); color: var(--btn-txt); font-weight: 800; font-size: 13px; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap; letter-spacing: 0.01em; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn:hover:not(:disabled) { filter: brightness(1.1); }
+.err { font-size: 12px; color: var(--caution); width: 100%; font-family: var(--mono); }
 
-/* ── HERO / VERDICT ── */
-.hero { background: var(--card); border: 1px solid var(--bdr); border-top: 6px solid var(--bdr2); border-radius: var(--radius); padding: 18px 18px 16px; box-shadow: var(--shadow); }
-.hero.v-go { border-top-color: var(--go); }
-.hero.v-watch { border-top-color: var(--watch); }
-.hero.v-caution { border-top-color: var(--caution); }
-.hero-top { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 22px; }
-.v-kicker { width: 100%; font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
-.v-word { font-size: clamp(46px, 13vw, 66px); font-weight: 700; letter-spacing: -0.05em; line-height: 0.95; }
-.v-go .v-word { color: var(--go); }
-.v-watch .v-word { color: var(--watch); }
+/* ── RESULTS ── */
+#results { width: min(var(--content), calc(100% - 2rem)); margin: 0 auto; padding: 24px 0 36px; }
+
+.crumb { font-family: var(--mono); font-size: 14px; color: var(--dim); margin-bottom: 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.crumb .sep { color: var(--faint); }
+.crumb strong { color: var(--txt); }
+.climb-frame { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-bottom: 18px; line-height: 1.7; }
+.climb-frame .cf-sun { color: var(--watch); }
+.climb-frame .sep { color: var(--bdr2); margin: 0 6px; }
+
+.window-group { position: relative; margin: 2px 0 18px; padding: 18px 0 2px; border-top: 1px solid var(--bdr2); border-bottom: 1px solid var(--bdr); }
+.window-group::before { content: 'Selected climbing window'; position: absolute; top: -7px; left: 0; padding-right: 10px; background: var(--bg); color: var(--faint); font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; }
+
+/* verdict */
+.verdict { display: block; padding: 20px 22px; border-radius: var(--radius); margin-bottom: 14px; border: 1px solid var(--bdr); background: var(--card); border-left: 5px solid; box-shadow: 0 1px 0 rgba(16, 24, 32, 0.03); }
+.verdict.v-go   { border-left-color: var(--go); }
+.verdict.v-watch{ border-left-color: var(--watch); }
+.verdict.v-caution { border-left-color: var(--caution); }
+.v-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; }
+.v-word { font-size: 42px; font-weight: 850; letter-spacing: -0.06em; font-family: var(--sans); white-space: nowrap; margin-bottom: 12px; }
+.v-go   .v-word { color: var(--go); }
+.v-watch.v-word, .v-watch .v-word { color: var(--watch); }
 .v-caution .v-word { color: var(--caution); }
-.v-why { flex: 1 1 240px; align-self: center; font-size: 16px; line-height: 1.4; }
-.v-why small { display: block; margin-top: 6px; font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.5; }
-.hero-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 2px; }
-.meta-chip { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--bdr); color: var(--dim); background: var(--bg); }
-.meta-chip.go { border-color: var(--go); color: var(--go); }
-.meta-chip.watch { border-color: var(--watch); color: var(--watch); }
-.meta-chip.caution { border-color: var(--caution); color: var(--caution); }
-.meta-chip.accent { border-color: var(--accent); color: var(--accent); }
-.deal-list { display: flex; flex-direction: column; gap: 9px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--bdr); }
-.deal-item { display: grid; grid-template-columns: 10px 1fr; gap: 10px; align-items: start; font-size: 13.5px; line-height: 1.45; color: var(--txt); }
-.deal-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; background: var(--go); }
-.deal-item.watch .deal-dot { background: var(--watch); }
-.deal-item.caution .deal-dot { background: var(--caution); }
-.deal-item.neutral .deal-dot { background: var(--bdr2); }
-.deal-item.neutral { color: var(--dim); font-family: var(--mono); font-size: 11.5px; }
-@media (min-width: 720px) {
-  .deal-list { display: block; columns: 2; column-gap: 26px; }
-  .deal-item { break-inside: avoid; margin-bottom: 9px; }
-}
-.spark { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--bdr); display: flex; flex-direction: column; gap: 6px; }
+.spark { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--bdr); display: flex; flex-direction: column; gap: 6px; }
 .spark-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
 .spark-row { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 2px; }
-.spark-cell { height: 26px; border-radius: 4px; background: var(--go); min-width: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; font-weight: 600; color: #fff; }
+.spark-cell { height: 28px; border-radius: 3px; background: var(--go); min-width: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; font-weight: 600; color: #fff; letter-spacing: 0.04em; }
 .spark-cell.watch { background: var(--watch); }
 .spark-cell.caution { background: var(--caution); }
-.spark-axis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9px; color: var(--faint); }
-.spark-legend { font-family: var(--mono); font-size: 9px; color: var(--faint); }
-.hero-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.spark-axis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9px; color: var(--faint); letter-spacing: 0.08em; }
+.spark-legend { font-family: var(--mono); font-size: 9px; color: var(--faint); letter-spacing: 0.06em; }
 
-/* ── CARDS ── */
-.card { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 14px 16px; min-width: 0; }
-.card-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-.card-title::after { content: ''; flex: 1; height: 1px; background: var(--bdr); }
-.source-note { font-family: var(--mono); font-size: 10px; line-height: 1.6; color: var(--faint); margin: 0 0 8px; }
+	/* critical criteria list (rendered inside verdict) */
+	.deal-list { display: flex; flex-direction: column; gap: 8px; }
+	@media (min-width: 900px) {
+	  .deal-list { display: block; columns: 2; column-gap: 28px; }
+	  .deal-item { break-inside: avoid; margin-bottom: 8px; }
+	  .deal-item:last-child { margin-bottom: 0; }
+	}
+	.deal-item { display: grid; grid-template-columns: 9px 1fr; gap: 9px; align-items: start; font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.45; }
+	.deal-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 3px; background: var(--go); }
+	.deal-item.watch .deal-dot { background: var(--watch); }
+	.deal-item.caution .deal-dot { background: var(--caution); }
+	.deal-item.neutral .deal-dot { background: var(--bdr2); }
+	.signal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 14px; }
+	.signal-card { position: relative; background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 13px 15px; border-top: 4px solid var(--go); min-width: 0; }
+	.signal-card.watch { border-top-color: var(--watch); }
+	.signal-card.caution { border-top-color: var(--caution); }
+	.signal-card .lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
+	.signal-card .val { font-family: var(--mono); font-size: 18px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 5px; }
+	.signal-card .val a { color: inherit; text-decoration: none; border-bottom: 1px dotted currentColor; }
+	.signal-card .val a:hover { border-bottom-style: solid; }
+	.signal-card.go .val { color: var(--go); }
+	.signal-card.watch .val { color: var(--watch); }
+	.signal-card.caution .val { color: var(--caution); }
+	.signal-card .sub { color: var(--dim); font-size: 11px; line-height: 1.45; }
+	.signal-card[data-info]::after { content: attr(data-info); position: absolute; bottom: calc(100% + 6px); left: 0; right: 0; padding: 10px 12px; background: var(--card); border: 1px solid var(--bdr2); border-radius: 6px; font-family: var(--mono); font-size: 11px; color: var(--txt); line-height: 1.55; z-index: 10; white-space: normal; box-shadow: 0 6px 16px rgba(0,0,0,0.18); pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.12s ease, visibility 0.12s ease; }
+	.signal-card[data-info]:hover::after { opacity: 1; visibility: visible; }
+	.context-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin-bottom: 14px; }
+	.context-card { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 13px 15px; border-left: 4px solid var(--bdr2); min-width: 0; }
+	.context-card.go { border-left-color: var(--go); }
+	.context-card.watch { border-left-color: var(--watch); }
+	.context-card.caution { border-left-color: var(--caution); }
+	.context-card .lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 6px; }
+	.context-card .val { font-family: var(--mono); font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+	.context-card.go .val { color: var(--go); }
+	.context-card.watch .val { color: var(--watch); }
+	.context-card.caution .val { color: var(--caution); }
+		.context-card .sub { color: var(--dim); font-size: 11px; line-height: 1.5; }
+
+	/* avalanche danger card (North American danger-scale colors, fixed in both themes) */
+	.avy-bands { display: flex; gap: 6px; margin: 2px 0 8px; flex-wrap: wrap; }
+	.avy-band { flex: 1 1 88px; min-width: 88px; border-radius: 6px; padding: 5px 8px; font-family: var(--mono); border: 1px solid var(--bdr); }
+	.avy-band .b-elev { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.78; }
+	.avy-band .b-rating { font-size: 11px; font-weight: 700; }
+	.avy-d0 { background: var(--bdr2); color: var(--dim); }
+	.avy-d1 { background: #50b848; color: #0b1c0e; }
+	.avy-d2 { background: #fff200; color: #3a3500; }
+	.avy-d3 { background: #f7941e; color: #3a2102; }
+	.avy-d4 { background: #ed1c24; color: #ffffff; }
+	.avy-d5 { background: #231f20; color: #ffffff; border-color: #ed1c24; }
+	.avy-probs { margin: 0 0 6px; }
+	.avy-probs .p-item { font-size: 11px; color: var(--dim); line-height: 1.5; }
+
+	/* recent beta link list */
+	.beta-item { font-size: 11px; color: var(--dim); line-height: 1.7; }
+	.beta-item .b-note { color: var(--faint); }
+
+	/* best-window finder strip */
+	.window-finder { margin-bottom: 14px; }
+	.wf-title { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 6px; }
+	.wf-strip { display: flex; gap: 6px; flex-wrap: wrap; }
+	.wf-day { flex: 1 1 86px; min-width: 86px; background: var(--card); border: 1px solid var(--bdr); border-top: 3px solid var(--bdr2); border-radius: 8px; padding: 7px 6px 6px; text-align: center; cursor: pointer; font-family: var(--mono); }
+	.wf-day.go { border-top-color: var(--go); }
+	.wf-day.watch { border-top-color: var(--watch); }
+	.wf-day.caution { border-top-color: var(--caution); }
+	.wf-day.selected { outline: 2px solid var(--blue); outline-offset: 1px; }
+	.wf-day:hover { filter: brightness(1.08); }
+	.wf-day .wf-dow { font-size: 11px; font-weight: 700; }
+	.wf-day .wf-date { font-size: 10px; color: var(--faint); }
+	.wf-day .wf-verdict { font-size: 10px; font-weight: 700; margin-top: 3px; }
+	.wf-day.go .wf-verdict { color: var(--go); }
+	.wf-day.watch .wf-verdict { color: var(--watch); }
+	.wf-day.caution .wf-verdict { color: var(--caution); }
+	.wf-day .wf-why { font-size: 9px; color: var(--dim); margin-top: 2px; }
+	.wf-note { font-size: 10px; color: var(--faint); margin-top: 6px; }
+		.context-card a { color: var(--blue); text-decoration: none; }
+		.context-card a:hover { text-decoration: underline; }
+		.route-profile { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px; overflow: hidden; }
+		.route-profile-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+		.route-profile-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
+		.route-profile-note { font-family: var(--mono); font-size: 10px; color: var(--faint); line-height: 1.5; max-width: 78ch; }
+		.route-track { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 1fr); gap: 10px; overflow-x: auto; padding: 10px 2px 4px; }
+		.route-track::before { content:''; position: absolute; left: 16px; right: 16px; top: 27px; height: 2px; background: linear-gradient(90deg, var(--bdr2), var(--blue)); opacity: 0.55; }
+		.route-point { position: relative; z-index: 1; min-width: 150px; padding-top: 23px; }
+		.route-point::before { content:''; position: absolute; z-index: 3; top: 8px; left: 12px; width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--card); background: var(--go); box-shadow: 0 0 0 1px var(--bdr2); }
+		.route-point.watch::before { background: var(--watch); }
+		.route-point.caution::before { background: var(--caution); }
+		.route-point-card { position: relative; z-index: 2; border: 1px solid var(--bdr); border-radius: 8px; padding: 10px 11px; background: var(--surf); min-height: 136px; }
+		.route-point-name { font-family: var(--mono); font-size: 11px; color: var(--txt); font-weight: 600; line-height: 1.35; margin-bottom: 4px; }
+		.route-point-meta { font-family: var(--mono); font-size: 10px; color: var(--faint); margin-bottom: 8px; }
+		.route-point-weather { font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.55; }
+		.route-point-weather strong { color: var(--txt); font-weight: 600; }
+		.route-point.caution .route-point-weather strong { color: var(--caution); }
+		.route-point.watch .route-point-weather strong { color: var(--watch); }
+		.route-profile-empty { font-family: var(--mono); font-size: 11px; color: var(--faint); padding: 6px 0; }
+
+			/* inversion alert */
+	.inv-alert { background: var(--inv-bg); border: 1px solid var(--inv-bdr); border-left: 4px solid var(--watch); color: var(--inv-txt); font-size: 12px; padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-family: var(--mono); line-height: 1.6; }
+
+/* metric cards */
+.met-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.met { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 13px 15px; box-shadow: 0 1px 0 rgba(16, 24, 32, 0.03); }
+.met .lbl { font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; line-height: 1.3; min-height: 2.6em; }
+.met .val { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+.met .sub { font-size: 10px; color: var(--faint); margin-top: 4px; }
+.met.go   .val { color: var(--go); }
+.met.watch .val { color: var(--watch); }
+.met.caution  .val { color: var(--caution); }
+
+/* spread */
+.spread { font-family: var(--mono); font-size: 11px; padding: 8px 12px; border-radius: 6px; margin-bottom: 14px; border: 1px solid var(--bdr); color: var(--dim); }
+.spread.wide { border-color: var(--inv-bdr); color: var(--watch); }
+.spread.tight { border-color: var(--tight-bdr); color: var(--go); }
+.source-note { font-family: var(--mono); font-size: 10px; line-height: 1.6; color: var(--faint); letter-spacing: 0.02em; margin: 0 0 8px; }
 .source-note strong { color: var(--dim); font-weight: 500; }
 
-/* ── PHASE / TIMING ── */
-.phase-bar { display: flex; gap: 3px; }
-.phase-seg { flex: 1; min-width: 70px; border-radius: 8px; padding: 6px 6px; background: var(--go-bg); border-top: 3px solid var(--go); display: flex; flex-direction: column; gap: 1px; overflow: hidden; }
-.phase-seg.watch { background: var(--watch-bg); border-top-color: var(--watch); }
-.phase-seg.caution { background: var(--caution-bg); border-top-color: var(--caution); }
-.ps-name { font-weight: 700; font-size: 11px; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ps-time { font-family: var(--mono); font-size: 11px; color: var(--dim); white-space: nowrap; }
-.ps-why { font-family: var(--mono); font-size: 10px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.phase-seg.watch .ps-why { color: var(--watch); }
-.phase-seg.caution .ps-why { color: var(--caution); }
-.phase-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; margin-top: 12px; }
-@media (min-width: 640px) { .phase-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.fact { min-width: 0; }
-.fact .k { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
-.fact .v { font-family: var(--mono); font-size: 15px; font-weight: 600; margin-top: 2px; }
-.fact .v.go { color: var(--go); }
-.fact .v.watch { color: var(--watch); }
-.fact .v.caution { color: var(--caution); }
-.fact .s { font-size: 11px; color: var(--dim); line-height: 1.4; margin-top: 2px; }
-.phase-adjust { margin-top: 12px; border-top: 1px solid var(--bdr); padding-top: 10px; }
-.phase-adjust summary { cursor: pointer; font-family: var(--mono); font-size: 11px; color: var(--accent); list-style: none; min-height: 28px; display: flex; align-items: center; }
-.phase-adjust summary::-webkit-details-marker { display: none; }
-.phase-adjust-row { display: flex; align-items: center; gap: 10px; margin: 8px 0 8px; flex-wrap: wrap; }
-.phase-adjust input[type="range"] { flex: 1 1 180px; accent-color: var(--accent); min-height: 28px; }
-.phase-adjust output { font-family: var(--mono); font-size: 13px; font-weight: 600; min-width: 52px; }
-
-/* ── TILES ── */
-.tile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-@media (min-width: 560px) { .tile-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 1000px) { .tile-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (min-width: 1240px) { .tile-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-.tile { background: var(--card); border: 1px solid var(--bdr); border-top: 4px solid var(--bdr2); border-radius: 12px; padding: 12px 13px; min-width: 0; }
-.tile.go { border-top-color: var(--go); }
-.tile.watch { border-top-color: var(--watch); }
-.tile.caution { border-top-color: var(--caution); }
-.tile .lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; line-height: 1.3; }
-.tile .val { font-family: var(--mono); font-size: 19px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; overflow-wrap: anywhere; }
-.tile.go .val { color: var(--go); }
-.tile.watch .val { color: var(--watch); }
-.tile.caution .val { color: var(--caution); }
-.tile .sub { font-size: 11px; color: var(--dim); margin-top: 5px; line-height: 1.4; }
-
-/* ── BEST WINDOW STRIP ── */
-.window-finder { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 12px 14px; }
-.wf-title { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px; }
-.wf-strip { display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
-.wf-day { flex: 0 0 96px; scroll-snap-align: start; background: var(--bg); border: 1px solid var(--bdr); border-top: 3px solid var(--bdr2); border-radius: 10px; padding: 8px 6px; text-align: center; cursor: pointer; font-family: var(--mono); min-width: 0; }
-.wf-day.go { border-top-color: var(--go); }
-.wf-day.watch { border-top-color: var(--watch); }
-.wf-day.caution { border-top-color: var(--caution); }
-.wf-day.selected { outline: 2px solid var(--accent); outline-offset: 1px; }
-.wf-day:hover { border-color: var(--bdr2); }
-.wf-dow { font-size: 12px; font-weight: 700; }
-.wf-date { font-size: 10px; color: var(--faint); }
-.wf-verdict { font-size: 11px; font-weight: 700; margin-top: 3px; }
-.wf-day.go .wf-verdict { color: var(--go); }
-.wf-day.watch .wf-verdict { color: var(--watch); }
-.wf-day.caution .wf-verdict { color: var(--caution); }
-.wf-why { font-size: 9px; color: var(--dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wf-note { font-size: 10px; color: var(--faint); margin-top: 6px; line-height: 1.5; }
-@media (min-width: 1000px) {
-  .wf-strip { flex-wrap: wrap; overflow: visible; }
-  .wf-day { flex: 1 1 96px; }
-}
-
-/* ── CONTEXT CARDS ── */
-.context-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-@media (min-width: 640px) and (max-width: 999px) { .context-grid { grid-template-columns: 1fr 1fr; } }
-.context-card { background: var(--card); border: 1px solid var(--bdr); border-left: 4px solid var(--bdr2); border-radius: 12px; padding: 12px 14px; min-width: 0; }
-.context-card.go { border-left-color: var(--go); }
-.context-card.watch { border-left-color: var(--watch); }
-.context-card.caution { border-left-color: var(--caution); }
-.context-card .lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 6px; }
-.context-card .val { font-family: var(--mono); font-size: 14px; font-weight: 600; margin-bottom: 6px; overflow-wrap: anywhere; }
-.context-card.go .val { color: var(--go); }
-.context-card.watch .val { color: var(--watch); }
-.context-card.caution .val { color: var(--caution); }
-.context-card .sub { color: var(--dim); font-size: 11.5px; line-height: 1.5; }
-.context-card a { color: var(--accent); text-decoration: none; }
-.context-card a:hover { text-decoration: underline; }
-.c-go { color: var(--go); }
-.c-watch { color: var(--watch); }
-.c-caution { color: var(--caution); }
-.c-dim { color: var(--faint); }
-.avy-bands { display: flex; gap: 6px; margin: 2px 0 8px; flex-wrap: wrap; }
-.avy-band { flex: 1 1 88px; min-width: 88px; border-radius: 6px; padding: 5px 8px; font-family: var(--mono); border: 1px solid var(--bdr); }
-.avy-band .b-elev { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.78; }
-.avy-band .b-rating { font-size: 11px; font-weight: 700; }
-.avy-d0 { background: var(--bdr2); color: var(--dim); }
-.avy-d1 { background: #50b848; color: #0b1c0e; }
-.avy-d2 { background: #fff200; color: #3a3500; }
-.avy-d3 { background: #f7941e; color: #3a2102; }
-.avy-d4 { background: #ed1c24; color: #ffffff; }
-.avy-d5 { background: #231f20; color: #ffffff; border-color: #ed1c24; }
-.avy-probs { margin: 0 0 6px; }
-.avy-probs .p-item { font-size: 11px; color: var(--dim); line-height: 1.5; }
-.beta-item { font-size: 11.5px; color: var(--dim); line-height: 1.7; }
-.beta-item .b-note { color: var(--faint); }
-
-/* ── SIGNAL CARDS ── */
-.signal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-.signal-card { position: relative; background: var(--card); border: 1px solid var(--bdr); border-top: 4px solid var(--go); border-radius: 12px; padding: 12px 13px; min-width: 0; }
-.signal-card.watch { border-top-color: var(--watch); }
-.signal-card.caution { border-top-color: var(--caution); }
-.signal-card .lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
-.signal-card .val { font-family: var(--mono); font-size: 15px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 5px; overflow-wrap: anywhere; }
-.signal-card .val a { color: inherit; text-decoration: none; border-bottom: 1px dotted currentColor; }
-.signal-card.go .val { color: var(--go); }
-.signal-card.watch .val { color: var(--watch); }
-.signal-card.caution .val { color: var(--caution); }
-.signal-card .sub { color: var(--dim); font-size: 11px; line-height: 1.45; }
-@media (hover: hover) {
-  .signal-card[data-info]::after { content: attr(data-info); position: absolute; bottom: calc(100% + 6px); left: 0; right: 0; padding: 10px 12px; background: var(--card); border: 1px solid var(--bdr2); border-radius: 8px; font-family: var(--mono); font-size: 11px; color: var(--txt); line-height: 1.55; z-index: 10; white-space: normal; box-shadow: var(--shadow); pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.12s ease, visibility 0.12s ease; }
-  .signal-card[data-info]:hover::after { opacity: 1; visibility: visible; }
-}
-
-/* ── ROUTE PROFILE ── */
-.route-profile { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 14px 16px; overflow: hidden; }
-.route-profile-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
-.route-profile-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
-.route-profile-note { font-family: var(--mono); font-size: 10px; color: var(--faint); line-height: 1.5; max-width: 78ch; }
-.route-track { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 1fr); gap: 10px; overflow-x: auto; padding: 10px 2px 4px; -webkit-overflow-scrolling: touch; }
-.route-track::before { content: ''; position: absolute; left: 16px; right: 16px; top: 27px; height: 2px; background: linear-gradient(90deg, var(--bdr2), var(--accent)); opacity: 0.55; }
-.route-point { position: relative; z-index: 1; min-width: 150px; padding-top: 23px; }
-.route-point::before { content: ''; position: absolute; z-index: 3; top: 8px; left: 12px; width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--card); background: var(--go); box-shadow: 0 0 0 1px var(--bdr2); }
-.route-point.watch::before { background: var(--watch); }
-.route-point.caution::before { background: var(--caution); }
-.route-point-card { position: relative; z-index: 2; border: 1px solid var(--bdr); border-radius: 10px; padding: 10px 11px; background: var(--bg); min-height: 136px; }
-.route-point-name { font-family: var(--mono); font-size: 11px; color: var(--txt); font-weight: 600; line-height: 1.35; margin-bottom: 4px; }
-.route-point-meta { font-family: var(--mono); font-size: 10px; color: var(--faint); margin-bottom: 8px; }
-.route-point-weather { font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.55; }
-.route-point-weather strong { color: var(--txt); font-weight: 600; }
-.route-point.caution .route-point-weather strong { color: var(--caution); }
-.route-point.watch .route-point-weather strong { color: var(--watch); }
-.route-profile-empty { font-family: var(--mono); font-size: 11px; color: var(--faint); padding: 6px 0; }
-
-/* ── TIMELINE ── */
-.sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-.sec-head .card-title { flex: 1; margin: 0; min-width: 200px; }
-.mini-control { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
-.mini-control select { appearance: none; background: var(--card); color: var(--txt); border: 1px solid var(--bdr); border-radius: 8px; padding: 8px 28px 8px 10px; font-family: var(--mono); font-size: 13px; letter-spacing: 0; text-transform: none; min-height: 36px; background-image: linear-gradient(45deg, transparent 50%, var(--faint) 50%), linear-gradient(135deg, var(--faint) 50%, transparent 50%); background-position: calc(100% - 13px) 50%, calc(100% - 8px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
-.pretrend { border: 1px solid var(--bdr); border-radius: 10px; overflow-x: auto; background: var(--bg); -webkit-overflow-scrolling: touch; }
+.pretrend { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); margin-bottom: 16px; overflow-x: auto; }
 .pretrend-grid { display: grid; min-width: 920px; }
-.pretrend-row { display: grid; grid-template-columns: 84px repeat(var(--trend-cols), minmax(72px, 1fr)); border-bottom: 1px solid var(--bdr); }
+.pretrend-row { display: grid; grid-template-columns: 94px repeat(var(--trend-cols), minmax(74px, 1fr)); border-bottom: 1px solid var(--bdr); }
 .pretrend-row:last-child { border-bottom: none; }
-.pretrend-label { position: sticky; left: 0; z-index: 2; background: var(--card); color: var(--faint); font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 10px 10px; border-right: 1px solid var(--bdr); }
-.pretrend-cell { min-height: 42px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 7px 6px; border-right: 1px solid var(--bdr); font-family: var(--mono); font-size: 12px; color: var(--txt); line-height: 1.25; }
+.pretrend-label { position: sticky; left: 0; z-index: 2; background: var(--card); color: var(--faint); font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 10px 12px; border-right: 1px solid var(--bdr); }
+.pretrend-cell { min-height: 42px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 7px 8px; border-right: 1px solid var(--bdr); font-family: var(--mono); font-size: 12px; color: var(--txt); line-height: 1.25; }
 .pretrend-cell:last-child { border-right: none; }
 .pretrend-cell small { display: block; color: var(--faint); font-size: 9px; margin-top: 3px; }
 .pretrend-time-cell { background: var(--day-bg); box-shadow: inset 0 -2px 0 var(--day-line); }
-.pretrend-cell.pretrend-window { background: var(--window-fill); box-shadow: inset 0 2px 0 var(--window-stroke), inset 0 -2px 0 var(--window-stroke); }
-.pretrend-cell.pretrend-window-start { border-left: 2px solid var(--window-stroke); }
-.pretrend-cell.pretrend-window-end { border-right: 2px solid var(--window-stroke); }
-.pretrend-time-cell.pretrend-window { background: linear-gradient(var(--window-fill), var(--window-fill)), var(--day-bg); }
+.pretrend-cell.pretrend-window { background: rgba(88, 166, 255, 0.10); box-shadow: inset 0 2px 0 rgba(88, 166, 255, 0.55), inset 0 -2px 0 rgba(88, 166, 255, 0.55); }
+.pretrend-cell.pretrend-window-start { border-left: 2px solid rgba(88, 166, 255, 0.82); }
+.pretrend-cell.pretrend-window-end { border-right: 2px solid rgba(88, 166, 255, 0.82); }
+.pretrend-time-cell.pretrend-window { background: linear-gradient(rgba(88, 166, 255, 0.18), rgba(88, 166, 255, 0.18)), var(--day-bg); }
 .pretrend-time { font-size: 13px; color: var(--txt); }
 .pretrend-date { color: var(--day-text); font-size: 9px; margin-top: 2px; }
 .pretrend-sky { gap: 3px; flex-direction: column; font-size: 11px; }
 .pretrend-icon { font-size: 19px; line-height: 1; color: var(--dim); }
 .pretrend-wind { font-size: 12px; }
 .pretrend-wind strong { color: var(--txt); font-size: 16px; }
+.pretrend-wind .dir { color: var(--faint); font-size: 10px; }
 .pretrend-temp { font-size: 15px; font-weight: 600; }
-.pretrend-freeze { color: var(--accent); }
+.pretrend-freeze { color: var(--blue); }
 .pretrend-pop.watch, .pretrend-wind.watch, .pretrend-temp.watch { color: var(--watch); }
 .pretrend-pop.caution, .pretrend-wind.caution, .pretrend-temp.caution { color: var(--caution); }
 .pretrend-empty { padding: 12px 14px; font-family: var(--mono); font-size: 11px; color: var(--faint); }
 
-/* ── QUICK LINKS ── */
-.links { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.links-lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.14em; text-transform: uppercase; margin-right: 4px; }
-.link-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 12px; border: 1px solid var(--bdr); border-radius: 999px; background: var(--card); color: var(--txt); font-family: var(--mono); font-size: 11px; letter-spacing: 0.03em; text-decoration: none; white-space: nowrap; }
-.link-chip:hover { border-color: var(--bdr2); }
-.link-chip .ext { font-size: 9px; color: var(--faint); }
-.link-chip .caveat { font-size: 9px; color: var(--watch); margin-left: 2px; text-transform: lowercase; letter-spacing: 0.04em; }
-
-/* ── FOLDS (secondary sections) ── */
-#more { display: flex; flex-direction: column; gap: 10px; margin-bottom: 44px; }
-.fold { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); overflow: hidden; min-width: 0; }
-.fold summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 12px 14px; min-height: 48px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); user-select: none; }
-.fold summary::-webkit-details-marker { display: none; }
-.fold summary::before { content: '+'; flex: none; width: 20px; height: 20px; border: 1px solid var(--bdr2); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; color: var(--dim); letter-spacing: 0; }
-.fold[open] summary::before { content: '−'; }
-.fold summary .hint { margin-left: auto; font-size: 9px; letter-spacing: 0.1em; color: var(--faint); white-space: nowrap; }
-.fold-body { padding: 0 14px 14px; min-width: 0; }
-.chart-card { padding: 10px 0 4px; }
-.chart-card + .chart-card { border-top: 1px solid var(--bdr); margin-top: 6px; }
-.chart-card h3 { font-family: var(--sans); font-size: 16px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 2px; }
-.chart-sub { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-bottom: 10px; }
-.chart-wrap { height: 200px; position: relative; }
-.tbl-wrap { overflow-x: auto; border: 1px solid var(--bdr); border-radius: 10px; -webkit-overflow-scrolling: touch; }
+/* hourly table */
+.hourly-details { border: 1px solid var(--bdr); border-radius: var(--radius); margin: 18px 0 18px; background: var(--card); overflow: hidden; }
+.hourly-details summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: var(--faint); font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; user-select: none; }
+.hourly-details summary::-webkit-details-marker { display: none; }
+.hourly-details summary::before { content: '+'; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: 1px solid var(--bdr2); border-radius: 50%; color: var(--dim); font-size: 13px; line-height: 1; letter-spacing: 0; }
+.hourly-details[open] summary::before { content: '-'; }
+.hourly-details summary::after { content:''; flex: 1; height: 1px; background: var(--bdr); }
+.hourly-details-hint { margin-left: auto; color: var(--faint); font-size: 9px; letter-spacing: 0.12em; }
+.hourly-details[open] .hourly-details-hint::before { content: 'click to collapse'; }
+.hourly-details:not([open]) .hourly-details-hint::before { content: 'click to expand'; }
+.hourly-details .source-note { margin: 0 14px 8px; }
+.hourly-details .tbl-wrap { border-left: none; border-right: none; border-bottom: none; border-radius: 0; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--bdr); border-radius: var(--radius); }
 table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
 thead tr { background: var(--surf); }
 th { padding: 9px 12px; text-align: left; color: var(--faint); font-weight: 400; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border-bottom: 1px solid var(--bdr); white-space: nowrap; }
@@ -422,306 +367,296 @@ td { padding: 8px 12px; border-bottom: 1px solid var(--bdr); color: var(--txt); 
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: var(--hover-row); }
 tr.inv-row td:first-child { border-left: 3px solid var(--watch); }
-tr.now-row td { background: var(--accent-bg); }
-tr.now-row td:first-child { box-shadow: inset 3px 0 0 var(--accent); font-weight: 600; }
+tr.now-row td { background: rgba(88,166,255,0.08); }
+tr.now-row td:first-child { box-shadow: inset 3px 0 0 var(--blue); font-weight: 600; }
+.c-go    { color: var(--go); }
+.c-watch { color: var(--watch); }
+.c-caution  { color: var(--caution); }
+.c-dim   { color: var(--faint); }
 .flag { font-size: 10px; background: var(--inv-bg); color: var(--watch); padding: 1px 6px; border-radius: 4px; }
-.astro-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-.astro { background: var(--bg); border: 1px solid var(--bdr); border-radius: 10px; padding: 12px 14px; }
-.astro .lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-.astro .val { font-family: var(--mono); font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+
+/* footer */
+footer { border-top: 1px solid var(--bdr); padding: 14px 24px; font-size: 11px; color: var(--faint); font-family: var(--mono); line-height: 1.7; }
+
+/* ── SECTION LABELS ── */
+.sec-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--faint); margin: 26px 0 14px; display: flex; align-items: center; gap: 14px; }
+.sec-lbl::after { content:''; flex:1; height:1px; background: var(--bdr); }
+.sec-toolbar { display: flex; align-items: center; gap: 12px; margin: 26px 0 14px; }
+.sec-toolbar .sec-lbl { flex: 1; margin: 0; }
+.mini-control { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+.mini-control select { appearance: none; background: var(--card); color: var(--txt); border: 1px solid var(--bdr); border-radius: 6px; padding: 6px 26px 6px 9px; font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-transform: none; background-image: linear-gradient(45deg, transparent 50%, var(--faint) 50%), linear-gradient(135deg, var(--faint) 50%, transparent 50%); background-position: calc(100% - 13px) 50%, calc(100% - 8px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+@media (max-width: 600px) {
+  .sec-toolbar { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .sec-toolbar .sec-lbl { width: 100%; }
+}
+
+/* ── CHART CARDS ── */
+.chart-card { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 18px 22px; margin-bottom: 16px; box-shadow: 0 1px 0 rgba(16, 24, 32, 0.03); }
+.chart-card h3 { font-family: var(--sans); font-size: 22px; font-weight: 850; font-style: normal; margin-bottom: 3px; letter-spacing: -0.045em; }
+.chart-sub { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-bottom: 16px; }
+.chart-wrap { height: 210px; position: relative; }
+
+/* ── QUICK LINKS ── */
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center; }
+.links-lbl { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.14em; text-transform: uppercase; margin-right: 4px; }
+.link-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; border: 1px solid var(--bdr); border-radius: 999px;
+  background: var(--card); color: var(--txt);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.03em;
+  text-decoration: none; white-space: nowrap;
+}
+.link-chip:hover { border-color: var(--bdr2); background: var(--surf); }
+.link-chip .ext { font-size: 9px; color: var(--faint); }
+.link-chip .caveat { font-size: 9px; color: var(--watch); margin-left: 2px; text-transform: lowercase; letter-spacing: 0.04em; }
+
+/* ── ASTRONOMY CARDS ── */
+.astro-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.astro { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 12px 14px; }
+.astro .lbl { font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+.astro .val { font-family: var(--mono); font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
 .astro .sub { font-size: 10px; color: var(--faint); margin-top: 4px; }
-.station-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
-.station { background: var(--bg); border: 1px solid var(--bdr); border-radius: 10px; padding: 12px 14px; min-width: 0; }
-.station .hdr { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 2px; flex-wrap: wrap; }
-.station .id { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 500; letter-spacing: 0.04em; }
+.astro .moon-icon { font-size: 14px; margin-right: 4px; }
+
+/* ── STATION CARDS ── */
+.station-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.station { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 12px 14px; }
+.station .hdr { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+.station .id { font-family: var(--mono); font-size: 12px; color: var(--blue); font-weight: 500; letter-spacing: 0.04em; }
 .station .elev { font-family: var(--mono); font-size: 10px; color: var(--faint); }
 .station .name { font-size: 11px; color: var(--dim); margin-bottom: 8px; line-height: 1.4; }
-.station .val { font-family: var(--mono); font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+.station .val { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
 .station .stats { font-family: var(--mono); font-size: 11px; color: var(--dim); margin-top: 6px; line-height: 1.5; }
 .station .stats.stale { color: var(--watch); }
-.station-empty { font-family: var(--mono); font-size: 11px; color: var(--faint); padding: 12px 14px; border: 1px dashed var(--bdr); border-radius: 10px; }
+.station-empty { font-family: var(--mono); font-size: 11px; color: var(--faint); padding: 12px 14px; border: 1px dashed var(--bdr); border-radius: var(--radius); }
+
+/* ── GUIDANCE CARDS ── */
 .guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px; }
-.guide-card { background: var(--bg); border: 1px solid var(--bdr); border-left: 4px solid var(--bdr2); border-radius: 10px; padding: 13px 15px; min-width: 0; }
-.guide-card .tag { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; }
-.guide-card h4 { font-family: var(--sans); font-size: 15px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 5px; color: var(--txt); }
+.guide-card { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 14px 16px; border-left: 4px solid var(--bdr2); }
+.guide-card .tag { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-bottom: 8px; }
+.guide-card h4 { font-family: var(--sans); font-size: 16px; font-weight: 800; font-style: normal; letter-spacing: -0.025em; margin-bottom: 6px; color: var(--txt); }
 .guide-card p { font-size: 12px; color: var(--dim); line-height: 1.6; }
-.guide-card.g-temp { border-left-color: var(--accent); }
-.guide-card.g-temp .tag { color: var(--accent); }
+.guide-card.g-temp { border-left-color: var(--blue); }
+.guide-card.g-temp .tag { color: var(--blue); }
 .guide-card.g-wind { border-left-color: var(--watch); }
 .guide-card.g-wind .tag { color: var(--watch); }
 .guide-card.g-snow { border-left-color: var(--caution); }
 .guide-card.g-snow .tag { color: var(--caution); }
 .guide-card.g-good { border-left-color: var(--go); }
 .guide-card.g-good .tag { color: var(--go); }
-.guide-foot { font-family: var(--mono); font-size: 11px; color: var(--faint); line-height: 1.7; margin-top: 6px; }
-.local-guidance { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 14px 16px 16px; }
+.guide-foot { font-family: var(--mono); font-size: 11px; color: var(--faint); line-height: 1.7; margin-top: 6px; margin-bottom: 4px; }
+
+/* ── AFD ── */
+.local-guidance { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 14px 16px 16px; margin-bottom: 16px; }
 .local-guidance-hdr { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
-.local-guidance-name { font-size: 15px; color: var(--txt); font-weight: 700; }
-.local-guidance-link { font-family: var(--mono); font-size: 11px; color: var(--accent); text-decoration: none; border-bottom: 1px dotted currentColor; }
-.local-guidance-frame { width: 100%; height: 560px; border: 1px solid var(--bdr); border-radius: 8px; background: var(--bg); }
+.local-guidance-name { font-family: var(--sans); font-style: normal; font-size: 16px; color: var(--txt); font-weight: 800; }
+.local-guidance-link { font-family: var(--mono); font-size: 11px; color: var(--blue); text-decoration: none; border-bottom: 1px dotted currentColor; }
+.local-guidance-link:hover { border-bottom-style: solid; }
+.local-guidance-frame { width: 100%; height: 600px; border: 1px solid var(--bdr); border-radius: 6px; background: var(--bg); }
 .local-guidance-note { font-family: var(--mono); font-size: 10px; color: var(--faint); margin-top: 8px; line-height: 1.5; }
-.afd-card { background: var(--bg); border: 1px solid var(--bdr); border-radius: 10px; padding: 16px 18px; font-family: var(--mono); font-size: 12px; line-height: 1.75; white-space: pre-wrap; color: var(--dim); max-height: 440px; overflow-y: auto; }
-.afd-hdr { font-family: var(--sans); font-size: 15px; color: var(--txt); font-weight: 700; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--bdr); }
+.afd-card { background: var(--card); border: 1px solid var(--bdr); padding: 20px 24px; font-family: var(--mono); font-size: 12px; line-height: 1.75; white-space: pre-wrap; color: var(--dim); max-height: 440px; overflow-y: auto; border-radius: var(--radius); margin-bottom: 16px; }
+.afd-card::-webkit-scrollbar { width: 6px; }
+.afd-card::-webkit-scrollbar-track { background: var(--bg); }
+.afd-card::-webkit-scrollbar-thumb { background: var(--bdr2); border-radius: 3px; }
+.afd-hdr { font-family: var(--sans); font-style: normal; font-size: 16px; color: var(--txt); font-weight: 800; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--bdr); }
 
-/* ── BOTTOM BAR (mobile) ── */
-.bottombar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; background: var(--card); border-top: 1px solid var(--bdr); padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 12px; box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08); }
-.bb-verdict { border: none; background: transparent; color: var(--txt); font-family: var(--sans); font-weight: 700; font-size: 20px; letter-spacing: -0.03em; cursor: pointer; padding: 0; }
-.bb-verdict.go { color: var(--go); }
-.bb-verdict.watch { color: var(--watch); }
-.bb-verdict.caution { color: var(--caution); }
-.bb-why { flex: 1; min-width: 0; font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.35; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-@media (min-width: 1000px) {
-  .bottombar { display: none !important; }
-  body.has-results { padding-bottom: 0; }
-}
-
-/* ── DIALOG ── */
-dialog { border: 1px solid var(--bdr); border-radius: 16px; background: var(--card); color: var(--txt); padding: 18px; width: min(460px, calc(100% - 32px)); box-shadow: var(--shadow); }
-dialog::backdrop { background: rgba(10, 14, 17, 0.55); }
-.dlg-title { font-weight: 700; font-size: 18px; letter-spacing: -0.02em; margin-bottom: 4px; }
-.dlg-sub { font-size: 12px; color: var(--dim); margin-bottom: 12px; line-height: 1.5; }
-.thr-grid { display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px 10px; align-items: center; font-family: var(--mono); font-size: 11.5px; }
-.thr-grid .h { color: var(--faint); letter-spacing: 0.1em; text-transform: uppercase; font-size: 9.5px; }
-.thr-grid input { width: 100%; font: 16px var(--mono); padding: 8px 10px; border: 1px solid var(--bdr); border-radius: 8px; background: var(--bg); color: var(--txt); min-width: 0; }
-.dlg-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-.dlg-actions .btn { min-height: 40px; font-size: 14px; }
-dialog .err { margin-top: 10px; }
-dialog .source-note { margin-top: 12px; }
-
-/* ── TOAST / FOOTER ── */
-.toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--txt); color: var(--bg); padding: 8px 14px; border-radius: 999px; font-family: var(--mono); font-size: 12px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 70; white-space: nowrap; }
-.toast.show { opacity: 1; }
-@media (min-width: 1000px) { .toast { bottom: 24px; } }
-footer { border-top: 1px solid var(--bdr); padding: 16px 0 28px; font-size: 11px; color: var(--faint); font-family: var(--mono); line-height: 1.7; }
+@media (max-width: 600px) {
+  header { align-items: flex-start; padding: 14px 16px; }
+  .theme-toggle { margin-left: 0; }
+  .ver-link { margin-left: 0; }
+  .config { gap: 10px; padding: 14px 16px; }
+  .config select { min-width: 0; width: 100%; }
+	  .config label { width: 100%; }
+	  #results { padding: 14px 16px; }
+	  .verdict { padding: 16px 18px; }
+	  .v-word { font-size: 26px; }
+	}
 </style>
 </head>
-<!-- mw-v2.html: V2 preview of mw.html for A/B comparison. The first part of
-     the script (objective data through the station cards) is a copy of the
-     mw.html engine; the V2 layer at the end overrides loadForecast,
-     renderCharts, and renderSignalGrid. Mirror objective-data edits from
-     mw.html here so the two pages stay in sync. -->
 <body>
 
-<header class="topbar">
-  <div class="topbar-in">
-    <a class="brand" href="index.html">RK Mountains</a>
-    <div class="topbar-title">Mountain Weather <span class="ver-pill">V2</span></div>
-    <div class="topbar-actions">
-      <a id="version-link" class="chip-btn" href="mw.html" title="Open the same plan in the current dashboard">V1 view</a>
-      <button id="settings-btn" class="chip-btn" type="button">Thresholds</button>
-      <button class="chip-btn theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">
-        <span class="theme-icon" aria-hidden="true">☾</span>
-        <span class="theme-label">Dark</span>
-      </button>
-    </div>
-  </div>
+<header>
+  <a class="back-link" href="index.html">Back to RK Mountains</a>
+  <h1>Mountain Weather</h1>
+  <p>Climb-window planning dashboard for NWS forecasts and model guidance. Previous layout (V1), kept for comparison with the current dashboard.</p>
+  <a class="ver-link" id="version-link" href="mw.html" title="Open the same plan in the current dashboard">Current dashboard →</a>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">
+    <span class="theme-icon" aria-hidden="true">☾</span>
+    <span class="theme-label">Dark</span>
+  </button>
 </header>
 
-<section class="plan wrap" id="plan" aria-label="Plan">
-  <div class="plan-summary" id="plan-summary" hidden></div>
-  <div class="plan-form" id="plan-form">
-    <label>Objective
-      <select id="sel-mtn"></select>
-    </label>
-    <label>Trailhead / route
-      <select id="sel-th"></select>
-    </label>
-    <label>Climb start
-      <input type="datetime-local" id="inp-start">
-    </label>
-    <label>Climb end
-      <input type="datetime-local" id="inp-end">
-    </label>
-    <button class="btn" id="btn-go" type="button">Get forecast</button>
-    <div class="err" id="err-msg" hidden></div>
-  </div>
-</section>
-
-<main id="results" class="wrap" hidden>
-  <div id="notices">
-    <div class="notice" id="fallback-note" hidden></div>
-    <div class="notice info" id="since-last" hidden></div>
-    <div class="notice" id="inv-alert" hidden></div>
-  </div>
-
-  <section class="hero" id="verdict" aria-label="Climbing window guidance"></section>
-
-  <section class="card" id="phase-card" aria-label="Timing"></section>
-
-  <section class="tile-grid" id="met-grid" aria-label="Key numbers"></section>
-
-  <aside class="rail" aria-label="Context">
-    <div class="window-finder" id="window-finder" hidden></div>
-    <div class="context-grid" id="external-context"></div>
-    <div class="signal-grid" id="signal-grid"></div>
-  </aside>
-
-  <section class="route-profile" id="route-profile" hidden></section>
-
-  <section class="card" id="timeline-section" aria-label="Route weather timeline">
-    <div class="sec-head">
-      <div class="card-title">Route weather timeline · 48h before → 12h after</div>
-      <label class="mini-control">Point
-        <select id="pretrend-point-select">
-          <option value="summit">Summit</option>
-          <option value="mid">Mid-point</option>
-          <option value="trail">Trailhead</option>
-        </select>
-      </label>
-    </div>
-    <div class="source-note" id="pretrend-source"></div>
-    <div class="pretrend" id="pretrend"></div>
-  </section>
-
-  <div class="links" id="quick-links"></div>
-</main>
-
-<section id="more" class="wrap" hidden>
-    <details class="fold" id="fold-charts">
-      <summary>Model comparison charts <span class="hint">wind · gust · freezing level · precip · snow</span></summary>
-      <div class="fold-body">
-        <div class="source-note" id="chart-source"></div>
-        <div class="chart-card">
-          <h3>Wind speed</h3>
-          <div class="chart-sub">mph · sustained · dashed line = go threshold</div>
-          <div class="chart-wrap"><canvas id="chart-wind"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <h3>Wind gusts</h3>
-          <div class="chart-sub">mph · expected peak gust per hour</div>
-          <div class="chart-wrap"><canvas id="chart-gust"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <h3>Freezing level</h3>
-          <div class="chart-sub">ft MSL · dashed line = summit elevation</div>
-          <div class="chart-wrap"><canvas id="chart-freezing"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <h3>Precipitation probability</h3>
-          <div class="chart-sub">% · any precipitation</div>
-          <div class="chart-wrap"><canvas id="chart-precip"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <h3>Snowfall</h3>
-          <div class="chart-sub">in/hr · model snowfall amount</div>
-          <div class="chart-wrap"><canvas id="chart-snowfall"></canvas></div>
-        </div>
-      </div>
-    </details>
-
-    <details class="fold" id="fold-hourly">
-      <summary>Hourly details · climb window <span class="hint">summit + trailhead, hour by hour</span></summary>
-      <div class="fold-body">
-        <div class="source-note" id="table-source"></div>
-        <div class="tbl-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th class="r">Summit temp</th>
-                <th class="r">Trailhead temp</th>
-                <th class="r">Wind</th>
-                <th class="r">Gust</th>
-                <th>Dir</th>
-                <th class="r">Frz level</th>
-                <th class="r">Precip</th>
-                <th class="r">Sky</th>
-                <th class="r">CAPE</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody id="tbl-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </details>
-
-    <details class="fold" id="fold-precip">
-      <summary>Recent precipitation · summit <span class="hint">last 72 h and new snow before start</span></summary>
-      <div class="fold-body astro-grid" id="precip-history"></div>
-    </details>
-
-    <details class="fold" id="fold-obs">
-      <summary>Current observations <span class="hint">stations near the mountain</span></summary>
-      <div class="fold-body station-grid" id="station-grid"></div>
-    </details>
-
-    <details class="fold" id="fold-guidance">
-      <summary>Model guidance &amp; how to read this <span class="hint">which model to trust at this lead time</span></summary>
-      <div class="fold-body">
-        <div class="guide-grid" id="model-guidance">
-          <div class="guide-card g-temp"><span class="tag">Temperature</span><h4>Pick a window first</h4><p>The recommendation changes as your start time gets closer.</p></div>
-          <div class="guide-card g-wind"><span class="tag">Wind</span><h4>Pick a window first</h4><p>Wind guidance should always be checked at summit altitude.</p></div>
-          <div class="guide-card g-snow"><span class="tag">Snow</span><h4>Pick a window first</h4><p>Close-in shower timing is the part that matters most for alpine starts.</p></div>
-        </div>
-        <div class="guide-grid">
-          <div class="guide-card g-good"><span class="tag">Baseline</span><h4>NWS first</h4><p>Use the NWS hourly data here as the official, human-edited baseline. For raw model maps, compare Windy layers at the same time, layer, and altitude.</p></div>
-          <div class="guide-card g-temp"><span class="tag">Close-in</span><h4>HRRR inside 48 hours</h4><p>For an alpine start, HRRR is usually the lead model for shower timing, wind shifts, and cloud detail once you are within about two days.</p></div>
-          <div class="guide-card g-wind"><span class="tag">Cross-check</span><h4>Globals + mesoscale</h4><p>ECMWF is usually most accurate for 3–7 day synoptic timing; GEM often sees Pacific systems first; ICON and GFS add independent votes. If HRRR/NAM and the globals agree, confidence is high; if they diverge close-in, trust the mesoscale model.</p></div>
-          <div class="guide-card g-snow"><span class="tag">Verdict logic</span><h4>Worst hour, plus gates</h4><p>Wind, gust, and precip use the worst hour in your window against the thresholds. V2 adds thunderstorm, visibility, and rain-on-snow gates that can only lower the verdict, and an avalanche gate in season. The timing strip shows when each problem lands.</p></div>
-        </div>
-        <p class="guide-foot">Coordinates are precomputed route references, not official navigation data. NWS grid terrain is smoothed, so summit ridges can be colder, windier, or cloudier than the forecast grid cell. Snow level uses the freezing level minus roughly 1,000 ft.</p>
-      </div>
-    </details>
-
-    <div id="local-guidance-section" hidden>
-      <div class="local-guidance">
-        <div class="local-guidance-hdr">
-          <span class="local-guidance-name" id="local-guidance-name"></span>
-          <a class="local-guidance-link" id="local-guidance-link" target="_blank" rel="noopener">Open in new tab ↗</a>
-        </div>
-        <iframe class="local-guidance-frame" id="local-guidance-frame" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" loading="lazy" referrerpolicy="no-referrer"></iframe>
-        <div class="local-guidance-note">If the embed appears blank, the source site is blocking iframes. Use the link above to open it directly.</div>
-      </div>
-    </div>
-
-    <details class="fold" id="fold-afd">
-      <summary>NWS area forecast discussion <span class="hint">the forecaster's reasoning</span></summary>
-      <div class="fold-body">
-        <div class="afd-card" id="afd-card"><div class="afd-hdr">Loading discussion…</div></div>
-      </div>
-    </details>
-</section>
-
-<div class="bottombar" id="bottombar" hidden>
-  <button class="bb-verdict" id="bb-verdict" type="button" aria-label="Scroll to verdict"></button>
-  <div class="bb-why" id="bb-why"></div>
-  <button class="chip-btn" id="bb-share" type="button">Share brief</button>
+<div class="config">
+  <label>Mountain
+    <select id="sel-mtn"></select>
+  </label>
+  <label>Trailhead / Route
+    <select id="sel-th"></select>
+  </label>
+  <label>Climb start
+    <input type="datetime-local" id="inp-start">
+  </label>
+  <label>Climb end
+    <input type="datetime-local" id="inp-end">
+  </label>
+  <button class="btn" id="btn-go">Get Forecast</button>
+  <div class="err" id="err-msg" hidden></div>
 </div>
 
-<dialog id="thr-dialog" aria-labelledby="thr-title">
-  <div class="dlg-title" id="thr-title">Go / Watch thresholds</div>
-  <div class="dlg-sub"><strong id="thr-mtn"></strong> · <span id="thr-note"></span></div>
-  <div class="thr-grid">
-    <div></div><div class="h">Go at or below</div><div class="h">Watch up to</div>
-    <div>Wind mph</div>
-    <input id="thr-wGo" type="number" min="0" max="120" step="1" inputmode="numeric" aria-label="Wind go threshold">
-    <input id="thr-wWa" type="number" min="0" max="120" step="1" inputmode="numeric" aria-label="Wind watch threshold">
-    <div>Gust mph</div>
-    <input id="thr-gGo" type="number" min="0" max="150" step="1" inputmode="numeric" aria-label="Gust go threshold">
-    <input id="thr-gWa" type="number" min="0" max="150" step="1" inputmode="numeric" aria-label="Gust watch threshold">
-    <div>Precip %</div>
-    <input id="thr-pGo" type="number" min="0" max="100" step="1" inputmode="numeric" aria-label="Precipitation go threshold">
-    <input id="thr-pWa" type="number" min="0" max="100" step="1" inputmode="numeric" aria-label="Precipitation watch threshold">
+<div id="results" hidden>
+  <div class="crumb" id="crumb"></div>
+  <div class="climb-frame" id="climb-frame"></div>
+  <div class="inv-alert" id="fallback-note" hidden></div>
+  <div class="links" id="quick-links"></div>
+  <section class="window-group" aria-label="Selected climbing window">
+	  <div class="window-finder" id="window-finder" hidden></div>
+	  <div class="verdict" id="verdict"></div>
+	  <div class="inv-alert" id="inv-alert" hidden></div>
+	  <div class="met-grid" id="met-grid"></div>
+	  <div class="route-profile" id="route-profile" hidden></div>
+  </section>
+  <div class="sec-toolbar">
+    <div class="sec-lbl">Route weather timeline · 48h before → 12h after</div>
+    <label class="mini-control">Point
+      <select id="pretrend-point-select">
+        <option value="summit">Summit</option>
+        <option value="mid">Mid-point</option>
+        <option value="trail">Trailhead</option>
+      </select>
+    </label>
   </div>
-  <div class="err" id="thr-err" hidden></div>
-  <div class="dlg-actions">
-    <button class="btn" id="thr-save" type="button">Save</button>
-    <button class="btn ghost" id="thr-reset" type="button">Reset to defaults</button>
-    <button class="btn ghost" id="thr-cancel" type="button">Cancel</button>
+  <div class="source-note" id="pretrend-source"></div>
+  <div class="pretrend" id="pretrend"></div>
+
+  <details class="hourly-details">
+    <summary>Hourly details · climb window <span class="hourly-details-hint" aria-hidden="true"></span></summary>
+    <div class="source-note" id="table-source"></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th class="r">Summit temp</th>
+            <th class="r">Trailhead temp</th>
+            <th class="r">Wind</th>
+            <th class="r">Gust</th>
+            <th>Dir</th>
+            <th class="r">Frz level</th>
+            <th class="r">Precip</th>
+            <th class="r">Sky</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <div class="sec-lbl">Recent precipitation · summit</div>
+  <div class="astro-grid" id="precip-history"></div>
+
+  <div class="sec-lbl">Charts — model comparison · climb window highlighted</div>
+  <div class="source-note" id="chart-source">Sources: wind, gust, freezing level, precipitation, snowfall, and cloud data from Open-Meteo models. Charts show two days before the climb start through two days after the climb end; HRRR and NAM appear only where their shorter forecast horizons have data.</div>
+  <div class="chart-card">
+    <h3>Wind speed</h3>
+    <div class="chart-sub">mph · sustained · dashed line = go threshold</div>
+    <div class="chart-wrap"><canvas id="chart-wind"></canvas></div>
   </div>
-  <div class="source-note">Above the watch value is Caution. Saved in this browser only; anyone opening your shared link sees the built-in defaults.</div>
-</dialog>
+  <div class="chart-card">
+    <h3>Wind gusts</h3>
+    <div class="chart-sub">mph · expected peak gust per hour</div>
+    <div class="chart-wrap"><canvas id="chart-gust"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Freezing level</h3>
+    <div class="chart-sub">ft MSL · dashed line = summit elevation</div>
+    <div class="chart-wrap"><canvas id="chart-freezing"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Precipitation probability</h3>
+    <div class="chart-sub">% · any precipitation</div>
+    <div class="chart-wrap"><canvas id="chart-precip"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <h3>Snowfall</h3>
+    <div class="chart-sub">in/hr · model snowfall amount</div>
+    <div class="chart-wrap"><canvas id="chart-snowfall"></canvas></div>
+  </div>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+	  <div class="signal-grid" id="signal-grid"></div>
+  <div class="context-grid" id="external-context"></div>
+  <div class="spread" id="spread"></div>
 
-<footer class="wrap">
-  Data: api.weather.gov for NWS hourly temperatures, snowfall grid data, alerts, and AFD · open-meteo.com for GFS, ECMWF IFS 0.25°, DWD ICON, Canadian GEM, HRRR, and NAM model fields including CAPE and cloud layers · api.avalanche.org for avalanche-center danger ratings · NRCS AWDB for SNOTEL<br>
-  V2 preview. Go/Watch/Caution is an aid, not a substitute for judgment, real-time observations, and the avalanche center.
+  <div class="sec-lbl">Current observations · stations near mountain</div>
+  <div class="station-grid" id="station-grid"></div>
+
+  <div class="sec-lbl">Model guidance for this window</div>
+  <div class="guide-grid" id="model-guidance">
+    <div class="guide-card g-temp">
+      <span class="tag">Temperature</span>
+      <h4>Pick a window first</h4>
+      <p>The recommendation changes as your start time gets closer.</p>
+    </div>
+    <div class="guide-card g-wind">
+      <span class="tag">Wind</span>
+      <h4>Pick a window first</h4>
+      <p>Wind guidance should always be checked at summit altitude.</p>
+    </div>
+    <div class="guide-card g-snow">
+      <span class="tag">Snow</span>
+      <h4>Pick a window first</h4>
+      <p>Close-in shower timing is the part that matters most for alpine starts.</p>
+    </div>
+  </div>
+
+  <div class="sec-lbl">Interpretation notes</div>
+  <div class="guide-grid">
+    <div class="guide-card g-good">
+      <span class="tag">Baseline</span>
+      <h4>NWS first</h4>
+      <p>Use the NWS hourly data here as the official, human-edited baseline. For raw model maps, compare Windy layers at the same time, layer, and altitude.</p>
+    </div>
+    <div class="guide-card g-temp">
+      <span class="tag">Close-in</span>
+      <h4>HRRR inside 48 hours</h4>
+      <p>For a 1 am start, HRRR is usually the lead model for shower timing, wind shifts, and cloud detail once you are within about two days.</p>
+    </div>
+    <div class="guide-card g-wind">
+      <span class="tag">Cross-check</span>
+      <h4>Globals + mesoscale</h4>
+      <p>ECMWF is usually most accurate for 3–7 day synoptic timing; GEM often sees Pacific systems first; ICON and GFS add independent votes. If HRRR/NAM and the globals agree, confidence is high — if they diverge close-in, trust the mesoscale model.</p>
+    </div>
+    <div class="guide-card g-snow">
+      <span class="tag">Confidence</span>
+      <h4>Spread = uncertainty</h4>
+      <p>The Model Spread tile shows wind agreement across the six models. Tight (&lt;8 mph) = high confidence; wide (≥15 mph) means check back closer to climb day before committing.</p>
+    </div>
+  </div>
+  <p class="guide-foot">Coordinates are precomputed route references, not official navigation data. NWS grid terrain is smoothed, so summit ridges can be colder, windier, or cloudier than the forecast grid cell.</p>
+
+  <div id="local-guidance-section" hidden>
+    <div class="sec-lbl">Local mountain guidance</div>
+    <div class="local-guidance">
+      <div class="local-guidance-hdr">
+        <span class="local-guidance-name" id="local-guidance-name"></span>
+        <a class="local-guidance-link" id="local-guidance-link" target="_blank" rel="noopener">Open in new tab ↗</a>
+      </div>
+      <iframe class="local-guidance-frame" id="local-guidance-frame" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" loading="lazy" referrerpolicy="no-referrer"></iframe>
+      <div class="local-guidance-note">If the embed appears blank, the source site is blocking iframes — use the link above to open it directly.</div>
+    </div>
+  </div>
+
+  <div class="sec-lbl">NWS area forecast discussion</div>
+  <div class="afd-card" id="afd-card">
+    <div class="afd-hdr">Loading discussion…</div>
+  </div>
+</div>
+<footer>
+  Data: api.weather.gov for NWS hourly temperatures, snowfall grid data, and AFD · open-meteo.com for GFS, ECMWF IFS 0.25°, DWD ICON, Canadian GEM, HRRR, and NAM model fields · api.avalanche.org for avalanche-center danger ratings and statements<br>
+  Thresholds per mountain. Go/Watch/Caution is an aid — not a substitute for judgment, real-time observations, and NWAC.
 </footer>
 
 <script>
-// ===== V1 engine: copy of the mw.html script (see the note at the top of the body) =====
 const MTNS = {
   baker: {
     name: 'Mt Baker', summit: [48.7767, -121.8144, 10781], nws: 'SEW',
@@ -1222,7 +1157,7 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
       c.beginPath(); c.moveTo(a.left,y); c.lineTo(a.right,y); c.stroke();
       c.setLineDash([]);
       c.fillStyle=opts.refLine.color||'rgba(248,81,73,0.7)';
-      c.font='10px "IBM Plex Mono"';
+      c.font='10px "JetBrains Mono"';
       c.fillText(opts.refLine.label, a.left+8, y-4);
       c.restore();
     }
@@ -1242,7 +1177,7 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
       c.beginPath(); c.moveTo(x, a.top); c.lineTo(x, a.bottom); c.stroke();
       c.setLineDash([]);
       c.fillStyle = 'rgba(88,166,255,0.95)';
-      c.font = '10px "IBM Plex Mono"';
+      c.font = '10px "JetBrains Mono"';
       c.fillText('now', x + 4, a.top + 12);
       c.restore();
     }
@@ -1254,12 +1189,12 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
       responsive:true, maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{
-        legend:{position:'top',align:'end',labels:{color:theme.dim,font:{family:'IBM Plex Mono',size:10},usePointStyle:true,pointStyle:'rect',boxWidth:10,boxHeight:2,padding:12}},
+        legend:{position:'top',align:'end',labels:{color:theme.dim,font:{family:'JetBrains Mono',size:10},usePointStyle:true,pointStyle:'rect',boxWidth:10,boxHeight:2,padding:12}},
         tooltip:{
           backgroundColor:theme.tooltipBg,titleColor:theme.tooltipTxt,bodyColor:theme.tooltipTxt,
           borderColor:theme.bdr,borderWidth:1,padding:10,
-          titleFont:{family:'IBM Plex Mono',size:11,weight:'400'},
-          bodyFont:{family:'IBM Plex Mono',size:11},
+          titleFont:{family:'JetBrains Mono',size:11,weight:'400'},
+          bodyFont:{family:'JetBrains Mono',size:11},
           callbacks:{
             title:items=>fmtTime(new Date(items[0].parsed.x)),
             label:item=>`${item.dataset.label.padEnd(6)} ${chartValue(item.parsed.y, opts)}`,
@@ -1270,9 +1205,9 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
         x:{type:'time',time:{unit:'day',displayFormats:{day:'EEE d'}},
            min: new Date(climbStart.getTime() - 48*3600*1000),
            max: new Date(climbEnd.getTime() + 48*3600*1000),
-           ticks:{color:theme.faint,font:{family:'IBM Plex Mono',size:10}},
+           ticks:{color:theme.faint,font:{family:'JetBrains Mono',size:10}},
            grid:{color:theme.grid},border:{color:theme.bdr}},
-        y:{ticks:{color:theme.faint,font:{family:'IBM Plex Mono',size:10},callback:v=>chartValue(v, opts)},
+        y:{ticks:{color:theme.faint,font:{family:'JetBrains Mono',size:10},callback:v=>chartValue(v, opts)},
            grid:{color:theme.grid},border:{color:theme.bdr},...(opts.scaleOptions||{})},
       }
     },
@@ -1282,7 +1217,7 @@ function renderChart(canvasId, varName, climbStart, climbEnd, summitFt, opts={})
 
 const CHART_SOURCE_TEXT = 'Sources: wind, gust, freezing level, precipitation, snowfall, and cloud data from Open-Meteo models. Charts show two days before the climb start through two days after the climb end; HRRR and NAM appear only where their shorter forecast horizons have data.';
 
-function renderChartsNow(startStr, endStr, summitFt, thr){
+function renderCharts(startStr, endStr, summitFt, thr){
   _lastChartArgs = [startStr, endStr, summitFt, thr];
   const srcEl = document.getElementById('chart-source');
   document.querySelectorAll('.chart-card').forEach(c => { c.style.display = _apiData ? '' : 'none'; });
@@ -1355,7 +1290,7 @@ function renderAfd(result, office){
 
 
 const MODEL_NAMES = { gfs_seamless:'GFS', ecmwf_ifs025:'ECMWF', icon_seamless:'ICON', gem_seamless:'GEM', ncep_hrrr_conus:'HRRR', ncep_nam_conus:'NAM' };
-const VARS = ['temperature_2m','wind_speed_10m','wind_gusts_10m','wind_direction_10m','freezing_level_height','precipitation_probability','precipitation','snowfall','cloud_cover','cloud_cover_low','cloud_cover_mid','cape','snow_depth','visibility'];
+const VARS = ['temperature_2m','wind_speed_10m','wind_gusts_10m','wind_direction_10m','freezing_level_height','precipitation_probability','precipitation','snowfall','cloud_cover'];
 
 function pad2(n){ return String(n).padStart(2,'0'); }
 function dtlStr(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
@@ -3587,7 +3522,7 @@ function applyUrlParams(selMtn, updateThs, inpStart, inpEnd){
 
 function syncVersionLink(){
   const a = document.getElementById('version-link');
-  if(a) a.href = `mw-v2.html${window.location.search}`;
+  if(a) a.href = `mw.html${window.location.search}`;
 }
 
 function writeUrlFromForm(){
@@ -3600,967 +3535,12 @@ function writeUrlFromForm(){
   const params = new URLSearchParams({ m: mtn, r: slug, start, end });
   const newUrl = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
   window.history.replaceState(null, '', newUrl);
-  }
-
-// =====================================================================
-// V2 layer. Everything above this line is the V1 engine copied verbatim
-// by the build script (data, fetches, parsing, charts, context cards).
-// Functions declared below with the same name as a V1 function replace
-// it: loadForecast, renderCharts, renderSignalGrid, and the init call.
-// =====================================================================
-
-const V2_THR_KEY = 'mw-v2-thresholds';
-const V2_PHASE_KEY = 'mw-v2-summit-override';
-const V2_LAST_KEY = 'mw-v2-lastcheck';
-const V2_MIN_RECHECK_MS = 20 * 60000;
-const PHASE_DEFAULT = [0.25, 0.40, 0.10, 0.25];
-const THR_FIELDS = ['wGo', 'wWa', 'gGo', 'gWa', 'pGo', 'pWa'];
-let _v2ctx = null;
-let _chartsDirty = false;
-let _toastTimer = null;
-
-function lsGet(key, fallback){
-  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch(e) { return fallback; }
-}
-function lsSet(key, val){
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
-}
-function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
-function fmtFt(v){ return v === null || v === undefined || isNaN(v) ? '—' : Math.round(v).toLocaleString(); }
-function fmtMiles(ft){ const mi = ft / 5280; return mi < 0.2 ? `${Math.round(ft)} ft` : `${mi.toFixed(1)} mi`; }
-function fmtSpan(min){
-  const abs = Math.abs(Math.round(min));
-  const h = Math.floor(abs / 60), m = abs % 60;
-  return h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
-}
-function toast(msg){
-  const el = document.getElementById('toast');
-  if(!el) return;
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
-}
-function showPlanForm(){
-  document.getElementById('plan')?.classList.remove('collapsed');
-  const sum = document.getElementById('plan-summary');
-  if(sum) sum.hidden = true;
-}
-
-// ---------------------------------------------------------------- thresholds
-function thrOverrides(){
-  const o = lsGet(V2_THR_KEY, {});
-  return o && typeof o === 'object' ? o : {};
-}
-function effectiveThr(mtnKey){
-  const base = MTNS[mtnKey].thr;
-  const o = thrOverrides()[mtnKey];
-  return o ? {...base, ...o} : {...base};
-}
-function hasCustomThr(mtnKey){ return !!thrOverrides()[mtnKey]; }
-
-function openThrDialog(){
-  const dlg = document.getElementById('thr-dialog');
-  if(!dlg) return;
-  const mtnKey = document.getElementById('sel-mtn').value;
-  const thr = effectiveThr(mtnKey);
-  document.getElementById('thr-mtn').textContent = MTNS[mtnKey].name;
-  THR_FIELDS.forEach(f => { document.getElementById('thr-' + f).value = thr[f]; });
-  document.getElementById('thr-note').textContent = hasCustomThr(mtnKey)
-    ? 'custom values active for this objective'
-    : 'built-in defaults for this objective';
-  document.getElementById('thr-err').hidden = true;
-  dlg.showModal();
-}
-function readThrDialog(){
-  const vals = {};
-  for(const f of THR_FIELDS){
-    const v = Number(document.getElementById('thr-' + f).value);
-    if(!Number.isFinite(v) || v < 0) return { error: 'Every value must be a number of zero or more.' };
-    vals[f] = v;
-  }
-  if(!(vals.wGo < vals.wWa && vals.gGo < vals.gWa && vals.pGo < vals.pWa)){
-    return { error: 'Each go value must be lower than its watch value.' };
-  }
-  return { vals };
-}
-function reloadIfShown(){
-  const results = document.getElementById('results');
-  if(results && !results.hidden) loadForecast();
-}
-function saveThrDialog(){
-  const mtnKey = document.getElementById('sel-mtn').value;
-  const read = readThrDialog();
-  const err = document.getElementById('thr-err');
-  if(read.error){ err.textContent = read.error; err.hidden = false; return; }
-  const base = MTNS[mtnKey].thr;
-  const o = thrOverrides();
-  if(THR_FIELDS.every(f => read.vals[f] === base[f])) delete o[mtnKey];
-  else o[mtnKey] = read.vals;
-  lsSet(V2_THR_KEY, o);
-  document.getElementById('thr-dialog').close();
-  toast(o[mtnKey] ? 'Custom thresholds saved' : 'Thresholds match the defaults');
-  reloadIfShown();
-}
-function resetThrDialog(){
-  const mtnKey = document.getElementById('sel-mtn').value;
-  const o = thrOverrides();
-  delete o[mtnKey];
-  lsSet(V2_THR_KEY, o);
-  const base = MTNS[mtnKey].thr;
-  THR_FIELDS.forEach(f => { document.getElementById('thr-' + f).value = base[f]; });
-  document.getElementById('thr-dialog').close();
-  toast('Defaults restored');
-  reloadIfShown();
-}
-
-// ---------------------------------------------------------------- phases
-function phaseFractions(th){
-  const p = Array.isArray(th.phase) && th.phase.length === 4 && th.phase.every(x => typeof x === 'number' && x > 0)
-    ? th.phase : PHASE_DEFAULT;
-  const sum = p.reduce((a, b) => a + b, 0);
-  return p.map(x => x / sum);
-}
-function summitOverrideKey(mtnKey, slug){ return `${mtnKey}:${slug}`; }
-function loadSummitOverride(mtnKey, slug){
-  const o = lsGet(V2_PHASE_KEY, {});
-  const v = o && o[summitOverrideKey(mtnKey, slug)];
-  return typeof v === 'number' && v > 0 && v < 1 ? v : null;
-}
-function saveSummitOverride(mtnKey, slug, frac){
-  const o = lsGet(V2_PHASE_KEY, {}) || {};
-  const k = summitOverrideKey(mtnKey, slug);
-  if(frac === null) delete o[k]; else o[k] = frac;
-  lsSet(V2_PHASE_KEY, o);
-}
-// Split the climb window into approach / climb / summit / descent. summitFrac
-// (0..1, fraction of the window at which the summit is reached) rescales the
-// two ascent phases and the two descent phases while keeping their ratios.
-function computePhases(th, startStr, endStr, summitFrac){
-  const start = new Date(startStr), end = new Date(endStr);
-  const dur = end - start;
-  let [a, c, s, d] = phaseFractions(th);
-  if(summitFrac !== null && summitFrac !== undefined){
-    const up = a + c, down = s + d;
-    a *= summitFrac / up; c *= summitFrac / up;
-    s *= (1 - summitFrac) / down; d *= (1 - summitFrac) / down;
-  }
-  const at = fr => new Date(start.getTime() + dur * fr);
-  const t1 = at(a), t2 = at(a + c), t3 = at(a + c + s);
-  return [
-    { key:'approach', label:'Approach', start, end:t1, frac:a },
-    { key:'climb',    label:'Climb',    start:t1, end:t2, frac:c },
-    { key:'summit',   label:'Summit',   start:t2, end:t3, frac:s },
-    { key:'descent',  label:'Descent',  start:t3, end,    frac:d },
-  ];
-}
-function phaseOfTime(phases, timeStr){
-  const t = new Date(timeStr);
-  for(const p of phases){ if(t < p.end) return p; }
-  return phases[phases.length - 1];
-}
-// Hourly rows belonging to a phase; a phase shorter than an hour borrows the
-// nearest row so it still gets evaluated.
-function phaseRows(rows, phases, p){
-  const own = rows.filter(r => phaseOfTime(phases, r.time) === p);
-  if(own.length) return own;
-  const mid = (p.start.getTime() + p.end.getTime()) / 2;
-  let best = null, bestDiff = Infinity;
-  rows.forEach(r => {
-    const diff = Math.abs(new Date(r.time).getTime() - mid);
-    if(diff < bestDiff){ best = r; bestDiff = diff; }
-  });
-  return best ? [best] : [];
-}
-function thunderBand(cape, pop){
-  if(cape === null || cape === undefined || isNaN(cape)) return 'go';
-  const p = pop === null || pop === undefined ? 0 : pop;
-  if(cape >= 1000 && p >= 15) return 'caution';
-  if(cape >= 500) return 'watch';
-  if(cape >= 250 && p >= 30) return 'watch';
-  return 'go';
-}
-function summarizePhases(rows, phases, thr){
-  return phases.map(p => {
-    const prs = phaseRows(rows, phases, p);
-    const peakWind = mx(prs.map(r => r.wind_speed_10m));
-    const peakGust = mx(prs.map(r => r.wind_gusts_10m));
-    const maxPop = mx(prs.map(r => r.precipitation_probability));
-    const maxCape = mx(prs.map(r => r.cape));
-    const parts = [
-      { k:'W', b: metClass(peakWind, thr.wGo, thr.wWa) || 'go' },
-      { k:'G', b: metClass(peakGust, thr.gGo, thr.gWa) || 'go' },
-      { k:'P', b: metClass(maxPop, thr.pGo, thr.pWa) || 'go' },
-      { k:'T', b: thunderBand(maxCape, maxPop) },
-    ];
-    const band = worstBand(parts.map(x => x.b));
-    const drivers = band === 'go' ? '' : parts.filter(x => x.b === band).map(x => x.k).join('+');
-    const temp = mean(prs.map(r => r.summit_f !== null && r.summit_f !== undefined ? r.summit_f : r.temperature_2m));
-    return { ...p, rows: prs, peakWind, peakGust, maxPop, maxCape, band, drivers, temp };
-  });
-}
-
-// ---------------------------------------------------------------- assessments
-function thunderAssessment(rows, nws, phases){
-  const capeRes = mxAt(rows, 'cape');
-  const peakRow = capeRes.at ? rows.find(r => r.time === capeRes.at) : null;
-  const popRef = peakRow && peakRow.precipitation_probability !== null
-    ? peakRow.precipitation_probability
-    : mx(rows.map(r => r.precipitation_probability));
-  const capeBand = thunderBand(capeRes.value, popRef);
-  const periods = (nws.upper && nws.upper.periods) || [];
-  const thunderPeriods = periods.filter(p => /thunder/i.test(p.shortForecast || ''));
-  const nwsLikely = thunderPeriods.some(p => /likely/i.test(p.shortForecast || ''));
-  const nwsBand = thunderPeriods.length ? (nwsLikely ? 'caution' : 'watch') : 'go';
-  const band = worstBand([capeBand, nwsBand]);
-  const phase = capeRes.at && phases ? phaseOfTime(phases, capeRes.at).label : null;
-  return { band, cape: capeRes.value, at: capeRes.at, phase, nwsHours: thunderPeriods.length, nwsLikely };
-}
-// Cloud fraction at summit height: low cloud (<~6,500 ft) for low summits,
-// mid cloud for the volcanoes. Falls back to total cloud cover.
-function cloudAtSummit(r, summitFt){
-  const v = summitFt >= 6500 ? r.cloud_cover_mid : r.cloud_cover_low;
-  return v === null || v === undefined ? r.cloud_cover : v;
-}
-function visibilityAssessment(rows, phases, thr, summitFt){
-  const upper = rows.filter(r => phaseOfTime(phases, r.time).key !== 'approach');
-  const inCloud = countRows(upper, r => { const c = cloudAtSummit(r, summitFt); return c !== null && c !== undefined && c >= 70; });
-  const whiteout = countRows(upper, r => r.precipitation_probability !== null && r.precipitation_probability >= thr.pGo
-    && (((cloudAtSummit(r, summitFt) ?? 0) >= 70) || r.snow_signal));
-  const lowVis = countRows(upper, r => r.visibility !== null && r.visibility !== undefined && r.visibility <= 3300);
-  const visMin = upper.reduce((m, r) => (r.visibility !== null && r.visibility !== undefined && (m === null || r.visibility < m)) ? r.visibility : m, null);
-  const worst = Math.max(whiteout, lowVis);
-  let band = 'go', value = 'Clear up high';
-  if(worst >= 3){ band = 'caution'; value = `${worst} hr whiteout risk`; }
-  else if(worst >= 1){ band = 'watch'; value = `${worst} hr low visibility`; }
-  else if(inCloud >= 3){ band = 'watch'; value = `${inCloud} hr in cloud`; }
-  else if(inCloud >= 1){ value = `${inCloud} hr in cloud`; }
-  return { band, value, inCloud, whiteout, lowVis, visMin, upperHours: upper.length };
-}
-// Snow level ~ freezing level minus 1,000 ft, read at the hour of peak precip.
-function snowLevelAssessment(rows, th, summitFt, thr, s){
-  const fls = nonNull(rows.map(r => r.fl_ft));
-  if(!fls.length) return null;
-  const refRow = s.maxPrecipAt ? rows.find(r => r.time === s.maxPrecipAt) : null;
-  const fl = refRow && refRow.fl_ft !== null ? refRow.fl_ft : mean(fls);
-  const level = fl - 1000;
-  const precip = s.maxPrecip !== null && s.maxPrecip >= thr.pGo;
-  let relation, band = '';
-  const onRoute = level > th.elev && level < summitFt + 300;
-  if(level >= summitFt + 300){
-    relation = precip ? 'precip falls as rain even at the summit' : 'freezing level well above the summit; no snow expected';
-    band = precip ? 'watch' : '';
-  } else if(level <= th.elev){
-    relation = precip ? 'precip falls as snow all the way to the trailhead' : 'cold enough for snow down to the trailhead';
-    band = precip ? 'watch' : '';
-  } else {
-    relation = precip ? `rain below, snow above; transition on route` : `rain/snow line sits on the route`;
-    band = precip ? 'watch' : '';
-  }
-  return { level, relation, band, precip, onRoute, at: refRow ? refRow.time : null };
-}
-function daylightAssessment(phases, startStr, endStr, lat, lon){
-  const start = new Date(startStr), end = new Date(endStr);
-  const evStart = solarEvents(start, lat, lon);
-  const evEnd = solarEvents(end, lat, lon);
-  const darkStartMin = evStart.civilDawn && start < evStart.civilDawn ? Math.round((evStart.civilDawn - start) / 60000) : 0;
-  const afterDuskMin = evEnd.civilDusk ? Math.round((end - evEnd.civilDusk) / 60000) : null;
-  let band = 'go', text;
-  if(afterDuskMin === null){
-    text = 'civil light could not be computed for this date';
-    band = 'watch';
-  } else if(afterDuskMin > 0){
-    band = 'watch';
-    text = `plan ends ${fmtSpan(afterDuskMin)} after civil dusk; the descent finishes by headlamp`;
-  } else if(-afterDuskMin < 60){
-    band = 'watch';
-    text = `only ${fmtSpan(-afterDuskMin)} of light left after your planned end`;
-  } else {
-    text = `${fmtSpan(-afterDuskMin)} of light left after your planned end`;
-  }
-  if(darkStartMin > 0) text += ` · ${fmtSpan(darkStartMin)} by headlamp at the start`;
-  return {
-    band, text, afterDuskMin, darkStartMin,
-    duskLabel: evEnd.civilDusk ? `dusk ${fmtClock(evEnd.civilDusk)}` : '—',
-    civilDawn: evStart.civilDawn, civilDusk: evEnd.civilDusk, sunrise: evStart.sunrise, sunset: evEnd.sunset,
-  };
-}
-
-// Gates that can only lower the verdict. Each carries the reason text.
-function v2Gates(ctx){
-  const { rows, thr, mtn, nws, phases } = ctx;
-  const summitFt = mtn.summit[2];
-  const gates = [];
-
-  const t = thunderAssessment(rows, nws, phases);
-  if(t.band !== 'go'){
-    const capeTxt = t.cape !== null
-      ? `model CAPE peaks near ${Math.round(t.cape).toLocaleString()} J/kg at ${fmtHHMM(t.at)}${t.phase ? ` (${t.phase.toLowerCase()})` : ''}`
-      : 'no CAPE guidance';
-    const nwsTxt = t.nwsHours
-      ? `NWS mentions thunderstorms for ${t.nwsHours} h${t.nwsLikely ? ', likely' : ''}`
-      : 'NWS text does not mention thunderstorms';
-    gates.push({ band: t.band, cap: t.band, kind:'thunder',
-      text: `${t.band === 'caution' ? 'Thunderstorm risk' : 'Convective potential'}: ${capeTxt}; ${nwsTxt}. Lightning on exposed ridges is a hard turnaround; be off high points before the afternoon build.` });
-  }
-
-  const v = visibilityAssessment(rows, phases, thr, summitFt);
-  if(v.band !== 'go'){
-    const core = v.whiteout
-      ? `${v.whiteout} h of precip with the summit in cloud`
-      : `${Math.max(v.inCloud, v.lowVis)} h with the summit in cloud`;
-    const vis = v.visMin !== null ? ` · model visibility down to ${fmtMiles(v.visMin)}` : '';
-    gates.push({ band: v.band, cap: v.band, kind:'visibility',
-      text: `${v.band === 'caution' ? 'Whiteout ingredients' : 'Low visibility'}: ${core} above the approach${vis}. Carry a GPS track and wands; navigation errors in cloud are a leading cause of PNW accidents.` });
-  }
-
-  const ros = countRows(rows, r => r.precipitation_probability >= thr.pGo && r.fl_ft !== null && r.fl_ft > summitFt + 500);
-  if(ros >= 2){
-    gates.push({ band:'watch', cap:'watch', kind:'rainOnSnow',
-      text: `Rain on snow for ${ros} h: precip with the freezing level above the summit. Expect wet loose activity, saturated snow, and slow travel.` });
-  }
-  return gates;
-}
-
-// ---------------------------------------------------------------- reasons
-function v2Reasons(ctx){
-  const { rows, s, thr, mtn, th, nws, phases, phaseSummary, start, end, gates, avyDeal, custom } = ctx;
-  const summitFt = mtn.summit[2];
-  const [lat, lon] = mtn.summit;
-  const deals = [];
-  const phaseAt = t => t ? phaseOfTime(phases, t) : null;
-  const during = p => p ? ` during the ${p.label.toLowerCase()} (${fmtClock(p.start)}–${fmtClock(p.end)})` : '';
-
-  const gBand = metClass(s.peakGust, thr.gGo, thr.gWa);
-  if(gBand && gBand !== 'go'){
-    const over = countRows(rows, r => r.wind_gusts_10m !== null && r.wind_gusts_10m > thr.gGo);
-    deals.push({ band:gBand, text:`Gusts to ${Math.round(s.peakGust)} mph at ${fmtHHMM(s.peakGustAt)}${during(phaseAt(s.peakGustAt))} · ${over} h above your ${thr.gGo} mph go line.` });
-  }
-  const wBand = metClass(s.peakWind, thr.wGo, thr.wWa);
-  if(wBand && wBand !== 'go'){
-    const over = countRows(rows, r => r.wind_speed_10m !== null && r.wind_speed_10m > thr.wGo);
-    deals.push({ band:wBand, text:`Sustained wind to ${Math.round(s.peakWind)} mph at ${fmtHHMM(s.peakWindAt)}${during(phaseAt(s.peakWindAt))} · ${over} h above your ${thr.wGo} mph go line.` });
-  }
-  const pBand = metClass(s.maxPrecip, thr.pGo, thr.pWa);
-  if(pBand && pBand !== 'go'){
-    const amt = rows.reduce((a, r) => a + (r.precipitation || 0), 0);
-    deals.push({ band:pBand, text:`Precip probability up to ${Math.round(s.maxPrecip)}% at ${fmtHHMM(s.maxPrecipAt)}${during(phaseAt(s.maxPrecipAt))}${amt >= 0.01 ? ` · about ${amt.toFixed(2)} in over the window (model mean)` : ''}.` });
-  }
-
-  gates.forEach(g => deals.push({ band:g.band, text:g.text }));
-
-  const sl = snowLevelAssessment(rows, th, summitFt, thr, s);
-  if(sl && sl.precip && sl.onRoute){
-    deals.push({ band:'watch', text:`Rain/snow transition on route near ${fmtFt(sl.level)} ft (freezing level minus about 1,000 ft): wet below, accumulating above. Dress and pace for both.` });
-  }
-  if(s.flBelowSummit){
-    deals.push({ band:'watch', text:'Freezing level drops below the summit during the window: expect icing and a firmer, colder surface up high.' });
-  }
-
-  const dl = daylightAssessment(phases, start, end, lat, lon);
-  deals.push({ band: dl.band, text:`Daylight: ${dl.text}${dl.civilDusk ? ` (civil dusk ${fmtClock(dl.civilDusk)})` : ''}.` });
-
-  deals.push(windChillDeal(minWindChill(rows)));
-  const refreeze = refreezeSignal(rows, nws);
-  deals.push({ band: refreeze.band, text:`${refreeze.label}: ${refreeze.body}` });
-  const conf = confidenceLabel(s.avgSpread, start);
-  deals.push({ band: conf.band, text:`Forecast confidence: ${conf.label}. ${conf.body}` });
-  if(avyDeal) deals.push(avyDeal);
-  if(custom) deals.push({ band:'neutral', text:`Custom thresholds active: wind ${thr.wGo}/${thr.wWa} · gust ${thr.gGo}/${thr.gWa} · precip ${thr.pGo}/${thr.pWa}. Shared links use the defaults.` });
-
-  deals.sort((a, b) => bandRank(b.band) - bandRank(a.band));
-  const main = deals.filter(d => d.band !== 'neutral').slice(0, 10);
-  const neutral = deals.filter(d => d.band === 'neutral');
-  return [...main, ...neutral, compactAstronomyDeal(start, end, lat, lon)];
-}
-function whyLine(ctx, reasons){
-  if(ctx.s.verdict === 'go'){
-    return 'Wind, gusts, and precip stay inside your limits for the whole window. Check the timing strip for how much margin you have.';
-  }
-  const top = reasons.find(r => r.band === ctx.s.verdict) || reasons[0];
-  return top ? top.text : '';
-}
-
-// ---------------------------------------------------------------- since last check
-function lastCheckKey(m, r, start){ return `${m}|${r}|${start}`; }
-function readLastCheck(k){ const o = lsGet(V2_LAST_KEY, {}); return o && o[k] ? o[k] : null; }
-function writeLastCheck(k, data){
-  const o = lsGet(V2_LAST_KEY, {}) || {};
-  o[k] = data;
-  const keys = Object.keys(o);
-  if(keys.length > 40){
-    keys.sort((a, b) => (o[a].at || 0) - (o[b].at || 0)).slice(0, keys.length - 40).forEach(x => delete o[x]);
-  }
-  lsSet(V2_LAST_KEY, o);
-}
-function renderSinceLast(prev, s){
-  const el = document.getElementById('since-last');
-  if(!el) return;
-  if(!prev || (Date.now() - prev.at) < V2_MIN_RECHECK_MS){ el.hidden = true; return; }
-  const diffs = [];
-  const d = (label, a, b, unit, minDelta) => {
-    if(a === null || a === undefined || b === null || b === undefined) return;
-    if(Math.abs(a - b) < minDelta) return;
-    diffs.push(`${label} ${Math.round(a).toLocaleString()} → ${Math.round(b).toLocaleString()}${unit}`);
-  };
-  d('gust', prev.peakGust, s.peakGust, ' mph', 3);
-  d('wind', prev.peakWind, s.peakWind, ' mph', 3);
-  d('precip', prev.maxPrecip, s.maxPrecip, '%', 5);
-  d('freezing level', prev.maxFL, s.maxFL, ' ft', 500);
-  if(prev.verdict && prev.verdict !== s.verdict) diffs.push(`verdict ${cap(prev.verdict)} → ${cap(s.verdict)}`);
-  const when = new Date(prev.at).toLocaleString([], { weekday:'short', hour:'2-digit', minute:'2-digit' });
-  el.hidden = false;
-  el.innerHTML = diffs.length
-    ? `<strong>Since your last check (${escapeHtml(when)}):</strong> ${escapeHtml(diffs.join(' · '))}.`
-    : `<strong>Since your last check (${escapeHtml(when)}):</strong> no material change in wind, gust, precip, or freezing level.`;
-}
-
-// ---------------------------------------------------------------- share brief
-function buildBrief(ctx){
-  const { mtn, th, start, end, s, phases, reasons } = ctx;
-  const [lat, lon] = mtn.summit;
-  const ev = solarEvents(new Date(end), lat, lon);
-  const L = [];
-  L.push(`${mtn.name} — ${th.name}`);
-  L.push(`${start.replace('T', ' ')} to ${end.replace('T', ' ')} (Pacific)`);
-  L.push(`Verdict: ${cap(s.verdict)}${s.baseVerdict && s.baseVerdict !== s.verdict ? ` (wind/gust/precip alone: ${cap(s.baseVerdict)})` : ''}`);
-  (reasons || []).filter(r => r.band === 'caution' || r.band === 'watch').slice(0, 3).forEach(r => L.push(`- ${r.text}`));
-  L.push(`Summit ~${fmtClock(phases[1].end)} · turnaround ${fmtClock(phases[2].end)} · civil dusk ${fmtClock(ev.civilDusk)}`);
-  L.push(`Peak wind ${rnd(s.peakWind)} / gust ${rnd(s.peakGust)} mph · precip ${rnd(s.maxPrecip)}% · max freezing level ${s.maxFL !== null ? Math.round(s.maxFL).toLocaleString() : '—'} ft`);
-  L.push(location.href);
-  return L.join('\n');
-}
-async function shareBrief(){
-  if(!_v2ctx) return;
-  const text = buildBrief(_v2ctx);
-  try {
-    if(navigator.share && /Mobi|Android/i.test(navigator.userAgent)){
-      await navigator.share({ text });
-      return;
-    }
-    await navigator.clipboard.writeText(text);
-    toast('Brief copied to clipboard');
-  } catch(e) {
-    if(e && e.name === 'AbortError') return;
-    window.prompt('Copy this brief:', text);
-  }
-}
-
-// ---------------------------------------------------------------- rendering
-function climbUrl(ctx){
-  const qs = `m=${encodeURIComponent(ctx.mtnKey)}&r=${encodeURIComponent(ctx.th.slug)}&start=${encodeURIComponent(ctx.start)}&end=${encodeURIComponent(ctx.end)}`;
-  return `climb.html?${qs}`;
-}
-function renderPlanSummary(ctx){
-  const el = document.getElementById('plan-summary');
-  if(!el) return;
-  const { mtn, th, start, end } = ctx;
-  const sd = new Date(start), ed = new Date(end);
-  const day = sd.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' });
-  const endLbl = ed.toDateString() === sd.toDateString() ? fmtClock(ed) : `${ed.toLocaleDateString([], { weekday:'short' })} ${fmtClock(ed)}`;
-  el.innerHTML = `<strong>${escapeHtml(mtn.name)}</strong><span>${escapeHtml(th.name)}</span><span>${escapeHtml(day)} · ${fmtClock(sd)}–${endLbl}</span><button type="button" class="chip-btn" id="plan-edit">Edit plan</button>`;
-  el.hidden = false;
-  document.getElementById('plan-edit').addEventListener('click', showPlanForm);
-}
-function renderHero(ctx, reasons, why){
-  const { s, thr, mtn, th, custom, start, phases } = ctx;
-  const el = document.getElementById('verdict');
-  if(!el) return;
-  el.className = `hero v-${s.verdict}`;
-  const conf = confidenceLabel(s.avgSpread, start);
-  const chips = [];
-  chips.push(`<span class="meta-chip ${conf.band}">Confidence ${conf.label.toLowerCase()}</span>`);
-  if(s.baseVerdict && s.baseVerdict !== s.verdict) chips.push(`<span class="meta-chip ${s.verdict}">Wind/gust/precip alone: ${cap(s.baseVerdict)}</span>`);
-  if(custom) chips.push(`<span class="meta-chip accent">Custom thresholds</span>`);
-  const gain = mtn.summit[2] - th.elev;
-  const miles = (typeof th.miles === 'number' && th.miles > 0) ? ` · ${th.miles} mi ${th.oneWay ? 'one-way' : 'RT'}` : '';
-  chips.push(`<span class="meta-chip">${th.elev.toLocaleString()} → ${mtn.summit[2].toLocaleString()} ft · +${gain.toLocaleString()} ft${miles}</span>`);
-  const dealsHtml = reasons.map(d => `<div class="deal-item ${d.band}"><span class="deal-dot"></span><span>${d.text}</span></div>`).join('');
-  el.innerHTML =
-    `<div class="hero-top">` +
-      `<div class="v-kicker">Climbing window guidance · ${escapeHtml(mtn.name)} · ${escapeHtml(th.name)}</div>` +
-      `<div class="v-word">${cap(s.verdict)}</div>` +
-      `<div class="v-why">${escapeHtml(why)}<small>Summit ≈ ${fmtClock(phases[1].end)} · turnaround ${fmtClock(phases[2].end)} · the worst hour in the window sets the verdict; the timing strip shows when it lands.</small></div>` +
-    `</div>` +
-    `<div class="hero-meta">${chips.join('')}</div>` +
-    `<div class="deal-list">${dealsHtml}</div>` +
-    buildHourSpark(ctx.rows, thr) +
-    `<div class="hero-actions">` +
-      `<button type="button" class="chip-btn primary" id="share-brief">Share brief</button>` +
-      `<a class="chip-btn" href="${climbUrl(ctx)}">Summit-day view</a>` +
-      `<button type="button" class="chip-btn" id="hero-thr">Adjust thresholds</button>` +
-    `</div>`;
-  document.getElementById('share-brief').addEventListener('click', shareBrief);
-  document.getElementById('hero-thr').addEventListener('click', openThrDialog);
-}
-function factHtml(k, v, sub, band){
-  return `<div class="fact"><div class="k">${k}</div><div class="v ${band || ''}">${v}</div><div class="s">${sub}</div></div>`;
-}
-function renderPhaseCard(ctx){
-  const el = document.getElementById('phase-card');
-  if(!el) return;
-  const { phases, phaseSummary, start, end, mtn, s, thr, mtnKey, th, summitFrac } = ctx;
-  const [lat, lon] = mtn.summit;
-  const startD = new Date(start), endD = new Date(end);
-  const durMin = Math.round((endD - startD) / 60000);
-  const dl = daylightAssessment(phases, start, end, lat, lon);
-  const segs = phaseSummary.map(p => {
-    const tt = `${p.label} ${fmtClock(p.start)}–${fmtClock(p.end)} · W ${rnd(p.peakWind, 0)} · G ${rnd(p.peakGust, 0)} · P ${rnd(p.maxPop, 0)}%`;
-    return `<div class="phase-seg ${p.band}" style="flex:${Math.max(p.frac, 0.09)}" title="${escapeHtml(tt)}">` +
-      `<span class="ps-name">${p.label}</span><span class="ps-time">${fmtClock(p.start)}</span>` +
-      `<span class="ps-why">${p.band === 'go' ? 'clear' : `${p.drivers} · ${p.band}`}</span></div>`;
-  }).join('');
-  const summitP = phaseSummary[2];
-  const gustPhase = s.peakGustAt ? phaseOfTime(phases, s.peakGustAt) : null;
-  const facts = [
-    factHtml('Summit', fmtClock(phases[1].end), `turnaround ${fmtClock(phases[2].end)} · ${fmtSpan(Math.round((phases[1].end - startD) / 60000))} in`, ''),
-    factHtml('At the summit', `${summitP.peakWind !== null ? Math.round(summitP.peakWind) : '—'} / ${summitP.peakGust !== null ? Math.round(summitP.peakGust) : '—'} mph`, `wind / gust · precip ${rnd(summitP.maxPop, 0)}%${summitP.temp !== null ? ` · ${Math.round(summitP.temp)}°F` : ''}`, summitP.band),
-    factHtml('Peak gust', s.peakGustAt ? fmtHHMM(s.peakGustAt) : '—', gustPhase && s.peakGust !== null ? `${Math.round(s.peakGust)} mph in the ${gustPhase.label.toLowerCase()}` : 'no gust guidance', metClass(s.peakGust, thr.gGo, thr.gWa)),
-    factHtml('Light', dl.duskLabel, dl.text, dl.band),
-  ];
-  const summitMin = Math.round((phases[1].end - startD) / 60000);
-  const maxMin = Math.max(120, durMin - 60);
-  el.innerHTML =
-    `<div class="card-title">Timing · ${fmtClock(startD)}–${fmtClock(endD)} · ${fmtSpan(durMin)}</div>` +
-    `<div class="phase-bar">${segs}</div>` +
-    `<div class="phase-facts">${facts.join('')}</div>` +
-    `<details class="phase-adjust" id="phase-adjust"${summitFrac !== null ? ' open' : ''}>` +
-      `<summary>${summitFrac !== null ? 'Summit time adjusted · edit' : 'Adjust summit time'}</summary>` +
-      `<div class="phase-adjust-row">` +
-        `<input type="range" id="summit-range" min="60" max="${maxMin}" step="15" value="${Math.min(Math.max(summitMin, 60), maxMin)}" aria-label="Minutes from start to summit">` +
-        `<output id="summit-out">${fmtClock(phases[1].end)}</output>` +
-        `<button type="button" class="chip-btn" id="summit-reset"${summitFrac === null ? ' disabled' : ''}>Route default</button>` +
-      `</div>` +
-      `<div class="source-note">Phases come from the route's typical approach / climb / summit / descent split. Drag to match your pace; the choice is remembered for this route on this device.</div>` +
-    `</details>`;
-  const range = document.getElementById('summit-range');
-  const out = document.getElementById('summit-out');
-  range.addEventListener('input', () => { out.textContent = fmtClock(new Date(startD.getTime() + Number(range.value) * 60000)); });
-  range.addEventListener('change', () => {
-    saveSummitOverride(mtnKey, th.slug, Number(range.value) / durMin);
-    v2Recompute(ctx);
-  });
-  document.getElementById('summit-reset').addEventListener('click', () => {
-    saveSummitOverride(mtnKey, th.slug, null);
-    v2Recompute(ctx);
-  });
-}
-function tileHtml(lbl, val, sub, band){
-  return `<div class="tile ${band || ''}"><div class="lbl">${lbl}</div><div class="val">${val}</div><div class="sub">${sub}</div></div>`;
-}
-function renderTiles(ctx){
-  const el = document.getElementById('met-grid');
-  if(!el) return;
-  const { rows, s, thr, mtn, th, nws, phases, phaseSummary, start } = ctx;
-  const summitFt = mtn.summit[2];
-  const summitP = phaseSummary[2];
-  const t = thunderAssessment(rows, nws, phases);
-  const v = visibilityAssessment(rows, phases, thr, summitFt);
-  const sl = snowLevelAssessment(rows, th, summitFt, thr, s);
-  const wc = minWindChill(rows);
-  const conf = confidenceLabel(s.avgSpread, start);
-  const snowAcc = computeSnowAccumulation(_apiData, start);
-  const amt = rows.reduce((a, r) => a + (r.precipitation || 0), 0);
-  const fls = nonNull(rows.map(r => r.fl_ft));
-  const minFL = fls.length ? Math.min(...fls) : null;
-  const modelPeaks = MODELS.map(m => {
-    const peak = mx(rows.map(r => r.byModel[m] ? r.byModel[m].wind_speed_10m : null));
-    return peak !== null ? `${MODEL_NAMES[m]} ${Math.round(peak)}` : null;
-  }).filter(Boolean).join(' · ');
-  const wcBand = wc.value === null || wc.value === undefined || isNaN(wc.value) ? '' : wc.value <= 0 ? 'caution' : wc.value <= 25 ? 'watch' : 'go';
-  const tiles = [
-    tileHtml('Peak wind', s.peakWind !== null ? `${Math.round(s.peakWind)} mph` : '—',
-      `at summit ${summitP.peakWind !== null ? Math.round(summitP.peakWind) + ' mph' : '—'} · go ≤${thr.wGo} · caution >${thr.wWa}${atSuffix(s.peakWindAt)}`,
-      metClass(s.peakWind, thr.wGo, thr.wWa)),
-    tileHtml('Peak gust', s.peakGust !== null ? `${Math.round(s.peakGust)} mph` : '—',
-      `at summit ${summitP.peakGust !== null ? Math.round(summitP.peakGust) + ' mph' : '—'} · go ≤${thr.gGo} · caution >${thr.gWa}${atSuffix(s.peakGustAt)}`,
-      metClass(s.peakGust, thr.gGo, thr.gWa)),
-    tileHtml('Precip prob', s.maxPrecip !== null ? `${Math.round(s.maxPrecip)}%` : '—',
-      `at summit ${rnd(summitP.maxPop, 0)}% · ${amt >= 0.005 ? amt.toFixed(2) : '0.00'} in over window · go ≤${thr.pGo}%${atSuffix(s.maxPrecipAt)}`,
-      metClass(s.maxPrecip, thr.pGo, thr.pWa)),
-    tileHtml('Thunder · CAPE', t.cape !== null ? `${Math.round(t.cape).toLocaleString()} J/kg` : '—',
-      t.cape !== null
-        ? `${t.nwsHours ? `NWS: thunder ${t.nwsHours} h` : 'NWS text: none'}${t.at ? ` · peak ${fmtHHMM(t.at)}` : ''} · quiet <250 · active >1,000`
-        : 'model CAPE unavailable',
-      t.band),
-    tileHtml('Summit temp', tempRangeFmt(nws.upper.minTemp, nws.upper.maxTemp),
-      `wind chill low ${wc.value !== null && wc.value !== undefined && !isNaN(wc.value) ? Math.round(wc.value) + '°F' : '—'}${wc.at ? ` at ${fmtHHMM(wc.at)}` : ''} · NWS at ${summitFt.toLocaleString()} ft`,
-      wcBand),
-    tileHtml('Freezing level', s.maxFL !== null ? `${fmtFt(minFL)}–${fmtFt(s.maxFL)} ft` : '—',
-      `summit ${summitFt.toLocaleString()} ft${s.flBelowSummit ? ' · dips below the summit' : ''}${atSuffix(s.maxFLAt)}`,
-      s.flBelowSummit ? 'watch' : ''),
-    tileHtml('Snow level', sl ? `≈${fmtFt(sl.level)} ft` : '—',
-      sl ? `${sl.relation}${sl.at ? ` · at ${fmtHHMM(sl.at)}` : ''} · FL minus 1,000 ft` : 'freezing level unavailable',
-      sl ? sl.band : ''),
-    tileHtml('Visibility', v.value,
-      `${v.inCloud} of ${v.upperHours} h above the approach with the summit in cloud${v.visMin !== null ? ` · min vis ${fmtMiles(v.visMin)}` : ''}`,
-      v.band),
-    tileHtml('Snow', s.snowInches >= 0.05 ? `${s.snowInches.toFixed(1)} in` : s.snowHours ? `${s.snowHours} hr` : 'Low',
-      `NWS grid snow in window${snowAcc ? ` · new snow before start ${snowAcc.snow72 < 0.05 ? '0' : snowAcc.snow72.toFixed(1)} in (72 h model)` : ''}`,
-      s.snowInches >= 2 ? 'watch' : ''),
-    tileHtml('Confidence', conf.label,
-      `wind spread ${s.avgSpread !== null ? Math.round(s.avgSpread) + ' mph' : '—'}${modelPeaks ? ` · peaks ${modelPeaks}` : ''}`,
-      conf.band),
-  ];
-  el.innerHTML = tiles.join('');
-}
-
-SIGNAL_META['Thunderstorm'] = {
-  info: 'Convective available potential energy (CAPE) from the model mean plus NWS forecast text. Summer afternoon build-ups over the Cascades and the east slopes are common; lightning on exposed ridges and summits is a hard stop. Quiet under 250 J/kg, active above 1,000.',
-  link: 'https://www.weather.gov/safety/lightning'
-};
-SIGNAL_META['Visibility'] = {
-  info: 'Hours after the approach when model cloud at summit height is dense, plus precipitation overlap (whiteout ingredients) and model visibility where a model provides it. Navigation in cloud on snowfields and glaciers is a leading cause of PNW accidents.'
-};
-function renderSignalGrid(rows, thr, summitFt, nws, startStr, endStr, mtn, th, ctx){
-  const el = document.getElementById('signal-grid');
-  if(!el) return;
-  const phases = ctx && ctx.phases ? ctx.phases : computePhases(th, startStr, endStr, null);
-  const t = thunderAssessment(rows, nws, phases);
-  const v = visibilityAssessment(rows, phases, thr, summitFt);
-  const signals = [
-    buildSignal('Thunderstorm', t.band === 'caution' ? 'Likely' : t.band === 'watch' ? 'Possible' : 'Low', t.band,
-      t.cape !== null
-        ? `CAPE to ${Math.round(t.cape).toLocaleString()} J/kg${t.at ? ` at ${fmtHHMM(t.at)}` : ''}${t.nwsHours ? ` · NWS: ${t.nwsHours} h thunder` : ''}.`
-        : 'No CAPE guidance for this point.'),
-    buildSignal('Visibility', v.value, v.band,
-      v.whiteout ? `${v.whiteout} h combine precip with the summit in cloud.`
-        : v.inCloud ? `${v.inCloud} h with the summit in cloud, no precip overlap.`
-        : 'Summit stays clear of the cloud deck by model guidance.'),
-    wetSnowSignal(rows, startStr, endStr, mtn.summit[0], mtn.summit[1], summitFt),
-    rainOnSnowSignal(rows, thr, summitFt),
-    windExposureSignal(rows, th, thr),
-  ];
-  el.innerHTML = signals.map(sig => {
-    const meta = SIGNAL_META[sig.label] || {};
-    const infoAttr = meta.info ? ` data-info="${meta.info.replace(/"/g, '&quot;')}" title="${meta.info.replace(/"/g, '&quot;')}"` : '';
-    const link = (meta.links && meta.links[sig.value]) || meta.link;
-    const valHtml = link ? `<a href="${link}" target="_blank" rel="noreferrer">${sig.value}</a>` : sig.value;
-    return `<div class="signal-card ${sig.band}"${infoAttr}><div class="lbl">${sig.label}</div><div class="val">${valHtml}</div><div class="sub">${sig.body}</div></div>`;
-  }).join('');
-}
-function renderHourlyTable(ctx){
-  const { rows, thr, mtn, nws } = ctx;
-  const summitFt = mtn.summit[2];
-  const src = document.getElementById('table-source');
-  if(src){
-    src.innerHTML = _apiData
-      ? `<strong>Sources:</strong> summit/trailhead temperatures = NWS hourly point forecasts ` +
-        `(summit generated ${formatGenerated(nws.upper.generatedAt)}; trailhead generated ${formatGenerated(nws.trail.generatedAt)}) · ` +
-        `wind/gust/freezing level/precip/cloud/CAPE = Open-Meteo available-model mean · snow flag = NWS upper forecast text`
-      : `<strong>Sources:</strong> Open-Meteo is unreachable; all columns come from NWS hourly point forecasts ` +
-        `(summit generated ${formatGenerated(nws.upper.generatedAt)}; trailhead generated ${formatGenerated(nws.trail.generatedAt)}). ` +
-        `Freezing level, cloud cover, CAPE, and model spread are unavailable in this mode.`;
-  }
-  const tbody = document.getElementById('tbl-body');
-  if(!tbody) return;
-  tbody.innerHTML = '';
-  const nowHour = new Date(); nowHour.setMinutes(0, 0, 0);
-  const nowKey = dtlStr(nowHour);
-  rows.forEach(r => {
-    const tr = document.createElement('tr');
-    const classes = [];
-    if(r.inversion) classes.push('inv-row');
-    if(r.time === nowKey) classes.push('now-row');
-    if(classes.length) tr.className = classes.join(' ');
-    const wC = colorClass(r.wind_speed_10m, thr.wGo, thr.wWa);
-    const gC = colorClass(r.wind_gusts_10m, thr.gGo, thr.gWa);
-    const pC = colorClass(r.precipitation_probability, thr.pGo, thr.pWa);
-    const flVsSummit = r.fl_ft !== null && r.fl_ft < summitFt ? ' ↓' : '';
-    const flStr = r.fl_ft !== null ? Math.round(r.fl_ft).toLocaleString() + flVsSummit : '—';
-    const capeBand = thunderBand(r.cape, r.precipitation_probability);
-    const capeC = capeBand === 'caution' ? 'c-caution' : capeBand === 'watch' ? 'c-watch' : 'c-dim';
-    const flags = [];
-    if(r.inversion) flags.push('<span class="flag">warm aloft</span>');
-    if(r.snow_signal) flags.push('<span class="flag">snow</span>');
-    tr.innerHTML =
-      `<td>${r.time.slice(11, 16)}</td>` +
-      `<td class="r">${tempFmt(r.summit_f)}</td>` +
-      `<td class="r c-dim">${tempFmt(r.trail_f)}</td>` +
-      `<td class="r ${wC}">${rnd(r.wind_speed_10m, 0)}</td>` +
-      `<td class="r ${gC}">${rnd(r.wind_gusts_10m, 0)}</td>` +
-      `<td>${windDir(r.wind_direction_10m)}</td>` +
-      `<td class="r">${flStr}</td>` +
-      `<td class="r ${pC}">${r.precipitation_probability !== null ? rnd(r.precipitation_probability, 0) + '%' : '—'}</td>` +
-      `<td class="r c-dim">${r.cloud_cover !== null ? rnd(r.cloud_cover, 0) + '%' : '—'}</td>` +
-      `<td class="r ${capeC}">${r.cape !== null && r.cape !== undefined ? Math.round(r.cape).toLocaleString() : '—'}</td>` +
-      `<td>${flags.join(' ')}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-function renderBottomBar(ctx, why){
-  const bb = document.getElementById('bottombar');
-  if(!bb) return;
-  bb.hidden = false;
-  const v = document.getElementById('bb-verdict');
-  v.textContent = cap(ctx.s.verdict);
-  v.className = `bb-verdict ${ctx.s.verdict}`;
-  document.getElementById('bb-why').textContent = why;
-}
-// Everything derived from phases/gates: re-run after a summit-time change
-// without refetching.
-function v2RenderCore(ctx){
-  const { mtnKey, mtn, th, start, end, rows, s, nws, thr } = ctx;
-  const summitFt = mtn.summit[2];
-  const reasons = v2Reasons(ctx);
-  ctx.reasons = reasons;
-  const why = whyLine(ctx, reasons);
-  ctx.why = why;
-  renderHero(ctx, reasons, why);
-  renderPhaseCard(ctx);
-  renderTiles(ctx);
-  const inv = document.getElementById('inv-alert');
-  if(inv){
-    if(s.anyInv){
-      inv.hidden = false;
-      inv.innerHTML = `<strong>Inversion:</strong> the freezing level sits more than 3,000 ft above the summit for part of this window, warm air aloft over a cold pool. Compare against the NWS summit temperature and station observations before trusting either.`;
-    } else inv.hidden = true;
-  }
-  renderSignalGrid(rows, thr, summitFt, nws, start, end, mtn, th, ctx);
-  renderHourlyTable(ctx);
-  renderBottomBar(ctx, why);
-}
-function v2Recompute(ctx){
-  const summitFrac = loadSummitOverride(ctx.mtnKey, ctx.th.slug);
-  ctx.summitFrac = summitFrac;
-  ctx.phases = computePhases(ctx.th, ctx.start, ctx.end, summitFrac);
-  ctx.phaseSummary = summarizePhases(ctx.rows, ctx.phases, ctx.thr);
-  ctx.gates = v2Gates(ctx);
-  const caps = [ctx.avyCap, ...ctx.gates.map(g => g.cap)].filter(Boolean);
-  ctx.s.verdict = caps.length ? worstBand([ctx.s.baseVerdict, ...caps]) : ctx.s.baseVerdict;
-  v2RenderCore(ctx);
-}
-function v2RenderAll(ctx){
-  renderPlanSummary(ctx);
-  v2RenderCore(ctx);
-  renderExternalContext(ctx.mtnKey, ctx.mtn, ctx.th, ctx.avy, ctx.start);
-  renderSinceLast(ctx.prev, ctx.s);
-  document.body.classList.add('has-results');
-  const results = document.getElementById('results');
-  results.hidden = false;
-  const more = document.getElementById('more');
-  if(more) more.hidden = false;
-  document.getElementById('plan').classList.add('collapsed');
-  requestAnimationFrame(() => results.scrollIntoView({ behavior:'smooth', block:'start' }));
-}
-
-// Charts are inside a collapsed fold; draw them only when it is open.
-function renderCharts(startStr, endStr, summitFt, thr){
-  _lastChartArgs = [startStr, endStr, summitFt, thr];
-  _chartsDirty = true;
-  const fold = document.getElementById('fold-charts');
-  if(fold && fold.open){
-    renderChartsNow(startStr, endStr, summitFt, thr);
-    _chartsDirty = false;
-  }
-}
-
-// ---------------------------------------------------------------- sidebar order
-// Rail order: recent beta first, then alerts, avalanche, snowpack. The alerts
-// card is filled in asynchronously, so it is located by id rather than index.
-function renderExternalContextBase(mtnKey, mtn, th, avy, startStr){
-  const el = document.getElementById('external-context');
-  if(!el) return;
-  const extras = MTN_LINKS[mtnKey] || {};
-  el.innerHTML = [
-    betaContextCard(mtnKey),
-    externalCard('NWS active alerts', 'Checking...', 'watch', 'Fetching official active alerts for the summit point.', 'nws-alerts-card'),
-    avalancheContextCard(mtnKey, extras, avy, startStr),
-    snowpackContextCard(mtnKey, mtn, th, startStr),
-  ].join('');
-}
-function replaceAlertsCard(html){
-  const old = document.getElementById('nws-alerts-card');
-  if(!old) return;
-  old.insertAdjacentHTML('beforebegin', html);
-  old.remove();
-}
-function renderNwsAlertsCard(alerts){
-  const features = (alerts && alerts.features) || [];
-  let card;
-  if(!features.length){
-    card = externalCard('NWS active alerts', 'None active', 'go',
-      'No active NWS watches, warnings, or advisories matched the summit point at fetch time.', 'nws-alerts-card');
-  } else {
-    const sorted = features.slice().sort((a, b) => bandRank(alertBand(b)) - bandRank(alertBand(a)));
-    const top = sorted[0];
-    const props = top.properties || {};
-    const count = features.length > 1 ? ` +${features.length - 1} more` : '';
-    const headline = props.headline || props.description || 'Open alert details.';
-    card = externalCard('NWS active alerts',
-      `<a href="${alertUrl(top)}" target="_blank" rel="noopener noreferrer">${escapeHtml(props.event || 'Active alert')}</a>${count}`,
-      alertBand(top),
-      `${escapeHtml(props.severity || 'Unknown severity')}: ${escapeHtml(headline).slice(0, 220)}`, 'nws-alerts-card');
-  }
-  replaceAlertsCard(card);
-}
-function renderNwsAlertsError(){
-  replaceAlertsCard(externalCard('NWS active alerts',
-    `<a href="https://www.weather.gov/alerts" target="_blank" rel="noopener noreferrer">Check manually</a>`,
-    'watch', 'The official NWS alerts API could not be reached from this page.', 'nws-alerts-card'));
-}
-
-// ---------------------------------------------------------------- load
-async function loadForecast(){
-  const mtnKey  = document.getElementById('sel-mtn').value;
-  const thr     = effectiveThr(mtnKey);
-  const mtn     = { ...MTNS[mtnKey], thr };
-  const thIdx   = parseInt(document.getElementById('sel-th').value) || 0;
-  const th      = mtn.ths[thIdx];
-  const startEl = document.getElementById('inp-start');
-  const endEl   = document.getElementById('inp-end');
-  ensureEndAfterStart(startEl, endEl);
-  const start   = startEl.value;
-  const end     = endEl.value;
-
-  const errEl = document.getElementById('err-msg');
-  errEl.hidden = true;
-
-  if(!start || !end || start >= end){
-    errEl.textContent = 'Enter a valid start and end time (start must be before end).';
-    errEl.hidden = false;
-    showPlanForm();
-    return;
-  }
-
-  savePrefs();
-
-  const btn = document.getElementById('btn-go');
-  btn.textContent = 'Loading…';
-  btn.disabled = true;
-
-  try {
-    const [lat, lon] = mtn.summit;
-    const summitPoint = { name:`${mtn.name} summit`, lat, lon, elevFt:mtn.summit[2] };
-    const trailPoint = { name:th.name, lat:th.lat, lon:th.lon, elevFt:th.elev };
-    const [api, upperBundle, trailBundle, avy] = await Promise.all([
-      fetchWeather(lat, lon).catch(err => { console.warn('Open-Meteo fetch failed:', err); return null; }),
-      fetchNwsPointForecast(summitPoint).catch(err => { console.warn('NWS summit forecast failed:', err); return null; }),
-      fetchNwsPointForecast(trailPoint).catch(err => { console.warn('NWS trailhead forecast failed:', err); return null; }),
-      fetchAvyForecast(mtnKey).catch(err => { console.warn('Avalanche forecast fetch failed:', err); return undefined; }),
-    ]);
-
-    if(!api && !upperBundle){
-      errEl.textContent = 'Neither Open-Meteo nor the NWS forecast API could be reached. This is a weather-service outage, not a problem with your connection. Try again in a few minutes.';
-      errEl.hidden = false;
-      showPlanForm();
-      return;
-    }
-
-    _apiData = api;
-    const nws = {
-      upper: summarizeRoutePointForecast(upperBundle, start, end),
-      trail: summarizeRoutePointForecast(trailBundle, start, end),
-    };
-    const rows = api ? parseWindow(api, start, end, mtn.summit[2], nws) : nwsFallbackRows(nws);
-
-    if(!rows.length){
-      errEl.textContent = api
-        ? 'No data for that window. Open-Meteo covers the next 7 days; try dates closer to now.'
-        : 'Open-Meteo is unreachable and the NWS hourly forecast has no data for that window; try dates closer to now.';
-      errEl.hidden = false;
-      showPlanForm();
-      return;
-    }
-
-    const missingSources = [
-      !api && 'Open-Meteo model data',
-      !upperBundle && 'the NWS summit forecast',
-      !trailBundle && 'the NWS trailhead forecast',
-    ].filter(Boolean);
-    const fallbackNote = document.getElementById('fallback-note');
-    if(fallbackNote){
-      if(missingSources.length){
-        fallbackNote.hidden = false;
-        fallbackNote.innerHTML = `<strong>Degraded data:</strong> ${missingSources.join(' and ')} could not be reached; showing what is available.` +
-          (api ? '' : ' The verdict is based on NWS hourly point data only: no model mean, freezing level, cloud cover, CAPE, or model spread. Reload later for the full view.');
-      } else {
-        fallbackNote.hidden = true;
-      }
-    }
-
-    const s = computeSummary(rows, thr, mtn.summit[2], nws);
-    s.baseVerdict = s.verdict;
-    const avyGate = avyVerdictGate(avy, start);
-    const summitFrac = loadSummitOverride(mtnKey, th.slug);
-    const ctx = {
-      mtnKey, mtn, th, start, end, rows, s, nws, avy,
-      avyDeal: avyGate.deal, avyCap: avyGate.cap,
-      thr, custom: hasCustomThr(mtnKey), summitFrac,
-      prev: readLastCheck(lastCheckKey(mtnKey, th.slug, start)),
-    };
-    ctx.phases = computePhases(th, start, end, summitFrac);
-    ctx.phaseSummary = summarizePhases(rows, ctx.phases, thr);
-    ctx.gates = v2Gates(ctx);
-    const caps = [avyGate.cap, ...ctx.gates.map(g => g.cap)].filter(Boolean);
-    if(caps.length) s.verdict = worstBand([s.verdict, ...caps]);
-    _v2ctx = ctx;
-
-    v2RenderAll(ctx);
-    const lk = lastCheckKey(mtnKey, th.slug, start);
-    if(!ctx.prev || (Date.now() - ctx.prev.at) >= V2_MIN_RECHECK_MS){
-      writeLastCheck(lk, { at: Date.now(), peakWind: s.peakWind, peakGust: s.peakGust, maxPrecip: s.maxPrecip, maxFL: s.maxFL, verdict: s.verdict });
-    }
-    renderWindowFinder(api, mtn, start, end);
-    setupPreTrendSelector(mtn, th, start, end, api);
-    fetchAndRenderRouteProfile(mtn, th, start, end, thr, {
-      ...(trailBundle ? { trail: nws.trail } : {}),
-      ...(upperBundle ? { summit: nws.upper } : {}),
-    }).catch(error => {
-      console.warn('Route profile fetch failed:', error);
-      renderRouteProfileError('Route profile weather unavailable.');
-    });
-    renderCharts(start, end, mtn.summit[2], thr);
-    renderModelGuidance(new Date(start));
-    renderQuickLinks(mtnKey, mtn, th);
-    renderPrecipHistory(api, { label:'Summit', elev:mtn.summit[2] }, start);
-    renderStations(null, mtn.summit[2], 'loading');
-    fetchNearestStations(mtn.summit[0], mtn.summit[1], mtn.summit[2])
-      .then(stations => renderStations(stations, mtn.summit[2]));
-    renderLocalGuidance(mtnKey);
-
-    document.getElementById('afd-card').innerHTML = '<div class="afd-hdr">Loading discussion…</div>';
-    fetchNwsAfd(mtn.nws).then(afd => renderAfd(afd, mtn.nws));
-  } catch(e) {
-    errEl.textContent = 'Fetch failed: ' + e.message + '. A weather service may be down, or your connection dropped; try again shortly.';
-    errEl.hidden = false;
-    showPlanForm();
-    console.error(e);
-  } finally {
-    btn.textContent = 'Get forecast';
-    btn.disabled = false;
-  }
-}
-
-// ---------------------------------------------------------------- init
-function syncVersionLink(){
-  const a = document.getElementById('version-link');
-  if(a) a.href = `mw.html${location.search}`;
-}
-function v2Init(){
-  initThemeToggle();
-  initForm();
   syncVersionLink();
-  document.getElementById('btn-go').addEventListener('click', syncVersionLink);
-  document.getElementById('settings-btn').addEventListener('click', openThrDialog);
-  document.getElementById('thr-save').addEventListener('click', saveThrDialog);
-  document.getElementById('thr-reset').addEventListener('click', resetThrDialog);
-  document.getElementById('thr-cancel').addEventListener('click', () => document.getElementById('thr-dialog').close());
-  document.getElementById('bb-share').addEventListener('click', shareBrief);
-  document.getElementById('bb-verdict').addEventListener('click', () => {
-    document.getElementById('verdict').scrollIntoView({ behavior:'smooth', block:'start' });
-  });
-  const fold = document.getElementById('fold-charts');
-  if(fold){
-    fold.addEventListener('toggle', () => {
-      if(fold.open && _chartsDirty && _lastChartArgs){
-        renderChartsNow(..._lastChartArgs);
-        _chartsDirty = false;
-      }
-    });
-  }
 }
-v2Init();
+
+initThemeToggle();
+initForm();
+syncVersionLink();
 </script>
 </body>
 </html>
