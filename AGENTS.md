@@ -48,6 +48,9 @@ Field guides are standalone HTML pages that share the dashboard's design tokens,
 - Use local assets under `assets/<route-name>/`; avoid relying on hotlinked images for normal page rendering.
 - Include official source links for permits, land managers, weather, and route context where possible.
 - Make route-scope explicit when routes have similar names or nearby alternatives.
+- Tone: state what to do and why in plain declarative sentences. Do not frame advice as a contrast that belittles what the reader might otherwise do (for example "not around photographs in the core" or "not a set of microspikes"), and avoid colloquial put-downs such as "wrecked", "loitering", or "the grind". Keep the judgment content; drop the verdict on the reader.
+- When adapting an outside draft, review stance sentence by sentence rather than swapping loaded words. A draft's register leaks into newly written copy, so re-read new sentences against the same rule.
+- Before stating that a phrase was removed or changed, grep the file for it.
 - After adding a guide, add a card to the Field Guides section in `index.html` and update `README.md`.
 
 ## Validation
