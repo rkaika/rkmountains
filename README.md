@@ -4,7 +4,7 @@ Small static mountaineering planning site with a weather dashboard and route-spe
 
 ## Main Page
 
-Open `index.html` for the site home page. Open `mw.html` directly for the mountaineering weather dashboard. Open `climb.html` for the Summit-Day Check — a lightweight during-climb view (see below).
+Open `index.html` for the site home page. Open `mw.html` directly for the mountaineering weather dashboard. Open `mw-v2.html` for the V2 preview of the dashboard (A/B comparison, see below). Open `climb.html` for the Summit-Day Check — a lightweight during-climb view (see below).
 
 The weather dashboard helps evaluate a selected mountain, trailhead/route, and climb window. It combines official NWS point forecasts with raw model guidance so you can compare the human-edited baseline against multiple numerical models.
 
@@ -82,9 +82,25 @@ What it shows:
 
 The last successful fetch is cached in `localStorage` per mountain/route. When a refresh fails, the page renders the cached data with a prominent `OFFLINE — showing cached data fetched N min ago` stamp. Route data is a trimmed copy of the dashboard's `MTNS`; keep them in sync when adding objectives.
 
+## Mountain Weather V2 (`mw-v2.html`, A/B preview)
+
+A second dashboard kept alongside `mw.html` so the two can be compared on the same plan. Both pages accept the same URL parameters, and each has a header link that opens the other with the current selection ("Try V2" on V1, "V1 view" on V2). V2 uses the same data sources and the same fetch and parsing code; the differences are in what is surfaced, how it is ordered, and a few extra judgment signals.
+
+What V2 changes:
+
+- **Verdict first, mobile first.** The Go / Watch / Caution verdict, a one-line reason, and the sorted reason list sit at the top. On phones the plan form collapses to a summary with an Edit button, and a bottom bar keeps the verdict and a Share button in view. Charts, hourly table, observations, model guidance, and the AFD are collapsed by default.
+- **Timing strip.** The window is split into approach, climb, summit, and descent using each route's `phase` fractions. The card shows the implied summit and turnaround times, weather at the summit phase, which phase the peak gust lands in, and civil dusk against the planned end. A slider adjusts the summit time; the choice is remembered per route in the browser.
+- **New gates that can only lower the verdict.** Thunderstorm risk (model CAPE plus NWS forecast text), visibility (cloud at summit height after the approach, precipitation overlap, model visibility), and rain-on-snow. The wind, gust, and precipitation logic is unchanged from V1, so V2 is never less conservative than V1; when a gate lowers the verdict the hero says what V1's logic alone would have said.
+- **Extra fields.** Snow level (freezing level minus about 1,000 ft) compared with the trailhead and summit, a thunder tile and hourly CAPE column, a visibility tile, daylight margin, and the new-snow-before-start total next to the NWS snow signal.
+- **Since your last check.** When you reopen the same plan 20 minutes or more after a previous check, a notice lists what moved (gust, wind, precipitation probability, freezing level, verdict).
+- **Share brief.** Copies a short text summary (verdict, top reasons, summit and turnaround times, peak numbers, link) for partners; uses the system share sheet on phones.
+- **Adjustable thresholds.** A Thresholds dialog edits the wind, gust, and precipitation go/watch values per objective and saves them in the browser (`localStorage` key `mw-v2-thresholds`). Shared links still use the built-in defaults for other people.
+
+Implementation notes: the V2 script begins with a copy of the `mw.html` engine (objective data through the station cards) and ends with a V2 layer that overrides `loadForecast`, `renderCharts`, and `renderSignalGrid`. Objective-data edits in `mw.html` must be mirrored in `mw-v2.html` (the same rule as `climb.html`). V2 requests four extra Open-Meteo hourly fields: `cape`, `cloud_cover_low`, `cloud_cover_mid`, and `visibility` (plus `snow_depth`, kept for future use).
+
 ## Shareable / Embeddable URLs
 
-The dashboard accepts four query parameters. When all four are present and valid, the forecast loads automatically — no need to click **Get Forecast**. Clicking **Get Forecast** also writes the current selections back to the URL so the page can be shared or bookmarked.
+The dashboard accepts four query parameters; `mw-v2.html` accepts the same four. When all four are present and valid, the forecast loads automatically — no need to click **Get Forecast**. Clicking **Get Forecast** also writes the current selections back to the URL so the page can be shared or bookmarked.
 
 | Param  | Value                                  | Example              |
 |--------|----------------------------------------|----------------------|
@@ -128,6 +144,7 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 - `index.html`: site home page with links to the weather dashboard and field guides.
 - `mw.html`: current mountaineering weather dashboard.
 - `climb.html`: Summit-Day Check — lightweight during-climb conditions page with offline cache.
+- `mw-v2.html`: Mountain Weather V2, the A/B preview of the dashboard (see above).
 - `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
 - `mount-rainier-dc.html`: Mount Rainier DC / Ingraham Direct Field Guide. Uses inline SVG diagrams for route planning and a local Rainier image for the home page field-guide card.
 - `mount-whitney-main-trail.html`: Mount Whitney Main Trail Field Guide.
@@ -141,8 +158,8 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 
 ## Planned Improvements
 
-- Customizable Go / Watch / Caution criteria in a settings panel.
-- Per-user threshold persistence with `localStorage`.
+- Customizable Go / Watch / Caution criteria in a settings panel (available in the V2 preview, not yet in `mw.html`).
+- Per-user threshold persistence with `localStorage` (available in the V2 preview).
 - Cleaner handling for model availability by forecast horizon.
 
 ## Supported Objectives Reference
