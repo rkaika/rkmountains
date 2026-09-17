@@ -2,296 +2,196 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>RK Mountains</title>
+<meta name="description" content="Mountain planning tools and field guides: a climb-window weather dashboard, a summit-day conditions check, and route guides for Pacific Northwest and Sierra objectives.">
+<meta name="color-scheme" content="dark light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+(function(){
+  try {
+    const saved = localStorage.getItem('summit-weather-theme');
+    document.documentElement.dataset.theme = saved || 'light';
+  } catch(e) {
+    document.documentElement.dataset.theme = 'light';
+  }
+})();
+</script>
 <style>
   :root {
     color-scheme: light;
-    --bg: #f7f9f8;
-    --panel: #ffffff;
-    --ink: #101820;
-    --text: #25333d;
-    --muted: #66747f;
-    --line: #dbe4e8;
-    --glacier: #2f6f86;
-    --forest: #2f5f45;
-    --amber: #a86425;
-    --shadow: 0 18px 48px rgba(16, 24, 32, 0.10);
-    --radius: 10px;
+    --bg:        #f3f1ea;
+    --surf:      #e9e6dc;
+    --card:      #fffdf8;
+    --bdr:       #dcd6c8;
+    --bdr2:      #b9b1a0;
+    --txt:       #1a1f24;
+    --dim:       #5a626b;
+    --faint:     #858d96;
+    --go:        #25774f;
+    --watch:     #c4711a;
+    --accent:    #1f6f8f;
+    --accent-bg: #e2eff5;
+    --btn-txt:   #ffffff;
+    --shadow:    0 10px 30px rgba(26, 31, 36, 0.08);
+    --radius:    14px;
+    --content:   1180px;
+    --sans:      'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   }
-
-  * { box-sizing: border-box; }
-
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    --bg:        #0e1316;
+    --surf:      #151c21;
+    --card:      #1a2229;
+    --bdr:       #28323a;
+    --bdr2:      #3b4854;
+    --txt:       #edf0ec;
+    --dim:       #a4adb5;
+    --faint:     #7b858e;
+    --go:        #6dcb9b;
+    --watch:     #f2a94f;
+    --accent:    #72bde0;
+    --accent-bg: rgba(114, 189, 224, 0.12);
+    --btn-txt:   #0e1316;
+    --shadow:    0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0;
+    background: var(--bg);
+    background-image: radial-gradient(circle at 18% -6%, rgba(31, 111, 143, 0.14), transparent 38%);
+    color: var(--txt);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
     min-height: 100vh;
-    background:
-      linear-gradient(180deg, rgba(247, 249, 248, 0.74), rgba(247, 249, 248, 0.98)),
-      radial-gradient(circle at 20% 0%, rgba(47, 111, 134, 0.16), transparent 34%),
-      var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.6;
   }
+  html[data-theme="dark"] body { background-image: radial-gradient(circle at 18% -6%, rgba(114, 189, 224, 0.10), transparent 38%); }
+  a { color: var(--accent); }
+  .wrap { width: min(var(--content), calc(100% - 32px)); margin-left: auto; margin-right: auto; }
 
-  a { color: inherit; }
+  /* top bar, shared with the dashboards */
+  .topbar { position: sticky; top: 0; z-index: 50; background: var(--bg); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--bdr); }
+  .topbar-in { width: min(var(--content), calc(100% - 32px)); margin: 0 auto; min-height: 54px; display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; padding: 8px 0; }
+  .brand { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); text-decoration: none; white-space: nowrap; }
+  .topbar-title { font-weight: 700; letter-spacing: -0.02em; font-size: 17px; white-space: nowrap; }
+  .topbar-actions { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--bdr); background: var(--card); color: var(--txt); font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-decoration: none; cursor: pointer; white-space: nowrap; }
+  .chip-btn:hover { border-color: var(--bdr2); }
+  .chip-btn.primary { background: var(--accent); color: var(--btn-txt); border-color: var(--accent); font-weight: 600; }
 
-  .page {
-    width: min(1120px, calc(100% - 2rem));
-    margin: 0 auto;
-    padding: 3rem 0 4rem;
-  }
+  /* masthead */
+  .masthead { padding: 44px 0 30px; border-bottom: 1px solid var(--bdr); }
+  .eyebrow { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+  h1 { margin: 12px 0 14px; font-size: clamp(2.4rem, 7vw, 4.8rem); font-weight: 700; line-height: 0.98; letter-spacing: -0.045em; max-width: 18ch; }
+  .intro { max-width: 680px; font-size: clamp(1rem, 2vw, 1.15rem); color: var(--dim); line-height: 1.55; }
+  .masthead-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
 
-  header {
-    padding: 2rem 0 2.5rem;
-    border-bottom: 1px solid var(--line);
-  }
+  /* sections */
+  main { display: grid; gap: 34px; padding: 30px 0 40px; }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .sec-title { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 10px; flex: 1 1 240px; }
+  .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--bdr); }
+  h2 { font-size: clamp(1.4rem, 3vw, 1.9rem); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px; }
+  .sec-note { color: var(--dim); font-size: 0.95rem; }
 
-  .eyebrow {
-    color: var(--glacier);
-    font-size: 0.78rem;
-    font-weight: 850;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-  }
+  .card-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 700px) { .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-  h1 {
-    margin: 0.65rem 0 0.75rem;
-    color: var(--ink);
-    font-size: clamp(3rem, 9vw, 6.5rem);
-    line-height: 0.92;
-    letter-spacing: -0.07em;
-  }
+  .card { display: grid; gap: 10px; min-height: 210px; padding: 18px; background: var(--card); border: 1px solid var(--bdr); border-top: 4px solid var(--accent); border-radius: var(--radius); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03); text-decoration: none; color: var(--txt); transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease; }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--bdr2); border-top-color: var(--accent); }
+  .card.secondary { border-top-color: var(--bdr2); }
+  .card.secondary:hover { border-top-color: var(--bdr2); }
+  .tag { width: fit-content; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); padding: 3px 8px; border: 1px solid currentColor; border-radius: 999px; }
+  .card.secondary .tag { color: var(--dim); }
+  .card h3 { margin-top: auto; font-size: clamp(1.35rem, 3vw, 1.75rem); font-weight: 700; line-height: 1.08; letter-spacing: -0.03em; }
+  .card p { color: var(--dim); font-size: 0.95rem; line-height: 1.5; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+  .meta span { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; padding: 4px 9px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); }
 
-  .intro {
-    max-width: 720px;
-    margin: 0;
-    font-size: clamp(1.05rem, 2.2vw, 1.25rem);
-    color: var(--muted);
-  }
-
-  main {
-    display: grid;
-    gap: 2.25rem;
-    padding-top: 2.5rem;
-  }
-
-  .section-head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  h2 {
-    margin: 0;
-    color: var(--ink);
-    font-size: clamp(1.45rem, 3vw, 2rem);
-    letter-spacing: -0.035em;
-  }
-
-  .section-note {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.95rem;
-  }
-
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-  }
-
-  .card {
-    display: grid;
-    gap: 0.8rem;
-    min-height: 220px;
-    padding: 1.25rem;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: 0 1px 0 rgba(16, 24, 32, 0.03);
-    text-decoration: none;
-    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
-  }
-
-  .card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(47, 111, 134, 0.42);
-    box-shadow: var(--shadow);
-  }
-
-  .card.primary {
-    background: linear-gradient(145deg, #ffffff 0%, #eef7f8 100%);
-  }
-
+  /* field guide cards keep their route imagery */
   .card.field {
     --field-image: url("assets/baker-easton/hero.jpg");
     --field-position: center 40%;
+    border-top-color: transparent;
+    border-color: rgba(16, 24, 32, 0.25);
+    color: #fff;
     background-image:
-      linear-gradient(180deg, rgba(16, 24, 32, 0.08), rgba(16, 24, 32, 0.68)),
+      linear-gradient(180deg, rgba(14, 19, 22, 0.12), rgba(14, 19, 22, 0.74)),
       var(--field-image);
     background-position: center, var(--field-position);
     background-size: cover, cover;
     background-repeat: no-repeat;
-    color: #fff;
-    border-color: rgba(16, 24, 32, 0.2);
   }
+  .card.field:hover { border-top-color: transparent; }
+  .card.field-baker { --field-image: url("assets/baker-easton/hero.jpg"); --field-position: center 40%; }
+  .card.field-rainier { --field-image: url("assets/rainier-dc/hero.jpg"); --field-position: center 45%; }
+  .card.field-enchantments { --field-image: url("assets/enchantments-thru-hike/hero.svg"); --field-position: center 60%; }
+  .card.field-whitney { --field-image: url("assets/whitney-main-trail/hero.webp"); --field-position: center 42%; }
+  .field .tag { color: #efd9a0; }
+  .field h3 { color: #fff; }
+  .field p { color: #e2eef2; }
+  .field .meta span { background: rgba(255, 255, 255, 0.16); color: #fff; }
 
-  .card.field-baker {
-    --field-image: url("assets/baker-easton/hero.jpg");
-    --field-position: center 40%;
-  }
+  .placeholder { border: 1px dashed var(--bdr2); border-radius: var(--radius); padding: 16px; color: var(--dim); background: var(--card); font-size: 0.95rem; }
 
-  .card.field-rainier {
-    --field-image: url("assets/rainier-dc/hero.jpg");
-    --field-position: center 45%;
-  }
+  footer { border-top: 1px solid var(--bdr); padding: 18px 0 32px; font-family: var(--mono); font-size: 11px; line-height: 1.7; color: var(--faint); }
 
-  .card.field-whitney {
-    --field-image: url("assets/whitney-main-trail/hero.webp");
-    --field-position: center 42%;
-  }
-
-  .tag {
-    width: fit-content;
-    border: 1px solid currentColor;
-    border-radius: 999px;
-    padding: 0.25rem 0.55rem;
-    color: var(--glacier);
-    font-size: 0.74rem;
-    font-weight: 850;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .field .tag {
-    color: #cce8f0;
-  }
-
-  .card h3 {
-    margin: auto 0 0;
-    color: var(--ink);
-    font-size: clamp(1.55rem, 4vw, 2.4rem);
-    line-height: 1.02;
-    letter-spacing: -0.045em;
-  }
-
-  .field h3 {
-    color: #fff;
-  }
-
-  .card p {
-    margin: 0;
-    color: var(--muted);
-  }
-
-  .field p {
-    color: #e2eef2;
-  }
-
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    margin-top: 0.25rem;
-  }
-
-  .meta span {
-    border-radius: 999px;
-    background: rgba(47, 111, 134, 0.09);
-    color: var(--glacier);
-    padding: 0.25rem 0.5rem;
-    font-size: 0.82rem;
-    font-weight: 700;
-  }
-
-  .field .meta span {
-    background: rgba(255, 255, 255, 0.16);
-    color: #fff;
-  }
-
-  .placeholder {
-    border: 1px dashed var(--line);
-    border-radius: var(--radius);
-    padding: 1rem;
-    color: var(--muted);
-    background: rgba(255, 255, 255, 0.52);
-  }
-
-  footer {
-    margin-top: 3rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--line);
-    color: var(--muted);
-    font-size: 0.92rem;
-  }
-
-  @media (max-width: 760px) {
-    .page {
-      width: min(100% - 1.5rem, 1120px);
-      padding-top: 1.4rem;
-    }
-
-    header {
-      padding-top: 1.25rem;
-    }
-
-    .section-head {
-      display: block;
-    }
-
-    .section-note {
-      margin-top: 0.25rem;
-    }
-
-    .card-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .card {
-      min-height: 210px;
-    }
+  @media (max-width: 480px) {
+    .masthead { padding: 30px 0 22px; }
+    .card { min-height: 190px; padding: 16px; }
   }
 </style>
 </head>
 <body>
-  <div class="page">
-    <header>
-      <div class="eyebrow">RK Mountains</div>
-      <h1>Mountain planning tools and field guides.</h1>
-      <p class="intro">A home base for weather windows, climb planning notes, field guides, and other resources for west-coast mountain objectives.</p>
-    </header>
+  <header class="topbar">
+    <div class="topbar-in">
+      <a class="brand" href="index.html">RK Mountains</a>
+      <div class="topbar-title">Home</div>
+      <div class="topbar-actions">
+        <a class="chip-btn primary" href="mw.html">Weather dashboard</a>
+        <button class="chip-btn theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">
+          <span class="theme-icon" aria-hidden="true">☾</span>
+          <span class="theme-label">Dark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="masthead">
+      <div class="eyebrow">Mountain planning tools and field guides</div>
+      <h1>Weather windows, timing, and route notes for the climbs ahead.</h1>
+      <p class="intro">A home base for climb-window forecasts, a during-the-climb conditions check, and route-specific field guides for Pacific Northwest, Sierra, and Alaska objectives.</p>
+      <div class="masthead-actions">
+        <a class="chip-btn" href="mw.html">Open the dashboard</a>
+        <a class="chip-btn" href="climb.html">Summit-day check</a>
+        <a class="chip-btn" href="#guides">Field guides</a>
+      </div>
+    </section>
 
     <main>
       <section aria-labelledby="tools-heading">
-        <div class="section-head">
-          <h2 id="tools-heading">Tools</h2>
-          <p class="section-note">Interactive resources for planning and checking conditions.</p>
+        <div class="sec-head">
+          <div class="sec-title">Tools</div>
         </div>
-        <div class="card-grid">
-          <a class="card primary" href="mw.html">
+        <h2 id="tools-heading">Plan the window, then check it on the mountain</h2>
+        <p class="sec-note">Interactive resources for planning and checking conditions.</p>
+        <div class="card-grid" style="margin-top:14px">
+          <a class="card" href="mw.html">
             <span class="tag">Weather</span>
             <h3>Mountain Weather Dashboard</h3>
-            <p>Verdict and reasons first, then phase timing with summit and turnaround times, thunderstorm and visibility gates, adjustable thresholds, NWS and model guidance, route timeline, and a shareable brief. Mobile-first.</p>
+            <p>Verdict and reasons first, then phase timing with high-point and descent times, thunderstorm and visibility gates, adjustable thresholds, NWS and model guidance, route timeline, and a shareable brief. Mobile-first.</p>
             <div class="meta">
               <span>NWS</span>
               <span>Open-Meteo</span>
               <span>Phase timing</span>
             </div>
           </a>
-          <a class="card primary" href="mw-v1.html">
-            <span class="tag">Weather — previous layout</span>
-            <h3>Mountain Weather V1</h3>
-            <p>The previous dashboard layout, kept for side-by-side comparison. Same data, thresholds, and links; opens the current dashboard with your plan from its header.</p>
-            <div class="meta">
-              <span>Comparison</span>
-              <span>Same data</span>
-              <span>Desktop-first</span>
-            </div>
-          </a>
-          <a class="card primary" href="climb.html">
+          <a class="card" href="climb.html">
             <span class="tag">During the climb</span>
             <h3>Summit-Day Check</h3>
             <p>Lightweight conditions check built for weak cell signal: next hours at the summit, live observations, alerts, and daylight countdown. Caches the last fetch for offline reading.</p>
@@ -301,18 +201,29 @@
               <span>Mobile-first</span>
             </div>
           </a>
+          <a class="card secondary" href="mw-v1.html">
+            <span class="tag">Weather · previous layout</span>
+            <h3>Mountain Weather V1</h3>
+            <p>The previous dashboard layout, kept for side-by-side comparison. Same data, thresholds, and links; opens the current dashboard with your plan from its header.</p>
+            <div class="meta">
+              <span>Comparison</span>
+              <span>Same data</span>
+              <span>Desktop-first</span>
+            </div>
+          </a>
         </div>
       </section>
 
-      <section aria-labelledby="guides-heading">
-        <div class="section-head">
-          <h2 id="guides-heading">Field Guides</h2>
-          <p class="section-note">Route-specific notes and practical planning references.</p>
+      <section id="guides" aria-labelledby="guides-heading">
+        <div class="sec-head">
+          <div class="sec-title">Field guides</div>
         </div>
-        <div class="card-grid">
+        <h2 id="guides-heading">Route-specific notes and planning references</h2>
+        <p class="sec-note">Sequence, timing, permits, weather checks, hazards, and the descent for each route.</p>
+        <div class="card-grid" style="margin-top:14px">
           <a class="card field field-baker" href="mount-baker-easton.html">
             <span class="tag">Mount Baker</span>
-            <h3>Easton Route Field Guide</h3>
+            <h3>Mount Baker Easton Route Field Guide</h3>
             <p>Park Butte Trailhead, Sandy Camp, Easton Glacier, weather checks, logistics, trip plans, prep, and descent notes.</p>
             <div class="meta">
               <span>10,778 ft</span>
@@ -322,7 +233,7 @@
           </a>
           <a class="card field field-rainier" href="mount-rainier-dc.html">
             <span class="tag">Mount Rainier</span>
-            <h3>DC / Ingraham Direct Field Guide</h3>
+            <h3>Mount Rainier DC / Ingraham Direct Field Guide</h3>
             <p>Paradise, Camp Muir, Ingraham Flats, the Cleaver vs the Direct, summit-day timing, permits, weather checks, and descent margin.</p>
             <div class="meta">
               <span>14,411 ft</span>
@@ -330,9 +241,19 @@
               <span>Glacier route</span>
             </div>
           </a>
+          <a class="card field field-enchantments" href="enchantments-thru-hike.html">
+            <span class="tag">The Enchantments</span>
+            <h3>Enchantments Thru-Hike Field Guide</h3>
+            <p>Stuart Lake trailhead over Aasgard Pass, through the core, and down the Snow Lakes trail in a day: sequence, timing gates, weather checks, permits, shuttle, hazards, gear, and the descent.</p>
+            <div class="meta">
+              <span>7,841 ft pass</span>
+              <span>19 mi one-way</span>
+              <span>Day traverse</span>
+            </div>
+          </a>
           <a class="card field field-whitney" href="mount-whitney-main-trail.html">
             <span class="tag">Mount Whitney</span>
-            <h3>Main Trail Field Guide</h3>
+            <h3>Mount Whitney Main Trail Field Guide</h3>
             <p>Whitney Portal, permits, the Main Trail sequence, weather checks, altitude prep, trip plans, and descent margin.</p>
             <div class="meta">
               <span>14,505 ft</span>
@@ -344,11 +265,12 @@
       </section>
 
       <section aria-labelledby="resources-heading">
-        <div class="section-head">
-          <h2 id="resources-heading">More Resources</h2>
-          <p class="section-note">A place to add future references, checklists, and route notes.</p>
+        <div class="sec-head">
+          <div class="sec-title">More resources</div>
         </div>
-        <div class="placeholder">More links can go here as the guide library grows.</div>
+        <h2 id="resources-heading">Room to grow</h2>
+        <p class="sec-note">A place for future references, checklists, and route notes.</p>
+        <div class="placeholder" style="margin-top:14px">More links can go here as the guide library grows.</div>
       </section>
     </main>
 
@@ -356,5 +278,30 @@
       Verify current weather, road status, permits, avalanche conditions, route conditions, and your team's readiness before any climb.
     </footer>
   </div>
+
+<script>
+(function(){
+  const btn = document.getElementById('theme-toggle');
+  function apply(theme, persist){
+    document.documentElement.dataset.theme = theme;
+    const isLight = theme === 'light';
+    if(btn){
+      btn.setAttribute('aria-pressed', String(!isLight));
+      btn.setAttribute('aria-label', `Switch to ${isLight ? 'dark' : 'light'} mode`);
+      btn.querySelector('.theme-icon').textContent = isLight ? '☾' : '☼';
+      btn.querySelector('.theme-label').textContent = isLight ? 'Dark' : 'Light';
+    }
+    if(persist){
+      try { localStorage.setItem('summit-weather-theme', theme); } catch(e) {}
+    }
+  }
+  apply(document.documentElement.dataset.theme || 'light', false);
+  if(btn){
+    btn.addEventListener('click', () => {
+      apply(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light', true);
+    });
+  }
+})();
+</script>
 </body>
 </html>

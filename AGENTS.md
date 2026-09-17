@@ -4,13 +4,13 @@ This repository is a small static site for mountaineering planning. Treat it as 
 
 ## Repository Map
 
-- `index.html` is the home page. It links to the weather dashboard and field guides.
+- `index.html` is the home page. It links to the tools and field guides and uses the dashboard's fonts, palette tokens, and `summit-weather-theme` dark-mode key; keep new cards in the existing card markup.
 - `mw.html` is the current production weather dashboard (V2 layout). Its script starts with the shared engine (objective data through the station cards) followed by a V2 layer that overrides `loadForecast`, `renderCharts`, `renderSignalGrid`, `renderExternalContextBase`, and the alerts card renderers.
 - `climb.html` is the Summit-Day Check, a lightweight during-climb page. Its `PEAKS` data is a trimmed copy of `MTNS` in `mw.html`; keep keys, slugs, coordinates, and thresholds in sync when objectives change.
 - `mw-v1.html` is the previous dashboard layout, kept for A/B comparison against `mw.html`. It shares the same engine and objective data; keep its data in sync with `mw.html` when objectives change.
 - `mw3.html`, `mw2.html`, and `mw1.html` are older or experimental dashboard copies. Do not edit them unless the task explicitly asks for it.
-- `mount-baker-easton.html` and `mount-whitney-main-trail.html` are standalone field guides.
-- `assets/baker-easton/` and `assets/whitney-main-trail/` contain local guide images.
+- `mount-baker-easton.html`, `mount-rainier-dc.html`, `mount-whitney-main-trail.html`, and `enchantments-thru-hike.html` are standalone field guides.
+- `assets/baker-easton/`, `assets/rainier-dc/`, `assets/whitney-main-trail/`, and `assets/enchantments-thru-hike/` contain local guide images (the Rainier and Enchantments guides themselves use inline SVG; their asset folders hold only the home-page card image).
 - `mountain-weather-window.html` is an earlier prototype kept for reference.
 - `README.md` documents user-facing behavior, supported objectives/routes, and file inventory.
 
@@ -42,7 +42,7 @@ When adding or changing objectives/routes:
 
 ## Field Guide Changes
 
-Field guides are standalone HTML pages modeled after `mount-baker-easton.html`:
+Field guides are standalone HTML pages. The older guides (`mount-baker-easton.html`, `mount-rainier-dc.html`, `mount-whitney-main-trail.html`) share one light-only style; `enchantments-thru-hike.html` uses the dashboard's design tokens, fonts, top bar, and `summit-weather-theme` dark-mode key. Model new guides on the Enchantments page:
 
 - Keep the first screen as an actual route guide, not a marketing landing page.
 - Use local assets under `assets/<route-name>/`; avoid relying on hotlinked images for normal page rendering.

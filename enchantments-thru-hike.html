@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Enchantments Thru-Hike Field Guide</title>
+<meta name="description" content="Route guide for the Enchantments day traverse in Washington's Alpine Lakes Wilderness: Stuart Lake trailhead over Aasgard Pass, through the core, and down the Snow Lakes trail. Sequence, timing, weather checks, permits, hazards, gear, and the descent.">
+<meta name="color-scheme" content="dark light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+(function(){
+  try {
+    const saved = localStorage.getItem('summit-weather-theme');
+    document.documentElement.dataset.theme = saved || 'light';
+  } catch(e) {
+    document.documentElement.dataset.theme = 'light';
+  }
+})();
+</script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg:        #f3f1ea;
+    --surf:      #e9e6dc;
+    --card:      #fffdf8;
+    --bdr:       #dcd6c8;
+    --bdr2:      #b9b1a0;
+    --txt:       #1a1f24;
+    --dim:       #5a626b;
+    --faint:     #858d96;
+    --go:        #25774f;
+    --watch:     #c4711a;
+    --caution:   #b0362b;
+    --accent:    #1f6f8f;
+    --go-bg:     #e4f2ea;
+    --watch-bg:  #fbeedd;
+    --caution-bg:#f9e3df;
+    --accent-bg: #e2eff5;
+    --btn-txt:   #ffffff;
+    --shadow:    0 10px 30px rgba(26, 31, 36, 0.08);
+    --radius:    14px;
+    --content:   1180px;
+    --sans:      'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:      'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    --bg:        #0e1316;
+    --surf:      #151c21;
+    --card:      #1a2229;
+    --bdr:       #28323a;
+    --bdr2:      #3b4854;
+    --txt:       #edf0ec;
+    --dim:       #a4adb5;
+    --faint:     #7b858e;
+    --go:        #6dcb9b;
+    --watch:     #f2a94f;
+    --caution:   #f2775f;
+    --accent:    #72bde0;
+    --go-bg:     rgba(109, 203, 155, 0.12);
+    --watch-bg:  rgba(242, 169, 79, 0.13);
+    --caution-bg:rgba(242, 119, 95, 0.13);
+    --accent-bg: rgba(114, 189, 224, 0.12);
+    --btn-txt:   #0e1316;
+    --shadow:    0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg);
+    background-image: radial-gradient(circle at 18% -6%, rgba(31, 111, 143, 0.14), transparent 38%);
+    color: var(--txt);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  html[data-theme="dark"] body { background-image: radial-gradient(circle at 18% -6%, rgba(114, 189, 224, 0.10), transparent 38%); }
+  img { max-width: 100%; display: block; }
+  a { color: var(--accent); text-underline-offset: 0.18em; }
+  .mono { font-family: var(--mono); letter-spacing: 0.02em; }
+  .wrap { width: min(var(--content), calc(100% - 32px)); margin-left: auto; margin-right: auto; }
+
+  /* ── TOP BAR (shared with the dashboards) ── */
+  .topbar { position: sticky; top: 0; z-index: 50; background: var(--bg); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--bdr); }
+  .topbar-in { width: min(var(--content), calc(100% - 32px)); margin: 0 auto; min-height: 54px; display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; padding: 8px 0 6px; }
+  .brand { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); text-decoration: none; white-space: nowrap; }
+  .brand:hover { color: var(--txt); }
+  .topbar-title { font-weight: 700; letter-spacing: -0.02em; font-size: 17px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .ver-pill { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; padding: 2px 7px; border-radius: 999px; background: var(--accent); color: var(--btn-txt); text-transform: uppercase; }
+  .topbar-actions { margin-left: auto; display: flex; gap: 6px; }
+  .chip-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--bdr); background: var(--card); color: var(--txt); font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-decoration: none; cursor: pointer; white-space: nowrap; }
+  .chip-btn:hover { border-color: var(--bdr2); }
+  .jump-nav { width: 100%; display: flex; gap: 6px; overflow-x: auto; padding: 0 0 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .jump-nav::-webkit-scrollbar { display: none; }
+  .jump-nav a { white-space: nowrap; color: var(--txt); text-decoration: none; border: 1px solid var(--bdr); background: var(--card); border-radius: 999px; padding: 6px 11px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; }
+  .jump-nav a:hover { border-color: var(--bdr2); }
+
+  /* ── HERO: drawn, not photographed ── */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    background:
+      linear-gradient(180deg, rgba(14, 19, 22, 0.10) 0%, rgba(14, 19, 22, 0.55) 58%, rgba(14, 19, 22, 0.94) 100%),
+      linear-gradient(195deg, #1a2a33 0%, #2b4a58 32%, #4a7a8c 56%, #b8a06a 84%, #e6d7b0 100%);
+  }
+  .hero-art { position: absolute; inset: auto 0 0 0; width: 100%; height: 74%; pointer-events: none; }
+  .hero-content { position: relative; width: min(var(--content), calc(100% - 32px)); margin: 0 auto; padding: 84px 0 34px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: #efd9a0; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; }
+  .eyebrow::before { content: ""; width: 28px; height: 2px; background: currentColor; }
+  h1 { margin: 14px 0 14px; max-width: 900px; color: #fff; font-size: clamp(2.6rem, 8vw, 5.4rem); font-weight: 700; line-height: 0.94; letter-spacing: -0.05em; }
+  .hero-copy { max-width: 760px; color: #eef2f0; font-size: clamp(1.02rem, 2.2vw, 1.3rem); line-height: 1.5; }
+  .hero-note { margin-top: 16px; max-width: 760px; color: #d7dfde; font-family: var(--mono); font-size: 12px; line-height: 1.6; }
+  .quick-stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px 14px; border-top: 1px solid rgba(255, 255, 255, 0.22); margin-top: 26px; padding-top: 16px; }
+  .quick-stat { min-width: 0; }
+  .quick-stat b { display: block; color: #fff; font-family: var(--mono); font-weight: 600; font-size: clamp(1.1rem, 2.3vw, 1.55rem); line-height: 1.05; letter-spacing: -0.02em; white-space: nowrap; }
+  .quick-stat.gain b { color: #9fd8b3; }
+  .quick-stat.loss b { color: #f0b98a; }
+  .quick-stat span { display: block; margin-top: 5px; color: #cbd8d6; font-size: 0.8rem; line-height: 1.35; }
+
+  /* ── SECTIONS ── */
+  main { padding: 0 0 30px; }
+  section { width: min(var(--content), calc(100% - 32px)); margin: 0 auto; padding: 44px 0; border-bottom: 1px solid var(--bdr); }
+  section:last-child { border-bottom: 0; }
+  .section-kicker { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 10px; }
+  .section-kicker::after { content: ''; flex: 1; height: 1px; background: var(--bdr); }
+  h2 { margin: 10px 0 12px; color: var(--txt); font-size: clamp(1.7rem, 4vw, 2.6rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.035em; }
+  h3 { margin: 0; color: var(--txt); font-size: 1.08rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.015em; }
+  .lead { max-width: 780px; margin: 0; color: var(--txt); font-size: clamp(1rem, 2vw, 1.15rem); line-height: 1.55; }
+  .notice { margin-top: 18px; padding: 12px 14px; border-left: 4px solid var(--go); background: var(--go-bg); border-radius: 12px; color: var(--txt); font-weight: 600; font-size: 0.98rem; line-height: 1.5; }
+  .notice.warn { border-left-color: var(--caution); background: var(--caution-bg); }
+
+  .grid { display: grid; gap: 12px; }
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 16px; min-width: 0; }
+  .card p { margin: 8px 0 0; color: var(--dim); font-size: 0.95rem; line-height: 1.55; }
+  .card strong, .stat strong { color: var(--txt); }
+  .stat { background: var(--card); border: 1px solid var(--bdr); border-top: 4px solid var(--accent); border-radius: var(--radius); padding: 14px 16px; min-width: 0; }
+  .stat .label { font-family: var(--mono); color: var(--faint); text-transform: uppercase; font-size: 10px; letter-spacing: 0.12em; }
+  .stat .value { margin-top: 6px; color: var(--txt); font-family: var(--mono); font-size: 1.3rem; font-weight: 600; line-height: 1.1; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+  .stat p { margin: 8px 0 0; color: var(--dim); font-size: 0.92rem; line-height: 1.5; }
+
+  /* Diagrams sit on a fixed light panel so lines and labels read in both themes. */
+  .viz { margin: 22px 0 0; overflow: hidden; border-radius: var(--radius); border: 1px solid var(--bdr); background: #fffdf8; box-shadow: var(--shadow); }
+  .viz svg { width: 100%; height: auto; display: block; }
+  .viz .caption { padding: 10px 14px; color: var(--dim); background: var(--surf); border-top: 1px solid var(--bdr); font-family: var(--mono); font-size: 11.5px; line-height: 1.55; }
+
+  .timeline { margin-top: 22px; display: grid; gap: 10px; }
+  .step { display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: start; }
+  .step-num { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: var(--accent-bg); color: var(--accent); font-family: var(--mono); font-weight: 600; }
+  .step-body { padding-bottom: 12px; border-bottom: 1px solid var(--bdr); min-width: 0; }
+  .step-body p { margin: 6px 0 0; color: var(--dim); font-size: 0.97rem; }
+  .step-body .meta { display: block; margin-top: 2px; color: var(--faint); font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; }
+
+  .weather-list, .resource-list { margin-top: 18px; display: grid; gap: 10px; }
+  .weather-link, .resource-link { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; padding: 14px 16px; background: var(--card); border: 1px solid var(--bdr); border-radius: var(--radius); text-decoration: none; color: var(--txt); }
+  .weather-link:hover, .resource-link:hover { border-color: var(--bdr2); }
+  .weather-link .alt, .resource-link .alt { min-width: 84px; color: var(--accent); font-family: var(--mono); font-weight: 600; font-size: 0.95rem; }
+  .weather-link strong, .resource-link strong { color: var(--txt); }
+  .weather-link span, .resource-link span { display: block; color: var(--dim); font-size: 0.92rem; line-height: 1.5; }
+
+  .split { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.75fr); gap: 16px; align-items: start; margin-top: 18px; }
+  .callout { background: var(--surf); border: 1px solid var(--bdr); border-radius: var(--radius); padding: 16px; }
+  .callout h3 { margin-bottom: 6px; }
+  .callout p, .callout li { color: var(--dim); }
+  ul.clean, ol.clean { margin: 0; padding: 0; list-style: none; }
+  .clean li { padding: 10px 0; border-bottom: 1px solid var(--bdr); color: var(--txt); font-size: 0.97rem; line-height: 1.55; }
+  .clean li strong { color: var(--txt); }
+  .clean li:last-child { border-bottom: 0; }
+
+  .gate { background: var(--card); border: 1px solid var(--bdr); border-left: 4px solid var(--caution); border-radius: 12px; padding: 14px 16px; min-width: 0; }
+  .gate b { display: block; color: var(--caution); font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .gate p { margin: 0; color: var(--txt); font-size: 0.97rem; line-height: 1.55; }
+
+  .checklist { counter-reset: item; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 18px; padding: 0; list-style: none; }
+  .checklist li { counter-increment: item; position: relative; background: var(--card); border: 1px solid var(--bdr); border-radius: 12px; padding: 14px 16px 14px 52px; font-size: 0.97rem; line-height: 1.55; color: var(--txt); }
+  .checklist li strong { color: var(--txt); }
+  .checklist li::before { content: counter(item, decimal-leading-zero); position: absolute; left: 16px; top: 17px; color: var(--caution); font-family: var(--mono); font-weight: 600; font-size: 11px; }
+
+  .gear { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+  .gear h3 { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 8px; font-weight: 600; }
+  .gear ul { margin: 0; padding-left: 18px; color: var(--txt); }
+  .gear li { margin: 5px 0; font-size: 0.95rem; line-height: 1.5; }
+  .gear li small { color: var(--dim); }
+  .compact-note { color: var(--dim); font-size: 0.92rem; line-height: 1.5; }
+
+  .footer { background: var(--surf); border-top: 1px solid var(--bdr); color: var(--dim); padding: 40px 0 48px; }
+  .footer-inner { width: min(var(--content), calc(100% - 32px)); margin: 0 auto; display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; }
+  .footer h2 { color: var(--txt); font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
+  .footer p { color: var(--dim); }
+  .footer a { color: var(--accent); }
+  .source-list { display: grid; gap: 0; }
+  .source-list a { display: block; padding: 8px 0; font-family: var(--mono); font-size: 12.5px; text-decoration: none; border-bottom: 1px solid var(--bdr); }
+  .source-list a:hover { text-decoration: underline; }
+  .source-list .compact-note { margin-top: 12px; }
+
+  @media (max-width: 840px) {
+    .hero-content { padding: 44px 0 22px; }
+    h1 { font-size: clamp(2.5rem, 13vw, 4.4rem); }
+    .quick-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    section { padding: 34px 0; }
+    .grid-2, .grid-3, .grid-4, .split, .footer-inner, .gear { grid-template-columns: 1fr; }
+    .checklist { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .quick-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .weather-link, .resource-link { grid-template-columns: 1fr; gap: 4px; }
+    .step { grid-template-columns: 36px 1fr; gap: 12px; }
+    .step-num { width: 36px; height: 36px; font-size: 0.9rem; }
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-in">
+      <a class="brand" href="index.html">RK Mountains</a>
+      <div class="topbar-title">Enchantments Thru-Hike <span class="ver-pill">Field guide</span></div>
+      <div class="topbar-actions">
+        <a class="chip-btn" href="mw.html?m=enchantments&amp;r=stuarttosnow">Forecast</a>
+        <button class="chip-btn theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">
+          <span class="theme-icon" aria-hidden="true">☾</span>
+          <span class="theme-label">Dark</span>
+        </button>
+      </div>
+      <nav class="jump-nav" aria-label="Page sections">
+        <a href="#route">Route</a>
+        <a href="#direction">Direction</a>
+        <a href="#sequence">Sequence</a>
+        <a href="#timing">Timing</a>
+        <a href="#weather">Weather</a>
+        <a href="#logistics">Logistics</a>
+        <a href="#hazards">Hazards</a>
+        <a href="#gear">Gear</a>
+        <a href="#descent">Descent</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero" aria-label="Overview">
+    <svg class="hero-art" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <polygon points="0,420 0,290 120,240 210,262 300,150 340,110 372,150 430,190 520,120 560,60 590,95 640,130 700,80 730,105 800,180 900,230 1000,270 1200,300 1200,420" fill="rgba(255,255,255,0.10)"/>
+      <polygon points="0,420 0,330 200,300 380,240 520,170 600,150 700,190 820,250 980,300 1200,340 1200,420" fill="rgba(255,255,255,0.08)"/>
+      <polygon points="520,120 560,60 590,95 574,130 540,140" fill="rgba(255,255,255,0.22)"/>
+      <polygon points="300,150 340,110 372,150 350,175 320,170" fill="rgba(255,255,255,0.16)"/>
+      <ellipse cx="640" cy="372" rx="260" ry="22" fill="rgba(125,196,220,0.22)"/>
+      <polygon points="0,420 0,392 1200,355 1200,420" fill="rgba(13,24,32,0.55)"/>
+    </svg>
+    <div class="hero-content">
+      <div class="eyebrow">Alpine Lakes Wilderness, Washington</div>
+      <h1>Enchantments Thru-Hike</h1>
+      <p class="hero-copy">
+        The day traverse from Stuart Lake trailhead over Aasgard Pass, across the granite basin of the core, and down the Snow Lakes trail to Icicle Creek Road. About 18 to 19 miles one way, almost all of it on rock.
+      </p>
+      <p class="hero-note">
+        A long, rough day with one committing decision at Colchuck Lake. Numbers here are planning context. Re-verify permits, road status, trip reports, and weather before you go.
+      </p>
+      <div class="quick-stats" aria-label="Route summary">
+        <div class="quick-stat"><b>3,400 ft</b><span>Stuart Lake trailhead</span></div>
+        <div class="quick-stat"><b>7,841 ft</b><span>Aasgard Pass, the high point</span></div>
+        <div class="quick-stat"><b>1,300 ft</b><span>Snow Lakes trailhead</span></div>
+        <div class="quick-stat gain"><b>+4,800 ft</b><span>Elevation gain</span></div>
+        <div class="quick-stat loss"><b>−6,900 ft</b><span>Elevation loss</span></div>
+        <div class="quick-stat"><b>12 to 16 h</b><span>Typical day for a fit party</span></div>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section id="route">
+      <div class="section-kicker">01 / Route</div>
+      <h2>Elevation profile and major waypoints</h2>
+      <p class="lead">
+        The traverse has three very different parts: a forest trail to Colchuck Lake, a steep cairned climb of Aasgard Pass, and a long descent past a dozen lakes to a hot, dry trailhead. Budget effort for each separately. Most parties are surprised by how much the descent costs.
+      </p>
+      <div class="notice">Primary objective: reach Snow Lakes trailhead with the whole party in daylight. Build the day around the Colchuck Lake decision and the pace gates, not around photographs in the core.</div>
+
+      <div class="grid grid-4" style="margin-top:18px">
+        <div class="stat">
+          <div class="label">Waypoint 1</div>
+          <div class="value">Stuart Lake TH</div>
+          <p>3,400 ft. End of Eightmile Road. Self-issue day permit box, toilet, small lot that fills before dawn on summer weekends.</p>
+        </div>
+        <div class="stat">
+          <div class="label">Waypoint 2</div>
+          <div class="value">Colchuck Lake</div>
+          <p>5,570 ft, about 4 miles in. Last comfortable place to turn around. Aasgard rises 2,200 ft directly above the far shore.</p>
+        </div>
+        <div class="stat">
+          <div class="label">Waypoint 3</div>
+          <div class="value">Aasgard Pass</div>
+          <p>7,841 ft, about 5.3 miles in. The route's high point and the gateway to the upper core. From here the only easy exit is forward.</p>
+        </div>
+        <div class="stat">
+          <div class="label">Waypoint 4</div>
+          <div class="value">Snow Lakes TH</div>
+          <p>1,300 ft, 18 to 19 miles. On Icicle Creek Road, 4.5 miles from Leavenworth. Toilet, large lot, no water.</p>
+        </div>
+      </div>
+
+      <figure class="viz">
+        <svg viewBox="0 0 1000 430" role="img" aria-label="Elevation profile of the Enchantments traverse from Stuart Lake trailhead at 3,400 feet over Aasgard Pass at 7,841 feet to Snow Lakes trailhead at 1,300 feet">
+          <g stroke="#d9e1e6" stroke-width="1">
+            <line x1="60" y1="380" x2="960" y2="380"/>
+            <line x1="60" y1="331.4" x2="960" y2="331.4"/>
+            <line x1="60" y1="234.3" x2="960" y2="234.3"/>
+            <line x1="60" y1="137.1" x2="960" y2="137.1"/>
+            <line x1="60" y1="40" x2="960" y2="40"/>
+          </g>
+          <g fill="#8b979f" font-size="12" font-family="IBM Plex Mono, ui-monospace, Menlo, monospace">
+            <text x="8" y="384">1,000</text>
+            <text x="8" y="335">2,000</text>
+            <text x="8" y="238">4,000</text>
+            <text x="8" y="141">6,000</text>
+            <text x="8" y="44">8,000</text>
+          </g>
+          <rect x="60" y="20" width="218" height="360" fill="#e8f3f6" opacity="0.45"/>
+          <rect x="278" y="20" width="220" height="360" fill="#c8901f" opacity="0.10"/>
+          <rect x="498" y="20" width="462" height="360" fill="#2f6f86" opacity="0.07"/>
+          <g fill="#64727d" font-size="12" font-weight="700" font-family="IBM Plex Mono, ui-monospace, Menlo, monospace">
+            <text x="86" y="372">FOREST TRAIL</text>
+            <text x="300" y="372">PASS AND CORE (CAIRNS)</text>
+            <text x="620" y="372">SNOW LAKES TRAIL</text>
+          </g>
+          <path d="M60,263.4 L181.6,212.4 L254.6,158 L278.9,156.6 L317.8,47.7 L342.2,54.6 L415.1,83.7 L458.9,93.4 L497.9,99 L561.1,165.6 L595.2,168.7 L668.1,190.6 L960,365.4 L960,380 L60,380 Z" fill="#2f6f86" opacity="0.16"/>
+          <path d="M60,263.4 L181.6,212.4 L254.6,158 L278.9,156.6 L317.8,47.7 L342.2,54.6 L415.1,83.7 L458.9,93.4 L497.9,99 L561.1,165.6 L595.2,168.7 L668.1,190.6 L960,365.4" fill="none" stroke="#2f6f86" stroke-width="3.5" stroke-linejoin="round"/>
+          <g>
+            <line x1="278.9" y1="156.6" x2="317.8" y2="47.7" stroke="#9a4631" stroke-width="6" opacity="0.5"/>
+            <text x="330" y="120" fill="#9a4631" font-size="12" font-weight="800">Aasgard: 2,200 ft in under a mile</text>
+          </g>
+          <g fill="#101820" font-size="13" font-weight="700">
+            <circle cx="60" cy="263.4" r="5" fill="#2f6f86"/><text x="64" y="292">Stuart Lake TH 3,400</text>
+            <circle cx="254.6" cy="158" r="5" fill="#2f6f86"/><text x="120" y="152">Colchuck Lake 5,570</text>
+            <circle cx="317.8" cy="47.7" r="6" fill="#9a4631"/><text x="240" y="34">Aasgard Pass 7,841</text>
+            <circle cx="415.1" cy="83.7" r="4" fill="#2f6f86"/><text x="380" y="70">Perfection Lake</text>
+            <circle cx="497.9" cy="99" r="5" fill="#2f6f86"/><text x="508" y="96">Lake Viviane 6,785</text>
+            <circle cx="561.1" cy="165.6" r="4" fill="#2f6f86"/><text x="572" y="158">Upper Snow Lake 5,415</text>
+            <circle cx="668.1" cy="190.6" r="4" fill="#2f6f86"/><text x="680" y="186">Nada Lake 4,900</text>
+            <circle cx="960" cy="365.4" r="5" fill="#2f6f86"/><text x="800" y="352">Snow Lakes TH 1,300</text>
+          </g>
+          <g fill="#8b979f" font-size="12" font-family="IBM Plex Mono, ui-monospace, Menlo, monospace">
+            <text x="60" y="425">0 mi</text>
+            <text x="298" y="425">5</text>
+            <text x="541" y="425">10</text>
+            <text x="784" y="425">15</text>
+            <text x="930" y="425">18.5 mi</text>
+          </g>
+        </svg>
+        <figcaption class="caption">One-way profile, west to east. Mileages and point elevations are planning approximations from the route's common waypoints; GPS tracks for the traverse typically read 19 to 21 miles. Not a navigation product.</figcaption>
+      </figure>
+
+      <div class="resource-list" aria-label="Route planning links">
+        <a class="resource-link" href="https://www.fs.usda.gov/r06/okanogan-wenatchee/recreation/enchantments" target="_blank" rel="noopener">
+          <div class="alt">USFS</div>
+          <div><strong>Enchantment Permit Area</strong><span>Land manager page: permit rules, group size, goat and food-storage guidance, current alerts.</span></div>
+        </a>
+        <a class="resource-link" href="https://www.wta.org/go-hiking/hikes/enchantment-lakes" target="_blank" rel="noopener">
+          <div class="alt">WTA</div>
+          <div><strong>The Enchantments hike page and trip reports</strong><span>The best single source for what the pass and core look like this week. Read the newest reports before you drive.</span></div>
+        </a>
+        <a class="resource-link" href="https://www.alltrails.com/trail/us/washington/the-enchantments-trail" target="_blank" rel="noopener">
+          <div class="alt">AllTrails</div>
+          <div><strong>The Enchantments Traverse</strong><span>GPS track for offline use, plus dated reviews with photos from recent thru-hikers.</span></div>
+        </a>
+      </div>
+    </section>
+
+    <section id="direction">
+      <div class="section-kicker">02 / Direction</div>
+      <h2>West to east, or the alternatives</h2>
+      <p class="lead">
+        Almost everyone goes west to east: start high at Stuart Lake trailhead, climb Aasgard, and descend the gradual Snow Lakes trail. The reverse saves nothing and puts the loose, steep part of the day on tired legs, facing downhill.
+      </p>
+      <div class="grid grid-3" style="margin-top:18px">
+        <div class="card">
+          <h3>West to east (this guide)</h3>
+          <p>Stuart Lake TH to Snow Lakes TH. About 2,000 ft less climbing than the reverse, Aasgard is climbed rather than descended, and the core is crossed in morning light. The cost is a 7,000 ft descent at the end of the day.</p>
+        </div>
+        <div class="card">
+          <h3>East to west</h3>
+          <p>Snow Lakes TH to Stuart Lake TH. A long, gradual 6,500 ft climb to the core, then a descent of Aasgard on loose rock. Some parties choose it for shuttle reasons. Descending Aasgard tired is where many injuries happen; treat it as the harder option.</p>
+        </div>
+        <div class="card">
+          <h3>Not a thru-hike day</h3>
+          <p>Colchuck Lake out and back (about 8 miles) is the right call when the pass has snow, weather is marginal, or the party is slow at the lake. Snow Lakes to Lake Viviane out and back is a long but non-committing way to see the lower core. An overnight in the core requires a lottery permit.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="sequence">
+      <div class="section-kicker">03 / Route Sequence</div>
+      <h2>Stuart Lake trailhead to Snow Lakes trailhead</h2>
+      <p class="lead">
+        Below Colchuck Lake the route is a maintained trail. From the lake to Lake Viviane it is cairned travel over boulders and granite slab, with some hands-on sections. Below Viviane it is trail again, mostly rock and roots, then sand and switchbacks.
+      </p>
+
+      <div class="timeline">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Stuart Lake trailhead, 3,400 ft</h3>
+            <span class="meta">Mile 0</span>
+            <p>Fill out the day permit at the box, display your parking pass, and start with headlamps for an alpine start. Good trail up Mountaineer Creek.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Stuart Lake and Colchuck junction, 4,450 ft</h3>
+            <span class="meta">Mile 2.5</span>
+            <p>Signed junction. Left for Colchuck Lake. The trail steepens through boulders and switchbacks; the lake appears suddenly.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Colchuck Lake, 5,570 ft</h3>
+            <span class="meta">Mile 4.0</span>
+            <p>The decision point. Eat, fill water, look at the pass, and check the party. The trail follows the west and south shore through a boulder field marked by cairns rather than tread; hitting it at first light saves time and confusion.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h3>Aasgard Pass, 7,841 ft</h3>
+            <span class="meta">Mile 5.3, about 2,200 ft in 0.8 miles</span>
+            <p>Climb to the left of the creek and waterfall, following cairns up ledges and scree. Loose rock throughout; do not stack the party directly above one another. The last easy water is near the base. Budget 2 to 2.5 hours for a moderate party.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <h3>Upper core: Isolation, Tranquil, Inspiration, Perfection</h3>
+            <span class="meta">Miles 5.3 to 7.5, roughly 7,800 to 7,100 ft</span>
+            <p>Granite slab and tarns with the trail marked by cairns. Route-finding is vague where tread disappears onto rock, especially between Inspiration and Perfection. Filter water at Isolation or Perfection.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <h3>Lower core: Sprite, Leprechaun, Lake Viviane, 6,785 ft</h3>
+            <span class="meta">Mile 9</span>
+            <p>Gentler walking past larches and Prusik Peak to Viviane, the last lake in the basin. This is the natural lunch stop and the point at which the day is roughly half done in time, not in effort.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">7</div>
+          <div class="step-body">
+            <h3>Viviane to Upper Snow Lake, 5,415 ft</h3>
+            <span class="meta">Mile 10.3, about 1,400 ft down</span>
+            <p>Steep polished slabs beside Snow Creek, with a short rebar-assisted step. Stow poles and use hands. Slower is correct here.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">8</div>
+          <div class="step-body">
+            <h3>Snow Lakes dam and Nada Lake, 4,900 ft</h3>
+            <span class="meta">Miles 11 to 12.5</span>
+            <p>Cross the dam between the two Snow Lakes; water can flow over it early in the season. Fill every bottle here or at Nada Lake. The trail below is largely dry for the remaining 5 to 6 miles.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">9</div>
+          <div class="step-body">
+            <h3>Snow Lakes trailhead, 1,300 ft</h3>
+            <span class="meta">Mile 18 to 19</span>
+            <p>Long sun-exposed switchbacks down to Icicle Creek Road. Near the very bottom, stay on the trail with a left turn toward the parking lot rather than following the obvious road into a residential area.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="timing">
+      <div class="section-kicker">04 / Timing</div>
+      <h2>A one-day schedule and its decision gates</h2>
+      <p class="lead">
+        Fit parties finish in 12 to 14 hours; 15 to 18 is common. Averages of 1.2 to 1.4 mph including breaks are normal because the terrain is rough. Time Aasgard for daylight, and set the gates below aloud at the trailhead so nobody has to argue about them at 7,800 feet.
+      </p>
+
+      <figure class="viz">
+        <svg viewBox="0 0 1000 250" role="img" aria-label="Sample sixteen-hour schedule from 03:00 to 19:00 with four phases and two decision gates">
+          <g stroke="#d9e1e6" stroke-width="1">
+            <line x1="60" y1="30" x2="60" y2="160"/><line x1="170" y1="30" x2="170" y2="160"/>
+            <line x1="280" y1="30" x2="280" y2="160"/><line x1="390" y1="30" x2="390" y2="160"/>
+            <line x1="500" y1="30" x2="500" y2="160"/><line x1="610" y1="30" x2="610" y2="160"/>
+            <line x1="720" y1="30" x2="720" y2="160"/><line x1="830" y1="30" x2="830" y2="160"/>
+            <line x1="940" y1="30" x2="940" y2="160"/>
+          </g>
+          <g fill="#8b979f" font-size="12" font-family="IBM Plex Mono, ui-monospace, Menlo, monospace">
+            <text x="42" y="180">03:00</text><text x="152" y="180">05:00</text><text x="262" y="180">07:00</text>
+            <text x="372" y="180">09:00</text><text x="482" y="180">11:00</text><text x="592" y="180">13:00</text>
+            <text x="702" y="180">15:00</text><text x="812" y="180">17:00</text><text x="922" y="180">19:00</text>
+          </g>
+          <rect x="60" y="50" width="156" height="30" rx="5" fill="#2f6f86" opacity="0.55"/>
+          <rect x="216" y="50" width="147" height="30" rx="5" fill="#9a4631"/>
+          <rect x="363" y="50" width="192" height="30" rx="5" fill="#c8901f"/>
+          <rect x="555" y="50" width="385" height="30" rx="5" fill="#2f6f86" opacity="0.75"/>
+          <g fill="#101820" font-size="12" font-weight="700">
+            <text x="64" y="42">Approach</text>
+            <text x="220" y="42">Aasgard</text>
+            <text x="367" y="42">Core traverse</text>
+            <text x="559" y="42">Snow Lakes descent</text>
+          </g>
+          <g fill="#ffffff" font-size="11" font-weight="700">
+            <text x="70" y="70">2.9 h by headlamp</text>
+            <text x="224" y="70">2.5 h</text>
+            <text x="371" y="70">3.5 h</text>
+            <text x="563" y="70">7 h</text>
+          </g>
+          <line x1="472" y1="30" x2="472" y2="160" stroke="#9a4631" stroke-width="3" stroke-dasharray="6 5"/>
+          <text x="464" y="118" fill="#9a4631" font-size="12" font-weight="800" text-anchor="end">Gate: on the pass by 10:30</text>
+          <text x="464" y="134" fill="#9a4631" font-size="11" text-anchor="end">or turn back to Stuart Lake TH</text>
+          <line x1="637" y1="30" x2="637" y2="160" stroke="#b56b24" stroke-width="3" stroke-dasharray="6 5"/>
+          <text x="645" y="118" fill="#b56b24" font-size="12" font-weight="800">Gate: Viviane by 13:30</text>
+          <text x="645" y="134" fill="#b56b24" font-size="11">or plan on finishing by headlamp</text>
+          <text x="60" y="225" fill="#64727d" font-size="13" font-weight="800">Civil dusk in mid-September is about 19:40; in late June about 21:45. Finish inside it.</text>
+        </svg>
+        <figcaption class="caption">A moderate-pace sample day for a 03:00 start and 19:00 finish. The weather dashboard's timing strip applies these phase shares to whatever window you enter and lets you drag the high-point time to match your own pace.</figcaption>
+      </figure>
+
+      <div class="grid grid-2" style="margin-top:18px">
+        <div class="gate">
+          <b>Behind at Colchuck Lake</b>
+          <p>Thirty minutes down at the lake is recoverable. Take it out of core-zone loitering, not out of the break before the pass. An hour down, or a party member struggling on the approach trail, means the out-and-back is the day.</p>
+        </div>
+        <div class="gate">
+          <b>Not on Aasgard by the agreed time</b>
+          <p>The real call. Turning back from the pass to Stuart Lake trailhead is about 5 miles. Past the pass, bailing means completing the traverse anyway, tired and in the dark. Set this gate around 10:30 for a 03:00 start.</p>
+        </div>
+        <div class="gate">
+          <b>Snow on the Aasgard headwall</b>
+          <p>Intermittent patches are what this plan assumes. Continuous snow with a runout into rock is a mountaineering route, not a hike, and the answer is Colchuck out and back, not a set of microspikes.</p>
+        </div>
+        <div class="gate">
+          <b>Not at Lake Viviane by early afternoon</b>
+          <p>You will finish by headlamp. That is manageable on the Snow Lakes trail, but confirm every person has a real headlamp with fresh batteries and nobody is counting on a phone.</p>
+        </div>
+      </div>
+      <div class="notice warn">Once you are over the pass, the only exit is forward. The weather and party decision is made at Colchuck Lake, not in the core.</div>
+    </section>
+
+    <section id="weather">
+      <div class="section-kicker">05 / Weather</div>
+      <h2>Weather checks and what to watch</h2>
+      <p class="lead">
+        The core sits between 6,800 and 7,800 feet on the east slope of the Cascades. Watch for afternoon thunderstorms in summer, early or late-season snow that can arrive in a day, heat on the sun-exposed descent, and smoke from late-summer fires. Compare the pass forecast against the trailheads, and read the trend rather than a single number.
+      </p>
+      <div class="weather-list">
+        <a class="weather-link" href="mw.html?m=enchantments&amp;r=stuarttosnow">
+          <div class="alt">Tool</div>
+          <div><strong>Get detailed forecast</strong><span>The Mountain Weather dashboard prefilled for the traverse: verdict and reasons, phase timing with high-point and descent times, thunderstorm and visibility gates, route-profile weather from the trailhead through the core to Snow Lakes trailhead, and recent trip-report links.</span></div>
+        </a>
+        <a class="weather-link" href="climb.html?m=enchantments&amp;r=stuarttosnow">
+          <div class="alt">Tool</div>
+          <div><strong>Summit-Day Check</strong><span>The lightweight during-hike view: next hours at the pass, alerts, daylight countdown, and an offline cache. There is no cell service on route, so load it at the trailhead.</span></div>
+        </a>
+        <a class="weather-link" href="https://forecast.weather.gov/MapClick.php?lat=47.4803&amp;lon=-120.8206&amp;unit=0&amp;lg=english&amp;FcstType=graphical" target="_blank" rel="noopener">
+          <div class="alt">NWS</div>
+          <div><strong>NWS hourly forecast at Aasgard Pass</strong><span>Graphical hourly forecast at the pass. Watch precipitation timing, wind, and the afternoon thunderstorm signal.</span></div>
+        </a>
+        <a class="weather-link" href="https://nwac.us/avalanche-forecast/#/east-slopes-central" target="_blank" rel="noopener">
+          <div class="alt">NWAC</div>
+          <div><strong>East Slopes Central avalanche forecast</strong><span>The zone covering the Enchantments. Relevant from the first autumn storms through early summer; Aasgard holds snow into July in a normal year.</span></div>
+        </a>
+        <a class="weather-link" href="https://www.wta.org/go-hiking/hikes/enchantment-lakes#trip-report-listing-header" target="_blank" rel="noopener">
+          <div class="alt">WTA</div>
+          <div><strong>Latest trip reports</strong><span>Snow on the pass, water, goats, road and parking status, and how long parties took. Read the two or three newest before committing to the drive.</span></div>
+        </a>
+        <a class="weather-link" href="https://www.airnow.gov/?city=Leavenworth&amp;state=WA&amp;country=USA" target="_blank" rel="noopener">
+          <div class="alt">Smoke</div>
+          <div><strong>Air quality at Leavenworth</strong><span>Late July through September is fire season on the east slopes. Check the morning of, and the Washington Smoke Blog for the outlook.</span></div>
+        </a>
+      </div>
+
+      <div class="grid grid-3" style="margin-top:18px">
+        <div class="card">
+          <h3>Thunderstorms</h3>
+          <p>Summer convection builds over the crest in the afternoon. The core and the pass are exposed granite with nowhere to hide. If the forecast shows a thunderstorm signal, the plan is to be off the pass and out of the upper basin by early afternoon, or to make it a Colchuck day.</p>
+        </div>
+        <div class="card">
+          <h3>Snow arrives fast</h3>
+          <p>In mid-September 2026 a single storm put one to three feet of snow on the pass and core. A day-hiking couple without overnight gear was stranded in the core, helicopters were turned back by weather, and one of them died of exposure before ground rescuers arrived. Pack for a night out, and treat any forecast precipitation at the pass as a reason to reconsider.</p>
+        </div>
+        <div class="card">
+          <h3>Heat and sun</h3>
+          <p>The Snow Lakes trail below Nada Lake faces south and east with little shade, and it comes at the end of the day. In July and August the trailhead is often over 90°F. Fill every bottle at the dam or Nada Lake; the last miles are dry.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="logistics">
+      <div class="section-kicker">06 / Permits &amp; Getting There</div>
+      <h2>Permits, parking, roads, and the car shuttle</h2>
+      <div class="split">
+        <div>
+          <p class="lead">
+            A day traverse needs no lottery permit: fill out the free self-issued day-use permit at the trailhead and display a Northwest Forest Pass or America the Beautiful pass on the car. Camping anywhere in the permit area from mid-May through October requires an overnight permit from the annual or daily lottery on Recreation.gov. Verify the current rules on the Forest Service page; they change.
+          </p>
+          <ul class="clean" style="margin-top:12px">
+            <li><strong>Group size:</strong> eight people maximum, including parties travelling together on separate permits. No dogs anywhere in the permit area.</li>
+            <li><strong>Roads:</strong> Snow Lakes trailhead is about 4.5 miles up Icicle Creek Road from Leavenworth. Stuart Lake trailhead is another 4 miles up Icicle, then about 4 miles of rough gravel on Eightmile Road (FR 7601). Both roads are heavily potholed in most years; a sedan is fine if driven slowly. Budget about 30 minutes between the two trailheads.</li>
+            <li><strong>Parking:</strong> the Stuart Lake lot is small and fills before dawn on summer weekends; overflow along the road is restricted, so arrive early or plan to walk from the overflow. Snow Lakes has a larger lot that also fills on weekends.</li>
+            <li><strong>Shuttle:</strong> leave one car at Snow Lakes and drive everyone to Stuart Lake, or park at Snow Lakes and book a commercial shuttle from Leavenworth to Stuart Lake ahead of time. Hitching back up Icicle Creek Road at the end of the day works but adds an hour or more to a long day.</li>
+            <li><strong>Fire restrictions:</strong> stage 1 restrictions banning open fires are typical from early summer; there is no reason to carry stove or fire gear on a day traverse.</li>
+            <li><strong>Cell service:</strong> none on the route and unreliable at the trailheads. A satellite messenger is the emergency plan, not a backup. Leave the route, both trailheads, vehicle details, and a "call for help by" time with someone at home.</li>
+          </ul>
+        </div>
+        <aside class="callout">
+          <h3>Official pages</h3>
+          <ul class="clean">
+            <li><a href="https://www.fs.usda.gov/r06/okanogan-wenatchee/recreation/enchantments" target="_blank" rel="noopener">Enchantment Permit Area (USFS)</a></li>
+            <li><a href="https://www.fs.usda.gov/r06/okanogan-wenatchee/recreation/enchantments-overnight-permits" target="_blank" rel="noopener">Overnight permits and lottery (USFS)</a></li>
+            <li><a href="https://www.recreation.gov/permits/233273" target="_blank" rel="noopener">Enchantment Permit Area on Recreation.gov</a></li>
+            <li><a href="https://www.fs.usda.gov/r06/okanogan-wenatchee/alerts" target="_blank" rel="noopener">Okanogan-Wenatchee alerts and closures</a></li>
+            <li><a href="https://www.fs.usda.gov/r06/okanogan-wenatchee/passes" target="_blank" rel="noopener">Passes and parking</a></li>
+            <li><a href="https://www.fs.usda.gov/r06/okanogan-wenatchee/recreation/trails/snow-lakes-trail" target="_blank" rel="noopener">Snow Lakes Trail (USFS)</a></li>
+          </ul>
+          <p class="compact-note" style="margin-top:12px">Emergencies: 911; Chelan County Sheriff coordinates search and rescue. Forest Supervisor's Office: (509) 664-9200; the Wenatchee River Ranger District in Leavenworth is listed under district offices on the USFS site.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="hazards">
+      <div class="section-kicker">07 / Hazards &amp; Preparation</div>
+      <h2>Where this route hurts people, and how to prepare</h2>
+      <p class="lead">
+        Injuries on the traverse are rarely dramatic. They come from loose rock on Aasgard, wrong turns that add miles, wet slab below Viviane, exhaustion and cramping on the final descent, and weather that changes faster than a day-hiking party expects.
+      </p>
+      <ol class="checklist">
+        <li><strong>Aasgard route.</strong> Stay to the climber's left of the creek and waterfall on the way up. The right-hand side leads onto steep, wet slab where people have died. If you find yourself on slick rock beside running water, you are off route.</li>
+        <li><strong>Loose rock.</strong> Aasgard is scree and unstable boulders for 2,200 feet. Spread the party laterally or move in pods with a gap, and call any rock you knock loose.</li>
+        <li><strong>Buried cairns.</strong> Even a few inches of new snow hides the route across the pass and the core. Carry the GPS track offline on more than one phone and check it at every gap between cairns.</li>
+        <li><strong>Snow patches.</strong> Old snow over talus is undercut by melt; probe with a pole before weighting anything that spans boulders. Prefer bare rock over snow even when the rock is steeper.</li>
+        <li><strong>Daylight.</strong> Time the pass for first light rather than headlamps, and know civil dusk for your date. Everyone carries a headlamp and spare batteries.</li>
+        <li><strong>Water.</strong> Plentiful from Colchuck Lake through Nada Lake; nearly absent below it. Carry 2.5 to 3 liters of capacity and a filter per two people, and leave Nada full.</li>
+        <li><strong>Fuel and salt.</strong> Cramps on the last descent are usually hours-old sodium and calorie debt. Eat on a schedule, use electrolytes, and carry something salty for the tenth hour.</li>
+        <li><strong>Feet.</strong> Almost the whole route is rock. Tape known hot spots before the pass, carry Leukotape, and bring dry socks if snow is reported.</li>
+        <li><strong>Mountain goats.</strong> Habituated to human urine and salt. Pee on bare rock well away from trail and camps, keep 50 yards, and never feed them or let them lick packs.</li>
+        <li><strong>Night out.</strong> Carry enough insulation and a shell to survive an unplanned night at 7,000 feet. It is the difference between an uncomfortable story and the alternative.</li>
+      </ol>
+    </section>
+
+    <section id="gear">
+      <div class="section-kicker">08 / Gear</div>
+      <h2>Day-traverse kit</h2>
+      <p class="lead">
+        Expect a temperature spread of 30 to 40 degrees across the day: cold and dark at the start, sun at the pass, hot at the end. Pack light enough to move, but not so light that an unplanned night is dangerous.
+      </p>
+      <div class="gear">
+        <div class="card">
+          <h3>Carry every time</h3>
+          <ul>
+            <li>Headlamp and spare batteries <small>(not a phone light)</small></li>
+            <li>Trekking poles <small>for 7,000 ft of descent</small></li>
+            <li>2.5 to 3 L water capacity and a filter</li>
+            <li>Offline GPS track on at least two phones</li>
+            <li>Satellite messenger for the party</li>
+            <li>Battery bank and cable</li>
+            <li>3,000 to 4,000 calories, electrolytes, salty food</li>
+            <li>Leukotape, ibuprofen, basic first aid, trash bag</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Layers and sun</h3>
+          <ul>
+            <li>Light fleece or hoody for the dark start</li>
+            <li>Wind shell, worn most of the day up high</li>
+            <li>Light insulated jacket for the pass and any stop</li>
+            <li>Rain shell, thin gloves, beanie</li>
+            <li>Sun hat, sunglasses, high-SPF sunscreen and lip balm</li>
+            <li>Sturdy shoes with grip on granite <small>(trail runners are common)</small></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Season-dependent</h3>
+          <ul>
+            <li>Microspikes and short gaiters when reports show snow on the pass or in the core</li>
+            <li>Dry spare socks in a bag</li>
+            <li>Bug head net in July</li>
+            <li>An ice axe means the pass is holding continuous snow, and the day is a different objective</li>
+          </ul>
+        </div>
+      </div>
+      <p class="compact-note" style="margin-top:12px">Leave behind bear spray and anything packed "just in case" beyond the night-out layers. Weight on the descent costs more than it saves.</p>
+    </section>
+
+    <section id="descent">
+      <div class="section-kicker">09 / Descent</div>
+      <h2>The Snow Lakes descent</h2>
+      <div class="grid grid-3" style="margin-top:18px">
+        <div class="stat">
+          <div class="label">Viviane to Snow Lakes</div>
+          <div class="value">Slab and rebar</div>
+          <p>Polished granite beside Snow Creek with a short rebar step. Stow poles, face in where needed, and keep the party together. Wet slab is slicker than the snow was.</p>
+        </div>
+        <div class="stat">
+          <div class="label">Dam to Nada Lake</div>
+          <div class="value">Last water</div>
+          <p>Fill everything. The lower trail is dry, exposed, and can be very hot. Sit down, eat, and put dry socks on if you have them; the grind starts here.</p>
+        </div>
+        <div class="stat">
+          <div class="label">Nada to the road</div>
+          <div class="value">3,600 ft of switchbacks</div>
+          <p>Sandy, relentless, and where legs give out. Take short scheduled stops rather than long ones. Near the bottom stay left on the trail toward the lot. Plan a driver who is not wrecked, or a night in Leavenworth.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="section-kicker">References</div>
+        <h2>Planning references and current-condition checks</h2>
+        <p>
+          Use this page as a planning brief for the day traverse, then verify permits, road and parking status, fire restrictions, air quality, trip reports, and weather before using it for a real day.
+        </p>
+      </div>
+      <div class="source-list">
+        <a href="https://www.fs.usda.gov/r06/okanogan-wenatchee/recreation/enchantments" target="_blank" rel="noopener">USFS - Enchantment Permit Area</a>
+        <a href="https://www.fs.usda.gov/r06/okanogan-wenatchee/recreation/enchantments-overnight-permits" target="_blank" rel="noopener">USFS - Enchantments Overnight Permits</a>
+        <a href="https://www.recreation.gov/permits/233273" target="_blank" rel="noopener">Recreation.gov - Enchantment Permit Area</a>
+        <a href="https://www.fs.usda.gov/r06/okanogan-wenatchee/alerts" target="_blank" rel="noopener">USFS - Okanogan-Wenatchee Alerts and Closures</a>
+        <a href="https://www.wta.org/go-hiking/hikes/enchantment-lakes" target="_blank" rel="noopener">WTA - The Enchantments</a>
+        <a href="https://www.wta.org/go-hiking/hikes/snow-lakes" target="_blank" rel="noopener">WTA - Snow Lakes</a>
+        <a href="https://www.wta.org/go-hiking/hikes/aasgard-pass" target="_blank" rel="noopener">WTA - Aasgard Pass</a>
+        <a href="https://www.alltrails.com/trail/us/washington/the-enchantments-trail" target="_blank" rel="noopener">AllTrails - The Enchantments Traverse</a>
+        <a href="https://nwac.us/avalanche-forecast/#/east-slopes-central" target="_blank" rel="noopener">NWAC - East Slopes Central</a>
+        <a href="https://forecast.weather.gov/MapClick.php?lat=47.4803&amp;lon=-120.8206" target="_blank" rel="noopener">NWS - Forecast at Aasgard Pass</a>
+        <a href="https://wasmoke.blogspot.com/" target="_blank" rel="noopener">Washington Smoke Blog</a>
+        <p class="compact-note">
+          All visuals on this page are schematic diagrams built for planning context; no photographs are used. Elevations, distances, and times are approximations.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+<script>
+(function(){
+  const btn = document.getElementById('theme-toggle');
+  function apply(theme, persist){
+    document.documentElement.dataset.theme = theme;
+    const isLight = theme === 'light';
+    if(btn){
+      btn.setAttribute('aria-pressed', String(!isLight));
+      btn.setAttribute('aria-label', `Switch to ${isLight ? 'dark' : 'light'} mode`);
+      btn.querySelector('.theme-icon').textContent = isLight ? '☾' : '☼';
+      btn.querySelector('.theme-label').textContent = isLight ? 'Dark' : 'Light';
+    }
+    if(persist){
+      try { localStorage.setItem('summit-weather-theme', theme); } catch(e) {}
+    }
+  }
+  apply(document.documentElement.dataset.theme || 'light', false);
+  if(btn){
+    btn.addEventListener('click', () => {
+      apply(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light', true);
+    });
+  }
+})();
+</script>
+</body>
+</html>

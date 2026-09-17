@@ -4,15 +4,16 @@ Small static mountaineering planning site with a weather dashboard and route-spe
 
 ## Main Page
 
-Open `index.html` for the site home page. Open `mw.html` directly for the mountaineering weather dashboard (the V2 layout, see below). Open `mw-v1.html` for the previous layout, kept for comparison. Open `climb.html` for the Summit-Day Check — a lightweight during-climb view (see below).
+Open `index.html` for the site home page. It shares the current dashboard's visual style (Space Grotesk and IBM Plex Mono, the same light and dark palettes) and the same dark-mode preference, so the theme toggle in its top bar carries over to the dashboards. Cards link to the tools and to each field guide. Open `mw.html` directly for the mountaineering weather dashboard (the V2 layout, see below). Open `mw-v1.html` for the previous layout, kept for comparison. Open `climb.html` for the Summit-Day Check — a lightweight during-climb view (see below).
 
 The weather dashboard helps evaluate a selected mountain, trailhead/route, and climb window. It combines official NWS point forecasts with raw model guidance so you can compare the human-edited baseline against multiple numerical models.
 
-The home page also links to field guides:
+Field guides are standalone pages with a sequence, timing, weather checks, permits and access, hazards, and descent notes for one route each:
 
 - `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
 - `mount-rainier-dc.html`: Mount Rainier DC / Ingraham Direct Field Guide.
 - `mount-whitney-main-trail.html`: Mount Whitney Main Trail Field Guide.
+- `enchantments-thru-hike.html`: Enchantments Thru-Hike Field Guide (day traverse, Stuart Lake TH to Snow Lakes TH).
 
 ## What Is On The Page
 
@@ -143,16 +144,18 @@ Use the NWS temperatures as the baseline for expected surface conditions. Use th
 
 ## Files
 
-- `index.html`: site home page with links to the weather dashboard and field guides.
+- `index.html`: site home page with links to the weather dashboard, the summit-day check, the previous dashboard layout, and the field guides. Styled to match the current dashboard, including the shared dark-mode toggle.
 - `mw.html`: current mountaineering weather dashboard (V2 layout).
 - `climb.html`: Summit-Day Check — lightweight during-climb conditions page with offline cache.
 - `mw-v1.html`: the previous dashboard layout, kept for comparison (see above).
 - `mount-baker-easton.html`: Mount Baker Easton Route Field Guide.
 - `mount-rainier-dc.html`: Mount Rainier DC / Ingraham Direct Field Guide. Uses inline SVG diagrams for route planning and a local Rainier image for the home page field-guide card.
 - `mount-whitney-main-trail.html`: Mount Whitney Main Trail Field Guide.
+- `enchantments-thru-hike.html`: Enchantments Thru-Hike Field Guide. Styled like the current dashboard (shared fonts, palette, and dark-mode toggle), with inline SVG diagrams (elevation profile, sample schedule with decision gates) and a drawn SVG hero for the home page card; no photographs.
 - `assets/baker-easton/`: local images used by the Mount Baker Easton guide.
 - `assets/rainier-dc/`: local image used by the Mount Rainier field-guide card on the home page.
 - `assets/whitney-main-trail/`: local images used by the Mount Whitney Main Trail guide.
+- `assets/enchantments-thru-hike/`: drawn SVG hero used by the Enchantments field-guide card on the home page.
 - `mw3.html`: latest experimental/source copy used before promoting to `mw.html`.
 - `mw2.html`: prior dashboard version kept for comparison.
 - `mw1.html`: earlier dashboard version kept for comparison.
